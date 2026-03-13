@@ -1,0 +1,86 @@
+{
+  "doc_type": "table",
+  "id": "AS_IFRS.IFRS_PRIM_VERISI",
+   "Keywords": [
+    "ifrs prim verisi",
+    "ifrs",
+    "prim",
+    "premium",
+    "komisyon",
+    "Ã¼retim",
+    "uretim",
+    "commission",
+    "komisyon",
+    "poliÃ§e",
+    "policy",
+    "police_no",
+    "report_period",
+    "dÃ¶nem",
+    "yyyymm",
+    "prim tl",
+    "prim orj",
+    "prim orjinal",
+    "acente_komisyon_tl",
+    "sgk_prim_tl",
+    "brans_kodu",
+    "tkz_kodu",
+    "ifrs_portfoy",
+    "portfÃ¶y",
+    "kpk_tl"
+  ],
+  "schema": "AS_IFRS",
+  "name": "IFRS_PRIM_VERISI",
+
+  "description": "IFRS prim ve komisyon verisi. DÃ¶nem bazlÄ± partition edilmiÅŸ tablo.",
+
+  "grain": "1 row per POLICE_NO + TECDIT_NO + EK_NO per REPORT_PERIOD",
+
+  "primary_key_candidate": [
+    "REPORT_PERIOD",
+    "POLICE_NO",
+    "TECDIT_NO",
+    "EK_NO"
+  ],
+
+  "partitioning": {
+    "type": "RANGE",
+    "column": "REPORT_PERIOD",
+    "description": "YYYYMM formatÄ±nda dÃ¶nem kolonu",
+    "mandatory_filter": true
+  },
+
+  "mandatory_filters": [
+    "REPORT_PERIOD"
+  ],
+
+  "performance_rules": [
+    "REPORT_PERIOD filtresi olmadan sorgu Ã§alÄ±ÅŸtÄ±rÄ±lmamalÄ±"
+  ],
+
+  "columns": [
+    {"name": "REPORT_PERIOD", "type": "NUMBER(6)", "description": "YYYYMM dÃ¶nem", "Keywords":["dÃ¶nem", "ay","yÄ±l ay", "donem", "period"], "Type": "YYYYMM" },
+    {"name": "POLICE_NO", "type": "NUMBER"},
+    {"name": "TECDIT_NO", "type": "NUMBER"},
+    {"name": "EK_NO", "type": "NUMBER"},
+    {"name": "PRIM_TL", "type": "NUMBER", "description": "Prim TL", "Keywords": ["Ã¼retim", "Uretim", "Prim" ,"Ãœretim"]},
+    {"name": "SGK_PRIM_TL", "type": "NUMBER"},
+    {"name": "ACENTE_KOMISYON_TL", "type": "NUMBER(18,6)"},
+    {"name": "MUSTERI_NO", "type": "NUMBER"},
+    {"name": "UPDATE_DATE", "type": "DATE"},
+    {"name": "DATA_SOURCE", "type": "VARCHAR2(25)"}
+  ],
+
+  "business_notes": [
+    "IFRS hesaplamalarÄ±nda kullanÄ±lÄ±r",
+    "Prim ve komisyon bazlÄ± raporlamalar iÃ§in ana tablodur"
+  ],
+
+  "security": {
+    "restricted": true,
+    "pii_columns": [],
+    "note": "Yetkisiz geniÅŸ dÃ¶nem sorgularÄ±na izin verilmemeli"
+  },
+
+  "version": 1,
+  "updated_at": "2026-02-09"
+}

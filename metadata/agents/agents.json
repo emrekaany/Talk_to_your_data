@@ -1,0 +1,23 @@
+{
+  "default_agent_id": "hasar",
+  "agents": [
+    {
+      "id": "hasar",
+      "label": "Hasar",
+      "metadata_path": "metadata_vectored_hasar.json",
+      "description": "Hasar verisi agenti"
+    },
+    {
+      "id": "uretim",
+      "label": "Uretim",
+      "metadata_path": "metadata_vectored_uretim.json",
+      "description": "Uretim verisi agenti"
+    },
+    {
+      "id": "satis",
+      "label": "Satis",
+      "metadata_path": "metadata_vectored_satis.json",
+      "description": "Satis verisi agenti"
+    }
+  ]
+}

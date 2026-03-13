@@ -1,0 +1,232 @@
+"""Human-readable SQL candidate descriptions."""
+
+from __future__ import annotations
+
+import json
+import re
+from typing import Any
+
+from .llm_client import LLMClient, LLMError
+
+
+def describe_sql_candidate(
+    candidate: dict[str, Any],
+    metadata: dict[str, Any],
+    llm_client: LLMClient | None = None,
+) -> str:
+    """Produce plain-language explanation for a SQL candidate."""
+    sql = str(candidate.get("sql", "")).strip()
+    if not sql:
+        return "No SQL text was provided."
+
+    llm_description = _describe_with_llm(sql, metadata, llm_client=llm_client)
+    if llm_description:
+        return llm_description
+
+    tables = _extract_tables(sql, metadata)
+    filters = _extract_where_clause(sql)
+    grouping = _extract_group_by_clause(sql)
+    select_cols = _extract_select_columns(sql)
+    assumptions = _infer_assumptions(sql, metadata)
+
+    lines = [
+        "Question answered: Alternative SQL interpretation of the user request.",
+        f"Tables used: {', '.join(tables) if tables else 'Not clearly identifiable from SQL text.'}",
+        f"Filters: {filters or 'No explicit filter found.'}",
+        f"Grouping/measures: {grouping or 'No GROUP BY clause (row-level or pre-aggregated output).'}",
+        f"Expected output columns: {', '.join(select_cols) if select_cols else 'Unable to parse selected columns.'}",
+        f"Assumptions: {assumptions}",
+    ]
+    return "\n".join(lines)
+
+
+def _describe_with_llm(
+    sql: str,
+    metadata: dict[str, Any],
+    *,
+    llm_client: LLMClient | None,
+) -> str | None:
+    if llm_client is None:
+        return None
+
+    prompt = (
+        "Explain the SQL query in plain business language.\n"
+        "Keep it concise and practical.\n"
+        "Use this output template exactly as plain text lines:\n"
+        "Question answered: ...\n"
+        "Tables used: ...\n"
+        "Filters: ...\n"
+        "Grouping/measures: ...\n"
+        "Expected output columns: ...\n"
+        "Assumptions: ...\n\n"
+        f"SQL:\n{sql}\n\n"
+        f"Relevant metadata summary:\n{_metadata_summary_for_prompt(metadata)}"
+    )
+    try:
+        output = llm_client.chat(
+            "You are a senior analytics engineer who explains SQL clearly.",
+            prompt,
+            temperature=0.0,
+            max_tokens=500,
+        )
+    except LLMError:
+        return None
+
+    text = output.strip()
+    if not text:
+        return None
+    if "Question answered:" not in text:
+        return None
+    return _strip_fence(text)
+
+
+def _metadata_summary_for_prompt(metadata: dict[str, Any]) -> str:
+    summary: dict[str, Any] = {
+        "dialect": metadata.get("dialect", "oracle sql"),
+        "mandatory_rules": _as_string_list(metadata.get("mandatory_rules"))[:12],
+        "guardrails": _as_string_list(metadata.get("guardrails"))[:12],
+        "tables": [],
+    }
+
+    relevant = metadata.get("relevant_items")
+    if isinstance(relevant, list):
+        for item in relevant[:6]:
+            if not isinstance(item, dict):
+                continue
+            table_name = str(item.get("table", "")).strip()
+            columns = item.get("columns", [])
+            column_names: list[str] = []
+            if isinstance(columns, list):
+                for col in columns[:12]:
+                    if isinstance(col, dict):
+                        name = str(col.get("name", "")).strip()
+                        if name:
+                            column_names.append(name)
+            summary["tables"].append(
+                {
+                    "table": table_name,
+                    "columns": column_names,
+                    "joins": _as_string_list(item.get("joins"))[:8],
+                    "mandatory_filters": _as_string_list(item.get("mandatory_filters"))[:8],
+                }
+            )
+
+    return json.dumps(summary, ensure_ascii=False, indent=2)
+
+
+def _extract_tables(sql: str, metadata: dict[str, Any]) -> list[str]:
+    lower_sql = sql.lower()
+    candidates: list[str] = []
+    relevant = metadata.get("relevant_items")
+    if isinstance(relevant, list):
+        for item in relevant:
+            if not isinstance(item, dict):
+                continue
+            table = str(item.get("table", "")).strip()
+            if table and table.lower() in lower_sql:
+                candidates.append(table)
+
+    if candidates:
+        return _dedupe(candidates)
+
+    matches = re.findall(
+        r"\bfrom\s+([a-zA-Z0-9_.]+)|\bjoin\s+([a-zA-Z0-9_.]+)",
+        sql,
+        flags=re.IGNORECASE,
+    )
+    extracted = []
+    for from_match, join_match in matches:
+        table = from_match or join_match
+        table = table.strip()
+        if table:
+            extracted.append(table)
+    return _dedupe(extracted)
+
+
+def _extract_where_clause(sql: str) -> str:
+    match = re.search(
+        r"\bwhere\b(.*?)(\bgroup\s+by\b|\border\s+by\b|\bhaving\b|\bfetch\s+first\b|$)",
+        sql,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if not match:
+        return ""
+    return _normalize_space(match.group(1))
+
+
+def _extract_group_by_clause(sql: str) -> str:
+    group_match = re.search(
+        r"\bgroup\s+by\b(.*?)(\border\s+by\b|\bhaving\b|\bfetch\s+first\b|$)",
+        sql,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if not group_match:
+        return ""
+    return f"GROUP BY {_normalize_space(group_match.group(1))}"
+
+
+def _extract_select_columns(sql: str) -> list[str]:
+    match = re.search(
+        r"\bselect\b(.*?)\bfrom\b",
+        sql,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if not match:
+        return []
+    clause = match.group(1)
+    cols = [part.strip() for part in clause.split(",")]
+    cols = [re.sub(r"\s+", " ", col) for col in cols if col]
+    return cols[:12]
+
+
+def _infer_assumptions(sql: str, metadata: dict[str, Any]) -> str:
+    assumptions: list[str] = []
+    if ":report_period" in sql.lower():
+        assumptions.append("A report period value must be provided at runtime.")
+    if ":n" in sql.lower():
+        assumptions.append("Row limit uses bind variable :n.")
+    mandatory = metadata.get("mandatory_rules")
+    if isinstance(mandatory, list) and mandatory:
+        assumptions.append("Mandatory metadata guardrails were applied.")
+    if not assumptions:
+        assumptions.append("Assumes selected columns and joins match business intent.")
+    return " ".join(assumptions)
+
+
+def _normalize_space(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _dedupe(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    output: list[str] = []
+    for value in values:
+        key = value.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        output.append(value)
+    return output
+
+
+def _strip_fence(text: str) -> str:
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        stripped = re.sub(r"^```[a-zA-Z0-9_]*\s*", "", stripped)
+        stripped = re.sub(r"\s*```$", "", stripped)
+    return stripped.strip()
+
+
+def _as_string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value.strip()] if value.strip() else []
+    if isinstance(value, list):
+        out: list[str] = []
+        for item in value:
+            text = str(item).strip()
+            if text:
+                out.append(text)
+        return out
+    return [str(value).strip()]
