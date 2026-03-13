@@ -17,7 +17,7 @@ If you skip these, do not proceed with edits.
 
 Do not disrupt existing behavior while adding features. Preserve:
 
-1. End-to-end flow: request -> extraction -> metadata retrieval -> 3 SQL options -> selection -> Oracle execution -> preview/summary/excel.
+1. End-to-end flow: request -> extraction -> metadata retrieval -> 3 SQL options -> best-option selection (LLM judge + fallback) -> Oracle execution -> preview/summary/excel.
 2. Safety constraints in SQL generation and execution.
 3. Artifact persistence under `runs/<timestamp>/`.
 4. Core function contracts documented in `README.md`.
@@ -29,8 +29,8 @@ Run these checks after edits:
 
 1. `py -m compileall app.py talk_to_data`
 2. If dependencies exist locally, run app smoke test:
-   - `py app.py`
-3. Verify UI still shows 3 options and selection-run flow works.
+   - `py -c "from app import build_app; build_app(); print('ok')"`
+3. Verify UI still shows 3 options, auto-selection works, and execution flow works.
 
 ## Documentation and Backlog Rules
 
@@ -85,3 +85,6 @@ If a request conflicts with existing architecture:
 - 2026-02-12 - Codex: Read `README.md`, `forhumans.md`, `AGENTS.md`, and `metadata_vectored.json`. Fixed `metadata_vectored.json` JSON syntax and encoding issues (added missing comma in `Keywords` list and rewrote file as UTF-8 without BOM). Validated with `py -` JSON parse check (pass for `metadata_vectored.json`), ran `py -m compileall app.py talk_to_data` (pass), and ran `py app.py` smoke test (failed due port 7860 already in use).
 - 2026-03-11 - Codex: Read `README.md`, `forhumans.md`, `AGENTS.md`, `app.py`, `talk_to_data/config.py`, `talk_to_data/pipeline.py`, `talk_to_data/runs.py`, and `talk_to_data/metadata_retriever.py`. Added multi-agent registry module `talk_to_data/agent_registry.py`; added `metadata/agents/agents.json` and empty stub files `metadata_vectored_hasar.json`, `metadata_vectored_uretim.json`, `metadata_vectored_satis.json`; updated `config`, `pipeline`, `runs`, and `app` for agent dropdown selection + agent-specific metadata loading + `agent_info.json` artifact persistence; updated `README.md` for agent registry/layout/env/UI flow docs. Ran `py -m compileall app.py talk_to_data` (pass), ran `py app.py` smoke test (timed out due long-running server), ran `py -` `build_app()` smoke check (pass), ran `py -` service check for `list_agents()` and per-agent `prepare_candidates()` stub-error behavior (pass), and ran `py -` check for `generate_sql_options(..., 'hasar')` returning clear metadata-empty generation failure.
 - 2026-03-12 - Codex: Read `README.md`, `forhumans.md`, `AGENTS.md`, `talk_to_data/requirements_extractor.py`, `talk_to_data/sql_generator.py`, `talk_to_data/sql_explainer.py`, `talk_to_data/summarizer.py`, and `talk_to_data/pipeline.py`. Removed runtime `scripts/llm_prompt.py` call paths from `talk_to_data/` modules and routed LLM usage through `talk_to_data/llm_client.py`. Removed SQL candidate fallback fabrication path and enforced explicit SQL-generation error when 3 valid candidates cannot be produced. Updated `README.md` and `AGENTS.md` documentation for new LLM-path and SQL-generation-failure behavior. Ran `py -m compileall app.py talk_to_data scripts/llm_prompt.py`; ran `py app.py` smoke test; ran `py -` targeted generation checks for no-LLM and malformed-output error paths.
+- 2026-03-13 - Codex: Read `README.md`, `forhumans.md`, `AGENTS.md`, `app.py`, `talk_to_data/config.py`, `talk_to_data/pipeline.py`, `talk_to_data/runs.py`, `talk_to_data/agent_registry.py`, and `talk_to_data/metadata_retriever.py`. Verified multi-agent registry/UI wiring (`hasar`, `uretim`, `satis`) and stub metadata behavior via `_load_agent_choices()` and `generate_sql_options(...)` checks. Edited `talk_to_data/metadata_retriever.py` to fix empty-metadata error text so it reports the selected metadata file path and schema stub path instead of a hardcoded filename. Ran `py -m compileall app.py talk_to_data`, ran `py app.py` smoke test (failed due port 7860 in use), and ran `py -c` checks for agent dropdown values and per-agent generation error output.
+- 2026-03-13 - Codex: Read repository docs (`README.md`, `forhumans.md`, `AGENTS.md`) and core modules (`app.py`, `talk_to_data/pipeline.py`, `talk_to_data/sql_generator.py`, `talk_to_data/sql_guardrails.py`, `talk_to_data/metadata_retriever.py`, `scripts/llm_prompt.py`). Added `talk_to_data/sql_judge.py` for strict LLM judge prompt (`max_tokens=32`) with hard-disqualify-aware deterministic fallback, integrated recommendation into `prepare_candidates`, persisted `judge_result.json`, enabled auto-run of recommended SQL in `app.py`, and updated manual run fallback behavior to use recommended option when none is selected. Updated `README.md` and `AGENTS.md` for new auto-selection flow and artifacts. Ran `py -m compileall app.py talk_to_data`, ran `py -c "from app import build_app; build_app(); print('ok')"`, and ran targeted `py -c` checks for judge parsing/fallback behavior.
+- 2026-03-13 - Codex: Read `AGENTS.md` and updated required smoke-test command to `py -c "from app import build_app; build_app(); print('ok')"` instead of long-running `py app.py`. Ran `py -c "from app import build_app; build_app(); print('ok')"` to validate.

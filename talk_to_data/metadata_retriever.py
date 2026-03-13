@@ -12,11 +12,11 @@ import unicodedata
 
 
 class MetadataFileError(RuntimeError):
-    """Raised when metadata_vectored.json is missing or malformed."""
+    """Raised when a metadata file is missing, invalid, or unusable."""
 
 
 def expected_metadata_schema_stub() -> dict[str, Any]:
-    """Expected schema example for metadata_vectored.json."""
+    """Expected schema example for metadata files."""
     return {
         "documents": [
             {
@@ -73,9 +73,10 @@ def load_metadata_documents(metadata_path: Path) -> list[dict[str, Any]]:
 
     documents = _normalize_documents(_coerce_to_documents(raw))
     if not documents:
+        stub_path = metadata_path.with_name("metadata_vectored.schema.stub.json")
         raise MetadataFileError(
-            "metadata_vectored.json has no usable documents. "
-            "See metadata_vectored.schema.stub.json for expected schema."
+            f"Metadata file '{metadata_path}' has no usable documents. "
+            f"See '{stub_path}' for expected schema."
         )
     return documents
 

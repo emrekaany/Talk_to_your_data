@@ -28,6 +28,7 @@ from .runs import create_run_dir, save_result_excel, save_result_preview, save_r
 from .sql_explainer import describe_sql_candidate
 from .sql_generator import SQLGenerationError, generate_sql_candidates
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
+from .sql_judge import choose_best_sql_candidate
 from .summarizer import summarize_result_to_text
 
 
@@ -126,6 +127,23 @@ class TalkToDataService:
                 llm_client=self.llm_client,
             )
 
+        judge_result = choose_best_sql_candidate(
+            user_request=request,
+            metadata_used=metadata_used,
+            candidates=candidates,
+            llm_client=self.llm_client,
+        )
+        recommended_candidate_id = str(
+            judge_result.get("recommended_candidate_id", "")
+        ).strip()
+        if not recommended_candidate_id and candidates:
+            recommended_candidate_id = str(candidates[0].get("id", "option_1")).strip()
+
+        for candidate in candidates:
+            candidate["recommended"] = (
+                str(candidate.get("id", "")).strip() == recommended_candidate_id
+            )
+
         run_dir = create_run_dir(self.config.runs_dir)
         save_run_artifacts(
             run_dir,
@@ -139,6 +157,7 @@ class TalkToDataService:
                 "description": agent.description,
                 "metadata_path": str(agent.metadata_path),
             },
+            judge_result=judge_result,
         )
 
         return {
@@ -150,6 +169,9 @@ class TalkToDataService:
             "requirements": requirements,
             "metadata_used": metadata_used,
             "candidates": candidates,
+            "recommended_candidate_id": recommended_candidate_id,
+            "selection_mode": str(judge_result.get("selection_mode", "fallback")),
+            "judge_result": judge_result,
             "llm_mode": "enabled" if self.llm_client is not None else "heuristic_fallback",
         }
 
@@ -167,13 +189,19 @@ class TalkToDataService:
         if not isinstance(candidates, list):
             raise PipelineError("SQL candidates are missing in context.")
 
+        selected_id = str(candidate_id or "").strip()
+        if not selected_id:
+            selected_id = str(context.get("recommended_candidate_id", "")).strip()
+        if not selected_id:
+            raise PipelineError("No SQL option id provided.")
+
         selected = None
         for candidate in candidates:
-            if isinstance(candidate, dict) and str(candidate.get("id")) == candidate_id:
+            if isinstance(candidate, dict) and str(candidate.get("id")) == selected_id:
                 selected = candidate
                 break
         if selected is None:
-            raise PipelineError("Selected option was not found.")
+            raise PipelineError(f"Selected option '{selected_id}' was not found.")
 
         sql = str(selected.get("sql", "")).strip()
         if not sql:

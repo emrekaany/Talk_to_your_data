@@ -33,6 +33,7 @@ def save_run_artifacts(
     metadata_used: dict[str, Any],
     sql_candidates: list[dict[str, Any]],
     agent_info: dict[str, Any] | None = None,
+    judge_result: dict[str, Any] | None = None,
 ) -> None:
     """Persist core run artifacts."""
     _save_json(run_dir / "requirements.json", requirements)
@@ -40,6 +41,8 @@ def save_run_artifacts(
     _save_json(run_dir / "sql_candidates.json", sql_candidates)
     if agent_info is not None:
         _save_json(run_dir / "agent_info.json", agent_info)
+    if judge_result is not None:
+        _save_json(run_dir / "judge_result.json", judge_result)
     (run_dir / "request.txt").write_text(sanitize_request(user_request), encoding="utf-8")
 
 

@@ -115,6 +115,9 @@ def _to_sql_literal(value: Any) -> str:
 def generate_sql_options(
     user_request: str,
     agent_id: str | None = None,
+    jdbc_url: str = "",
+    username: str = "",
+    password: str = "",
 ) -> tuple[Any, ...]:
     request = user_request.strip()
     if not request:
@@ -177,15 +180,52 @@ def generate_sql_options(
 
     selected_agent_label = str(context.get("agent_label", "")).strip()
     selected_agent_id = str(context.get("agent_id", "")).strip()
+    recommended_candidate_id = str(context.get("recommended_candidate_id", "")).strip()
+    selection_mode = str(context.get("selection_mode", "fallback")).strip() or "fallback"
+    if not recommended_candidate_id and radio_choices:
+        recommended_candidate_id = radio_choices[0][1]
     status = (
         f"Generated 3 SQL options for agent '{selected_agent_label or selected_agent_id}'. "
+        f"Auto-selected: {recommended_candidate_id or 'n/a'} ({selection_mode}). "
         f"Run folder: {context.get('run_dir')} "
         f"(LLM mode: {context.get('llm_mode')})."
     )
-    selected_default = radio_choices[0][1] if radio_choices else None
+    selected_default = recommended_candidate_id or (radio_choices[0][1] if radio_choices else None)
     option_1 = option_values[0]
     option_2 = option_values[1]
     option_3 = option_values[2]
+
+    run_status_text = ""
+    result_preview: Any = []
+    result_summary = ""
+    result_file_path: str | None = None
+    if selected_default:
+        connection = {
+            "dsn": jdbc_url.strip(),
+            "user": username.strip(),
+            "password": password,
+        }
+        try:
+            auto_result = SERVICE.execute_selected_candidate(
+                context,
+                selected_default,
+                connection=connection,
+            )
+            result_preview = auto_result.dataframe.head(500)
+            result_summary = auto_result.summary
+            result_file_path = str(auto_result.excel_path)
+            run_status_text = (
+                f"Auto-selected SQL '{selected_default}' executed successfully. "
+                f"Rows: {len(auto_result.dataframe)}"
+            )
+        except PipelineError as exc:
+            sql_text = _find_candidate_sql(context, selected_default)
+            run_status_text = f"Auto-run failed for '{selected_default}': {exc}"
+            if sql_text:
+                run_status_text += f"\n\nSQL:\n{sql_text}"
+    else:
+        run_status_text = "Auto-run skipped: recommended SQL option was not resolved."
+
     return (
         status,
         option_1[0],
@@ -205,10 +245,10 @@ def generate_sql_options(
         option_3[4],
         gr.update(choices=radio_choices, value=selected_default),
         context,
-        "",
-        [],
-        "",
-        None,
+        run_status_text,
+        result_preview,
+        result_summary,
+        result_file_path,
     )
 
 
@@ -226,8 +266,12 @@ def run_selected_sql(
             "",
             None,
         )
-    if not selected_option:
-        return ("Please select one SQL option.", [], "", None)
+
+    selected = selected_option.strip()
+    if not selected:
+        selected = str(context.get("recommended_candidate_id", "")).strip()
+    if not selected:
+        return ("No SQL option resolved to run.", [], "", None)
 
     connection = {
         "dsn": jdbc_url.strip(),
@@ -238,11 +282,11 @@ def run_selected_sql(
     try:
         result = SERVICE.execute_selected_candidate(
             context,
-            selected_option,
+            selected,
             connection=connection,
         )
     except PipelineError as exc:
-        sql_text = _find_candidate_sql(context, selected_option)
+        sql_text = _find_candidate_sql(context, selected)
         error_message = f"Run failed: {exc}"
         if sql_text:
             error_message += f"\n\nSQL:\n{sql_text}"
@@ -263,7 +307,7 @@ def _find_candidate_sql(context: dict[str, Any], candidate_id: str) -> str:
 
 
 def build_app() -> gr.Blocks:
-    with gr.Blocks(title="Talk to Your Data", css=APP_CSS) as demo:
+    with gr.Blocks(title="Talk to Your Data") as demo:
         context_state = gr.State(value=None)
         agent_choices, default_agent, agent_warning = _load_agent_choices()
 
@@ -271,7 +315,7 @@ def build_app() -> gr.Blocks:
             gr.Markdown(
                 """
                 ## Talk to Your Data
-                Request to SQL in 2 steps: generate 3 safe Oracle SQL options, then run selected option.
+                Generate 3 safe Oracle SQL options, auto-select the best one, and execute it immediately.
                 """,
                 elem_id="app-title",
             )
@@ -347,8 +391,14 @@ def build_app() -> gr.Blocks:
                 rationale_3 = gr.Textbox(label="Rationale", lines=2)
                 risk_3 = gr.Textbox(label="Risk notes", lines=2)
 
-            option_selector = gr.Radio(label="Choose one SQL option", choices=[])
-            run_btn = gr.Button("Run Selected SQL", variant="primary")
+            option_selector = gr.Radio(
+                label="Auto-selected option (optional manual override)",
+                choices=[],
+            )
+            run_btn = gr.Button(
+                "Run Selected SQL (Optional Manual Override)",
+                variant="secondary",
+            )
 
         with gr.Column(elem_id="panel"):
             run_status = gr.Markdown(label="Execution status")
@@ -358,7 +408,13 @@ def build_app() -> gr.Blocks:
 
         generate_btn.click(
             fn=generate_sql_options,
-            inputs=[request_box, agent_selector],
+            inputs=[
+                request_box,
+                agent_selector,
+                jdbc_url_box,
+                oracle_user_box,
+                oracle_password_box,
+            ],
             outputs=[
                 generation_status,
                 sql_1,
@@ -402,4 +458,11 @@ def build_app() -> gr.Blocks:
 
 if __name__ == "__main__":
     app = build_app()
-    app.launch(server_name="0.0.0.0", server_port=7860)
+    configured_port = os.getenv("GRADIO_SERVER_PORT", "").strip()
+    launch_kwargs: dict[str, Any] = {
+        "server_name": "0.0.0.0",
+        "css": APP_CSS,
+    }
+    if configured_port:
+        launch_kwargs["server_port"] = int(configured_port)
+    app.launch(**launch_kwargs)

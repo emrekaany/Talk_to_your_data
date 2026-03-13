@@ -1,6 +1,6 @@
 # Talk to Your Data
 
-Production-minded Gradio app that converts natural language requests into safe Oracle SQL options, lets the user choose one, executes it, and returns tabular + textual + Excel outputs.
+Production-minded Gradio app that converts natural language requests into safe Oracle SQL options, automatically chooses the best one, executes it, and returns tabular + textual + Excel outputs.
 
 ## Scope
 
@@ -12,9 +12,10 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 4. Generate exactly 3 SQL candidates.
 5. Save run artifacts into timestamped folders.
 6. Explain each SQL in plain language.
-7. Let user choose and execute one SQL on Oracle.
-8. Summarize query results (optional LLM step with heuristic fallback).
-9. Show result preview, summary text, and Excel download.
+7. LLM judge selects the best SQL candidate (hard-disqualify aware with deterministic fallback).
+8. Execute the selected SQL automatically on Oracle.
+9. Summarize query results (optional LLM step with heuristic fallback).
+10. Show result preview, summary text, and Excel download.
 
 ## Architecture Report
 
@@ -27,14 +28,14 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
    - `retrieve_relevant_metadata()`
    - `generate_sql_candidates()`
    - `describe_sql_candidate()`
+   - `choose_best_sql_candidate()`
    - artifact persistence under `runs/<timestamp>/`
-3. UI displays 3 candidate cards and a selector.
-4. User picks candidate and clicks run.
-5. `TalkToDataService.execute_selected_candidate()`:
+3. UI displays 3 candidate cards and highlights auto-selected candidate.
+4. `TalkToDataService.execute_selected_candidate()` auto-runs the recommended candidate:
    - executes SQL using Oracle driver and bind params
    - summarizes result (LLM optional via feature flag)
    - writes `result.xlsx`
-6. UI returns status, preview table, summary text, and download file.
+5. UI returns status, preview table, summary text, and download file.
 
 ### Module Responsibilities
 
@@ -77,6 +78,10 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `talk_to_data/sql_guardrails.py`
   - Execution-time SQL validation before Oracle run.
   - Re-checks safety, table allowlist, and mandatory filter obligations.
+- `talk_to_data/sql_judge.py`
+  - Evaluates 3 SQL candidates and picks best option id.
+  - Uses strict LLM judge prompt with `temperature=0.0` and `max_tokens=32`.
+  - Applies deterministic fallback (hard disqualify + local scoring + tie-break to option_1).
 - `talk_to_data/sql_explainer.py`
   - Implements `describe_sql_candidate(...) -> str`.
 - `talk_to_data/db.py`
@@ -100,6 +105,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `generate_sql_candidates(...) -> list[dict]`
   - each: `{id, sql, rationale_short, risk_notes}`.
 - `describe_sql_candidate(candidate, metadata) -> str`
+- `select_best_sql_option_id(user_request, metadata_used, candidates, llm_client=None) -> str`
 - `summarize_result_to_text(df) -> str`
   - optional args: `user_request`, `sql`, `llm_client`, `llm_enabled`
 - `TalkToDataService.prepare_candidates(user_request, agent_id=None) -> dict`
@@ -116,6 +122,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - Bare mandatory filter names are normalized to bind-safe predicates before SQL generation.
 - SQL output normalization rejects `INVALID_REQUEST` marker responses and keeps SQL-generation flow active.
 - SQL generation fails fast when 3 valid candidates cannot be produced after normalization/repair.
+- SQL judge output is parsed with regex for `option_[123]`; if parse fails, deterministic fallback is applied.
 - Bind placeholders are used for runtime values (`:report_period`, date binds, etc.).
 - Oracle errors are sanitized to avoid leaking secrets.
 
@@ -126,6 +133,7 @@ Each generation creates `runs/<timestamp>/` with:
 - `requirements.json`
 - `metadata_used.json`
 - `sql_candidates.json`
+- `judge_result.json`
 - `request.txt`
 - `agent_info.json` (when generation is agent-based)
 
@@ -151,6 +159,7 @@ Added and wired the following:
 - `talk_to_data/sql_generator.py`
 - `talk_to_data/sql_explainer.py`
 - `talk_to_data/sql_guardrails.py`
+- `talk_to_data/sql_judge.py`
 - `talk_to_data/db.py`
 - `talk_to_data/summarizer.py`
 - `talk_to_data/runs.py`
@@ -180,7 +189,8 @@ py app.py
 
 Open:
 
-- `http://localhost:7860`
+- App starts on the first available Gradio port (typically `7860`).
+- If you need a fixed port, set `GRADIO_SERVER_PORT` before launch.
 
 ## Environment Variables
 
@@ -223,6 +233,7 @@ Paths:
 - `METADATA_VECTORED_PATH` (default `metadata_vectored.json`)
 - `AGENT_REGISTRY_PATH` (default `metadata/agents/agents.json`)
 - `RUNS_DIR` (default `runs`)
+- `GRADIO_SERVER_PORT` (optional; when set, app binds to that fixed port)
 
 ## Agent Registry
 
@@ -303,9 +314,9 @@ Stub explains expected schema for table docs, columns, joins, mandatory filters,
 3. Open `Oracle Connection` and verify JDBC URL / username / password.
 4. Click `Generate SQL Options`.
 5. Review 3 SQL options with explanation and risk notes.
-6. Select one option via radio.
-7. Click `Run Selected SQL`.
-8. Review table preview and summary.
+6. System auto-selects best option and executes it immediately.
+7. Review table preview and summary.
+8. (Optional) Override option via radio and click `Run Selected SQL` for manual rerun.
 9. Download Excel output.
 
 ## Troubleshooting
