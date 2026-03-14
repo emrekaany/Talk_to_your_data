@@ -8,6 +8,7 @@ from typing import Any
 
 from .llm_client import LLMClient, LLMError, compact_json
 from .sql_generator import sanity_check_sql
+from .sql_validation import find_unknown_alias_column_violations
 
 
 class SQLGuardrailError(RuntimeError):
@@ -19,7 +20,7 @@ def validate_sql_before_execution(
     metadata_used: dict[str, Any],
     llm_client: LLMClient | None = None,
 ) -> None:
-    """Validate SQL safety, allowlisted tables, and filter obligations."""
+    """Validate SQL safety, allowlisted tables/columns, and filter obligations."""
     ok, reason = sanity_check_sql(sql)
     if not ok:
         raise SQLGuardrailError(f"Safety validation failed: {reason}")
@@ -38,6 +39,20 @@ def validate_sql_before_execution(
         raise SQLGuardrailError(
             "Table allowlist validation failed. "
             f"Disallowed tables: {', '.join(disallowed)}"
+        )
+
+    unknown_columns = find_unknown_alias_column_violations(sql, metadata_used)
+    if unknown_columns:
+        details = "; ".join(
+            (
+                f"{violation.reference} "
+                f"(expected metadata table: {violation.expected_table})"
+            )
+            for violation in unknown_columns
+        )
+        raise SQLGuardrailError(
+            "Column allowlist validation failed. "
+            f"Unknown alias.column references: {details}"
         )
 
     obligation_map = _build_table_obligations(metadata_used, selected_tables)

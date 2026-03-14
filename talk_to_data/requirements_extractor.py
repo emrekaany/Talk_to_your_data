@@ -68,7 +68,10 @@ def extract_requirements(
         )
 
     if raw.strip().upper() == "INVALID_REQUEST":
-        return _normalize_requirements({"invalid_request": True, "intent": "unknown"})
+        return _normalize_requirements(
+            {"invalid_request": True, "intent": "unknown"},
+            metadata_overview=metadata_overview,
+        )
 
     parsed = _try_parse_json(raw)
     if parsed is None:
@@ -78,7 +81,7 @@ def extract_requirements(
             "Could not parse requirement JSON from model output."
         )
 
-    return _normalize_requirements(parsed)
+    return _normalize_requirements(parsed, metadata_overview=metadata_overview)
 
 
 def _build_extraction_prompt(
@@ -87,7 +90,7 @@ def _build_extraction_prompt(
 ) -> str:
     schema_text = (
         '{"intent":"listing|metric|comparison|anomaly|other",'
-        '"required_filters":["REPORT_PERIOD = :report_period"],'
+        '"required_filters":["<optional filter expression>"],'
         '"measures":["PRIM_TL"],'
         '"dimensions":["BRANS_KODU"],'
         '"grain":["POLICE_NO"],'
@@ -109,6 +112,8 @@ def _build_extraction_prompt(
         "- Use Oracle-safe placeholders when relevant (:report_period).\n"
         "- For every mandatory filter from metadata overview, include an explicit filter predicate in required_filters.\n"
         "- If a mandatory filter is a column name (example REPORT_PERIOD), convert it to COLUMN = :column_bind.\n"
+        "- If metadata overview has time_filter_policy=ek_tanzim_date, use ek tanzim date context for period filters and avoid REPORT_PERIOD column filters.\n"
+        "- Do not invent REPORT_PERIOD filters unless metadata indicates REPORT_PERIOD exists or mandates it.\n"
         "- If request contains a concrete period (YYYYMM), fill report_period with that value.\n"
         "- If request cannot be answered, set invalid_request=true and provide reason in notes.\n\n"
         f"Schema:\n{schema_text}\n\n"
@@ -171,7 +176,11 @@ def _strip_fence(text: str) -> str:
     return stripped.strip()
 
 
-def _normalize_requirements(data: dict[str, Any]) -> dict[str, Any]:
+def _normalize_requirements(
+    data: dict[str, Any],
+    *,
+    metadata_overview: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     normalized: dict[str, Any] = {}
     normalized["intent"] = str(data.get("intent", "listing")).strip() or "listing"
     normalized["required_filters"] = _normalize_filter_list(data.get("required_filters"))
@@ -196,16 +205,13 @@ def _normalize_requirements(data: dict[str, Any]) -> dict[str, Any]:
     time_range = data.get("time_range")
     if isinstance(time_range, dict):
         normalized["time_range"] = {
-            "start": str(time_range.get("start", "")).strip() or None,
-            "end": str(time_range.get("end", "")).strip() or None,
+            "start": _normalize_optional_text(time_range.get("start")),
+            "end": _normalize_optional_text(time_range.get("end")),
         }
     else:
         normalized["time_range"] = {"start": None, "end": None}
 
-    if normalized["report_period"] and not _contains_report_period_filter(
-        normalized["required_filters"]
-    ):
-        normalized["required_filters"].append("REPORT_PERIOD = :report_period")
+    _apply_report_period_policy(normalized, metadata_overview)
 
     for key in REQUIRED_KEYS:
         normalized.setdefault(key, None)
@@ -234,8 +240,6 @@ def _heuristic_requirements(
     measures = _extract_measure_candidates(user_request)
 
     required_filters: list[str] = []
-    if report_period:
-        required_filters.append("REPORT_PERIOD = :report_period")
 
     overview_filters = _as_string_list((metadata_overview or {}).get("mandatory_filters"))
     for mandatory in overview_filters:
@@ -256,7 +260,7 @@ def _heuristic_requirements(
         "invalid_request": False,
         "notes": warning or "Heuristic extraction was used.",
     }
-    return _normalize_requirements(data)
+    return _normalize_requirements(data, metadata_overview=metadata_overview)
 
 
 def _extract_measure_candidates(user_request: str) -> list[str]:
@@ -292,11 +296,6 @@ def _extract_row_limit(user_request: str) -> int | None:
         return int(match.group(2))
     except ValueError:
         return None
-
-
-def _contains_report_period_filter(filters: list[str]) -> bool:
-    joined = " ".join(filters).upper()
-    return "REPORT_PERIOD" in joined
 
 
 def _safe_int(value: Any, fallback: int) -> int:
@@ -356,3 +355,68 @@ def _normalize_filter_expression(filter_text: str) -> str:
     column = token_match.group(0).upper()
     bind_name = "report_period" if column.lower() == "report_period" else column.lower()
     return f"{column} = :{bind_name}"
+
+
+def _normalize_optional_text(value: Any) -> str | None:
+    if value in (None, "", []):
+        return None
+    text = str(value).strip()
+    if not text or text.lower() == "none":
+        return None
+    return text
+
+
+def _apply_report_period_policy(
+    normalized: dict[str, Any],
+    metadata_overview: dict[str, Any] | None,
+) -> None:
+    report_period = str(normalized.get("report_period") or "").strip()
+    if not report_period:
+        return
+
+    filters = normalized.get("required_filters")
+    if not isinstance(filters, list):
+        return
+
+    overview = metadata_overview or {}
+    policy = str(overview.get("time_filter_policy", "")).strip().lower()
+    prefers_ek_tanzim = policy == "ek_tanzim_date"
+
+    if prefers_ek_tanzim:
+        normalized["required_filters"] = [
+            flt for flt in filters if not _references_report_period_column(flt)
+        ]
+        return
+
+    if _contains_report_period_reference(filters):
+        return
+
+    if _can_use_report_period_column(overview):
+        normalized["required_filters"].append("REPORT_PERIOD = :report_period")
+
+
+def _contains_report_period_reference(filters: list[str]) -> bool:
+    for flt in filters:
+        text = str(flt)
+        if re.search(r":\s*report_period\b", text, flags=re.IGNORECASE):
+            return True
+        if _references_report_period_column(text):
+            return True
+    return False
+
+
+def _references_report_period_column(filter_text: str) -> bool:
+    return bool(
+        re.search(
+            r"(?<!:)\breport_period\b",
+            str(filter_text),
+            flags=re.IGNORECASE,
+        )
+    )
+
+
+def _can_use_report_period_column(metadata_overview: dict[str, Any]) -> bool:
+    if bool(metadata_overview.get("has_report_period_column")):
+        return True
+    mandatory = _as_string_list(metadata_overview.get("mandatory_filters"))
+    return any(_references_report_period_column(flt) for flt in mandatory)

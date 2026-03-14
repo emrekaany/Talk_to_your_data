@@ -14,7 +14,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 6. Explain each SQL in plain language.
 7. LLM judge selects the best SQL candidate (hard-disqualify aware with deterministic fallback).
 8. Execute the selected SQL automatically on Oracle.
-9. Summarize query results (optional LLM step with heuristic fallback).
+9. Interpret query results in Turkish (optional LLM step with heuristic fallback) and generate chart plan payload.
 10. Show result preview, summary text, and Excel download.
 
 ## Architecture Report
@@ -33,7 +33,8 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 3. UI displays 3 candidate cards and highlights auto-selected candidate.
 4. `TalkToDataService.execute_selected_candidate()` auto-runs the recommended candidate:
    - executes SQL using Oracle driver and bind params
-   - summarizes result (LLM optional via feature flag)
+   - interprets result in Turkish and emits chart plan payload (LLM optional via feature flag)
+   - keeps chart rendering deactivated by default
    - writes `result.xlsx`
 5. UI returns status, preview table, summary text, and download file.
 
@@ -57,11 +58,13 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Implements `extract_requirements(user_request: str) -> dict`.
   - Uses `talk_to_data/llm_client.py` for LLM calls.
   - JSON validation + one retry via fix-json prompt.
+  - Applies metadata-aware period policy: does not auto-inject `REPORT_PERIOD` filters when selected metadata indicates a different time basis (for example `uretim` ek tanzim policy).
   - Heuristic fallback when LLM is unavailable.
 - `talk_to_data/metadata_retriever.py`
   - Loads selected agent metadata JSON.
   - High-recall retrieval using Unicode-aware token cosine similarity.
   - Returns broader relevant payload (more tables/columns) and mandatory rules.
+  - Builds metadata overview hints (`has_report_period_column`, `time_filter_policy`) for extractor prompts.
   - Supports high-recall retrieval up to top 200 metadata documents per request.
 - `talk_to_data/sql_generator.py`
   - Implements `generate_sql_candidates(...) -> list[dict]`.
@@ -74,10 +77,13 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Applies SQL safety checks and regeneration/repair path.
   - Fails with explicit error when model output cannot be normalized into 3 valid SQL candidates (no synthetic fallback SQL).
   - Normalizes mandatory filters (for example `REPORT_PERIOD` -> `REPORT_PERIOD = :report_period`) before enforcement.
+  - Enforces `uretim`-only ek tanzim period policy during candidate validation/repair (rejects `REPORT_PERIOD` column predicates when ek tanzim basis is active).
   - Enforces Oracle row limit style `FETCH FIRST 200 ROWS ONLY`.
 - `talk_to_data/sql_guardrails.py`
   - Execution-time SQL validation before Oracle run.
-  - Re-checks safety, table allowlist, and mandatory filter obligations.
+  - Re-checks safety, table allowlist, alias/column metadata compatibility, and mandatory filter obligations.
+- `talk_to_data/sql_validation.py`
+  - Shared alias/column metadata validation helpers used by guardrails and SQL judge.
 - `talk_to_data/sql_judge.py`
   - Evaluates 3 SQL candidates and picks best option id.
   - Uses strict LLM judge prompt with `temperature=0.0` and `max_tokens=32`.
@@ -88,8 +94,10 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Oracle execution and bind variable preparation.
   - Sanitized error messages (no secret leakage).
 - `talk_to_data/summarizer.py`
-  - Implements `summarize_result_to_text(df) -> str`.
-  - Optional LLM summarizer path controlled by `LLM_SUMMARIZER_ENABLED`; heuristic fallback remains default.
+  - Implements `summarize_result(...) -> ResultInterpretation` and compatibility wrapper `summarize_result_to_text(df) -> str`.
+  - Produces Turkish summary plus structured `chart_plan` payload.
+  - Optional LLM interpretation path controlled by `LLM_SUMMARIZER_ENABLED`; heuristic fallback remains default.
+  - Chart rendering can be toggled by `RESULT_CHART_RENDER_ENABLED` and is disabled by default.
 - `talk_to_data/runs.py`
   - Run folder creation + JSON/text/Excel persistence.
 - `talk_to_data/pipeline.py`
@@ -107,7 +115,9 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `describe_sql_candidate(candidate, metadata) -> str`
 - `select_best_sql_option_id(user_request, metadata_used, candidates, llm_client=None) -> str`
 - `summarize_result_to_text(df) -> str`
-  - optional args: `user_request`, `sql`, `llm_client`, `llm_enabled`
+  - optional args: `user_request`, `sql`, `metadata_used`, `llm_client`, `llm_enabled`, `chart_render_enabled`
+- `summarize_result(df) -> ResultInterpretation`
+  - fields: `summary_text`, `chart_plan`, `llm_used`, `chart_render_enabled`
 - `TalkToDataService.prepare_candidates(user_request, agent_id=None) -> dict`
 - `TalkToDataService.list_agents() -> list[dict[str, str]]`
 
@@ -122,6 +132,8 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - Bare mandatory filter names are normalized to bind-safe predicates before SQL generation.
 - SQL output normalization rejects `INVALID_REQUEST` marker responses and keeps SQL-generation flow active.
 - SQL generation fails fast when 3 valid candidates cannot be produced after normalization/repair.
+- `uretim` metadata only: when guardrails indicate ek tanzim period basis, SQL generation blocks `REPORT_PERIOD` column filters and requires ek tanzim date context with `:report_period`.
+- Execution-time guardrails validate SQL `alias.column` references against metadata-derived table-column sets.
 - SQL judge output is parsed with regex for `option_[123]`; if parse fails, deterministic fallback is applied.
 - Bind placeholders are used for runtime values (`:report_period`, date binds, etc.).
 - Oracle errors are sanitized to avoid leaking secrets.
@@ -141,6 +153,7 @@ Each execution also writes:
 
 - `result.xlsx`
 - `result_preview.csv`
+- `result_interpretation.json` (Turkish summary + chart plan payload + render flag)
 
 Global LLM prompt log:
 
@@ -159,6 +172,7 @@ Added and wired the following:
 - `talk_to_data/sql_generator.py`
 - `talk_to_data/sql_explainer.py`
 - `talk_to_data/sql_guardrails.py`
+- `talk_to_data/sql_validation.py`
 - `talk_to_data/sql_judge.py`
 - `talk_to_data/db.py`
 - `talk_to_data/summarizer.py`
@@ -202,6 +216,7 @@ LLM:
 - `LLM_MODEL` (optional; default `florence_v2`)
 - `LLM_TIMEOUT_SEC` (optional; default `60`)
 - `LLM_SUMMARIZER_ENABLED` (optional; `true/1/on` enables LLM result summarization step)
+- `RESULT_CHART_RENDER_ENABLED` (optional; `true/1/on` enables chart rendering path; default is disabled)
 - `LLM_PROMPT_LOG_PATH` (optional; default `runs/llm_prompts.log`)
 - Runtime LLM calls flow through `talk_to_data/llm_client.py`.
 - `scripts/llm_prompt.py` remains a standalone CLI helper and auto-loads root `.env`; `talk_to_data/config.py` also auto-loads `.env` (with built-in fallback parser when `python-dotenv` is unavailable).

@@ -24,12 +24,18 @@ from .metadata_retriever import (
     retrieve_relevant_metadata,
 )
 from .requirements_extractor import RequirementsExtractionError, extract_requirements
-from .runs import create_run_dir, save_result_excel, save_result_preview, save_run_artifacts
+from .runs import (
+    create_run_dir,
+    save_result_excel,
+    save_result_interpretation,
+    save_result_preview,
+    save_run_artifacts,
+)
 from .sql_explainer import describe_sql_candidate
 from .sql_generator import SQLGenerationError, generate_sql_candidates
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
 from .sql_judge import choose_best_sql_candidate
-from .summarizer import summarize_result_to_text
+from .summarizer import summarize_result
 
 
 class PipelineError(RuntimeError):
@@ -40,6 +46,7 @@ class PipelineError(RuntimeError):
 class CandidateRunResult:
     dataframe: pd.DataFrame
     summary: str
+    chart_plan: dict[str, Any] | None
     excel_path: Path
 
 
@@ -82,7 +89,10 @@ class TalkToDataService:
                 f"(agent='{agent.id}', path='{agent.metadata_path}'): {exc}"
             ) from exc
 
-        metadata_overview = build_metadata_overview(metadata_docs)
+        metadata_overview = build_metadata_overview(
+            metadata_docs,
+            metadata_path=agent.metadata_path,
+        )
 
         try:
             requirements = extract_requirements(
@@ -237,19 +247,35 @@ class TalkToDataService:
         run_dir = Path(run_dir_str) if run_dir_str else create_run_dir(self.config.runs_dir)
         run_dir.mkdir(parents=True, exist_ok=True)
 
-        summary = summarize_result_to_text(
+        interpreted = summarize_result(
             dataframe,
             user_request=str(context.get("request", "")),
             sql=sql,
+            metadata_used=metadata_used,
             llm_client=self.llm_client,
             llm_enabled=self.config.llm_summarizer_enabled,
+            chart_render_enabled=self.config.result_chart_render_enabled,
         )
+        summary = interpreted.summary_text
+        chart_plan = interpreted.chart_plan
         excel_path = save_result_excel(dataframe, run_dir)
         save_result_preview(dataframe, run_dir)
+        save_result_interpretation(
+            run_dir,
+            {
+                "summary": summary,
+                "chart_plan": chart_plan,
+                "llm_used": interpreted.llm_used,
+                "chart_render_enabled": interpreted.chart_render_enabled,
+                "selected_candidate_id": selected_id,
+                "executed_sql": sql,
+            },
+        )
 
         return CandidateRunResult(
             dataframe=dataframe,
             summary=summary,
+            chart_plan=chart_plan,
             excel_path=excel_path,
         )
 

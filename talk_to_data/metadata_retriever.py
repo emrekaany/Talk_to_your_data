@@ -81,10 +81,16 @@ def load_metadata_documents(metadata_path: Path) -> list[dict[str, Any]]:
     return documents
 
 
-def build_metadata_overview(documents: list[dict[str, Any]]) -> dict[str, Any]:
+def build_metadata_overview(
+    documents: list[dict[str, Any]],
+    *,
+    metadata_path: Path | None = None,
+) -> dict[str, Any]:
     """Small overview used for requirement extraction prompts."""
     tables: list[str] = []
     mandatory_filters: list[str] = []
+    performance_rules: list[str] = []
+    has_report_period_column = False
     for doc in documents:
         table_name = _table_name(doc)
         if table_name:
@@ -98,10 +104,32 @@ def build_metadata_overview(documents: list[dict[str, Any]]) -> dict[str, Any]:
             expr = f"{column} = :report_period"
             if expr not in mandatory_filters:
                 mandatory_filters.append(expr)
-    return {
+
+        if not has_report_period_column and _doc_has_column(doc, "REPORT_PERIOD"):
+            has_report_period_column = True
+
+        for rule in _as_string_list(doc.get("performance_rules")):
+            if rule and rule not in performance_rules:
+                performance_rules.append(rule)
+
+    metadata_source = str(metadata_path) if metadata_path is not None else ""
+    time_filter_policy = _detect_time_filter_policy(
+        performance_rules=performance_rules,
+        metadata_source=metadata_source,
+    )
+
+    overview = {
         "tables": tables[:30],
         "mandatory_filters": mandatory_filters[:20],
+        "has_report_period_column": has_report_period_column,
     }
+    if metadata_source:
+        overview["metadata_source"] = metadata_source
+    if performance_rules:
+        overview["performance_rules"] = performance_rules[:12]
+    if time_filter_policy:
+        overview["time_filter_policy"] = time_filter_policy
+    return overview
 
 
 def retrieve_relevant_metadata(
@@ -218,6 +246,38 @@ def _table_name(doc: dict[str, Any]) -> str:
         return name
     identifier = str(doc.get("id", "")).strip()
     return identifier
+
+
+def _doc_has_column(doc: dict[str, Any], column_name: str) -> bool:
+    raw_columns = doc.get("columns")
+    if not isinstance(raw_columns, list):
+        return False
+    target = column_name.strip().upper()
+    if not target:
+        return False
+    for column in raw_columns:
+        if not isinstance(column, dict):
+            continue
+        name = str(column.get("name", "")).strip().upper()
+        if name == target:
+            return True
+    return False
+
+
+def _detect_time_filter_policy(
+    *,
+    performance_rules: list[str],
+    metadata_source: str,
+) -> str | None:
+    source_low = metadata_source.lower()
+    is_uretim_source = "uretim" in source_low
+    if not is_uretim_source:
+        return None
+
+    text = _normalize_space(" ".join(performance_rules)).lower()
+    if "ek tanzim" in text:
+        return "ek_tanzim_date"
+    return None
 
 
 def _query_tokens(requirements: dict[str, Any], user_request: str) -> Counter[str]:

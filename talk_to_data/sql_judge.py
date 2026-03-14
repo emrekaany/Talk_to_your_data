@@ -9,6 +9,7 @@ from typing import Any
 from .llm_client import LLMClient, LLMError, compact_json
 from .sql_generator import sanity_check_sql
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
+from .sql_validation import find_unknown_alias_column_violations
 
 
 MAX_JUDGE_TOKENS = 32
@@ -26,19 +27,6 @@ _AGGREGATION_TOKENS = (
     "max",
 )
 _DETAIL_TOKENS = ("detay", "detail", "satir", "row", "liste", "list")
-_ALIAS_STOPWORDS = {
-    "on",
-    "where",
-    "group",
-    "order",
-    "fetch",
-    "inner",
-    "left",
-    "right",
-    "full",
-    "cross",
-    "join",
-}
 
 
 def select_best_sql_option_id(
@@ -280,7 +268,7 @@ def _evaluate_candidates(
         except SQLGuardrailError as exc:
             reasons.append(str(exc))
 
-        reasons.extend(_unknown_column_violations(sql, metadata_used))
+        reasons.extend(_unknown_column_reasons(sql, metadata_used))
         reasons.extend(_security_violations(sql, metadata_used))
         reasons = _dedupe_strings(reasons)
 
@@ -304,34 +292,15 @@ def _evaluate_candidates(
     return evaluations
 
 
-def _unknown_column_violations(sql: str, metadata_used: dict[str, Any]) -> list[str]:
-    table_columns = _metadata_table_columns(metadata_used)
-    if not table_columns:
-        return []
-
-    alias_map = _extract_alias_map(sql, table_columns)
-    if not alias_map:
-        return []
-
-    violations: list[str] = []
-    for alias, column in re.findall(
-        r"\b([A-Za-z_][A-Za-z0-9_$#]*)\.([A-Za-z_][A-Za-z0-9_$#]*)\b",
-        sql,
-        flags=re.IGNORECASE,
-    ):
-        alias_key = alias.lower()
-        table_key = alias_map.get(alias_key)
-        if not table_key:
-            continue
-        known_columns = table_columns.get(table_key)
-        if not known_columns:
-            continue
-        if column.lower() in known_columns:
-            continue
-        violations.append(
-            f"Unsupported column '{alias}.{column}' for metadata table '{table_key}'."
+def _unknown_column_reasons(sql: str, metadata_used: dict[str, Any]) -> list[str]:
+    reasons = [
+        (
+            "Unsupported column "
+            f"'{violation.reference}' for metadata table '{violation.expected_table}'."
         )
-    return _dedupe_strings(violations)
+        for violation in find_unknown_alias_column_violations(sql, metadata_used)
+    ]
+    return _dedupe_strings(reasons)
 
 
 def _security_violations(sql: str, metadata_used: dict[str, Any]) -> list[str]:
@@ -458,70 +427,6 @@ def _estimated_select_column_count(sql: str) -> int:
     return len([part for part in segment.split(",") if part.strip()])
 
 
-def _metadata_table_columns(metadata_used: dict[str, Any]) -> dict[str, set[str]]:
-    table_columns: dict[str, set[str]] = {}
-    items = metadata_used.get("relevant_items")
-    if not isinstance(items, list):
-        return table_columns
-
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-        table_name = _normalize_identifier(str(item.get("table", "")))
-        if not table_name:
-            continue
-        column_names: set[str] = set()
-        columns = item.get("columns")
-        if isinstance(columns, list):
-            for column in columns:
-                if not isinstance(column, dict):
-                    continue
-                name = str(column.get("name", "")).strip()
-                if name:
-                    column_names.add(name.lower())
-        if table_name not in table_columns:
-            table_columns[table_name] = set()
-        table_columns[table_name].update(column_names)
-
-        bare = table_name.split(".")[-1]
-        if bare not in table_columns:
-            table_columns[bare] = set()
-        table_columns[bare].update(column_names)
-    return table_columns
-
-
-def _extract_alias_map(
-    sql: str,
-    table_columns: dict[str, set[str]],
-) -> dict[str, str]:
-    alias_map: dict[str, str] = {}
-    matches = re.findall(
-        r"\b(?:from|join)\s+([A-Za-z0-9_.$#\"]+)(?:\s+(?:as\s+)?([A-Za-z_][A-Za-z0-9_$#]*))?",
-        sql,
-        flags=re.IGNORECASE,
-    )
-    for table_token, alias_token in matches:
-        normalized_table = _normalize_identifier(table_token)
-        if not normalized_table:
-            continue
-        table_key = normalized_table
-        if table_key not in table_columns:
-            bare = table_key.split(".")[-1]
-            if bare in table_columns:
-                table_key = bare
-            else:
-                continue
-
-        bare_key = table_key.split(".")[-1]
-        alias_map[bare_key] = table_key
-
-        alias = alias_token.strip().lower() if alias_token else ""
-        if alias and alias not in _ALIAS_STOPWORDS:
-            alias_map[alias] = table_key
-
-    return alias_map
-
-
 def _fallback_pick(evaluations: list[dict[str, Any]]) -> dict[str, Any] | None:
     if not evaluations:
         return None
@@ -610,13 +515,6 @@ def _normalize_filter_expression(filter_text: str) -> str:
     column = token_match.group(0).upper()
     bind_name = "report_period" if column.lower() == "report_period" else column.lower()
     return f"{column} = :{bind_name}"
-
-
-def _normalize_identifier(value: str) -> str:
-    identifier = value.strip().strip(",")
-    if identifier.startswith('"') and identifier.endswith('"'):
-        identifier = identifier[1:-1]
-    return identifier.replace('"', "").lower()
 
 
 def _dedupe_strings(values: list[str]) -> list[str]:

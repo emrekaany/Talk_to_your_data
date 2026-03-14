@@ -8,8 +8,9 @@ Before making any change, you must:
 
 1. Read `README.md` fully.
 2. Read `forhumans.md` for project-specific prompting rules.
-3. Confirm your planned change does not break the documented architecture and flow.
-4. Understand the repository flow end-to-end before writing any code. If understanding is incomplete, do not start coding.
+3. Read `architecture.md` fully and understand the documented architecture.
+4. Confirm your planned change does not break the documented architecture and flow.
+5. Understand the repository flow end-to-end before writing any code. If understanding is incomplete, do not start coding.
 
 If you skip these, do not proceed with edits.
 
@@ -37,8 +38,10 @@ Run these checks after edits:
 1. Document every change in repository documentation. At minimum, update `AGENTS.md` with what changed.
 2. Every agent must add a backlog entry in `AGENTS.md` for each work session.
 3. Backlog entries must include date, agent name, and a short list of operations performed (reads, edits, commands, tests).
-4. Agents must know and follow repository documentation (`README.md`, `forhumans.md`, `AGENTS.md`) during implementation.
-5. Agents must update documentation whenever behavior, configuration, or workflow changes.
+4. Agents must know and follow repository documentation (`README.md`, `forhumans.md`, `architecture.md`, `AGENTS.md`) during implementation.
+5. Agents must update documentation whenever behavior, configuration, workflow, or architecture changes.
+6. If architecture, flow, module responsibilities, or core contracts change, update `architecture.md` in the same session.
+7. If architecture changes, add an entry to `architecture.md` under `Architecture Change Log (Mandatory)`.
 
 ## Issue Resolution Standards
 
@@ -70,6 +73,13 @@ If a request conflicts with existing architecture:
 2. Preserve current contracts where possible.
 3. Explicitly document any breaking change in `README.md` before merging.
 
+## Architecture Discipline
+
+1. Every agent must read and understand `architecture.md` before development.
+2. `architecture.md` is the canonical architecture source of truth.
+3. Every architecture-impacting change must be documented in `architecture.md`.
+4. Architecture-impacting work is incomplete unless the change log in `architecture.md` is updated.
+
 ## Operations Backlog
 
 - 2026-02-09 - Codex: Read `README.md`, `forhumans.md`, `talk_to_data/db.py`, `talk_to_data/config.py`, `requirements.txt`, `AGENTS.md`. Attempted read of `talk_to_data/sql_explainer.py` was aborted. Ran `py -m compileall app.py talk_to_data`. Checked imports for `gradio`, `pandas`, `openpyxl`, `oracledb` and found `openpyxl` missing.
@@ -90,3 +100,8 @@ If a request conflicts with existing architecture:
 - 2026-03-13 - Codex: Read `AGENTS.md` and updated required smoke-test command to `py -c "from app import build_app; build_app(); print('ok')"` instead of long-running `py app.py`. Ran `py -c "from app import build_app; build_app(); print('ok')"` to validate.
 - 2026-03-13 - Codex: Continued validation from interrupted test run. Ran `py -m compileall app.py talk_to_data` (pass), ran `py -c "from app import build_app; build_app(); print('ok')"` (pass), validated `metadata/agents/metadata_vectored_uretim.json` structure/counts (`documents=20`, `sheet1_rows=43`, `sheet2_rows=18`, `acente_rows=11160`), validated metadata retrieval load path for `uretim` (`load_ok=20`), verified agent registry/UI choices via `TalkToDataService.list_agents()` and `_load_agent_choices()`, and confirmed `generate_sql_options(..., 'uretim')` reaches SQL generation but fails due unreachable LLM endpoint (`WinError 10061`).
 - 2026-03-13 - Codex: Audited Excel-to-JSON completeness for production metadata. Compared `metadata/agents/Chat Your Data Metadata Excel DosyasÄ±.xlsx` against `metadata/agents/metadata_vectored_uretim.json` via scripted checks: raw sheet copies (`Sheet1`, `Sheet2`, `Acente Bilgileri`) match exactly, known table set matches (`20/20`), document IDs match table set (`20/20`), business asset row coverage matches (`39/39`), note rows coverage matches (`3/3`), expected column mappings have no misses, and expected join mappings have no misses (`27/27`).
+- 2026-03-13 - Codex: Read `README.md`, `forhumans.md`, `AGENTS.md`, `talk_to_data/requirements_extractor.py`, `talk_to_data/metadata_retriever.py`, `talk_to_data/sql_generator.py`, and `talk_to_data/pipeline.py`; inspected `metadata/agents/Chat Your Data Metadata Excel Dosyasý - Kopya.xlsx` for ek tanzim rules. Implemented uretim-only period-policy flow: metadata overview now emits `time_filter_policy` and `has_report_period_column`, extractor no longer hardcodes `REPORT_PERIOD` for every `YYYYMM` request, and SQL generation now enforces ek tanzim period basis (rejects `REPORT_PERIOD` column use) only when selected metadata source is `uretim`. Updated `README.md` docs. Ran `py -m compileall app.py talk_to_data` (pass), ran `py -c "from app import build_app; build_app(); print('ok')"` (pass), and ran targeted `py -` checks for uretim requirements/mandatory-rules/policy validation behavior (pass).
+- 2026-03-14 - Codex: Read `README.md`, `forhumans.md`, `AGENTS.md`, `talk_to_data/summarizer.py`, `talk_to_data/pipeline.py`, `talk_to_data/config.py`, `talk_to_data/runs.py`, and `app.py`. Implemented post-query Turkish interpretation structure with chart plan payload in `talk_to_data/summarizer.py` (`summarize_result` + compatibility wrapper), added chart-render feature flag `RESULT_CHART_RENDER_ENABLED` in `talk_to_data/config.py` (default disabled), integrated interpretation payload persistence via `save_result_interpretation` in `talk_to_data/runs.py`, and wired execution flow in `talk_to_data/pipeline.py` to save `result_interpretation.json` while keeping chart rendering deactivated. Updated `README.md` architecture/contracts/env/artifact docs. Ran `py -m compileall app.py talk_to_data` (pass), ran `py -c "from app import build_app; build_app(); print('ok')"` (pass), and ran `py -` sanity check for `summarize_result(..., chart_render_enabled=False)` confirming `chart_plan.draw_chart=False` and `chart_type=none`.
+- 2026-03-14 - Codex: Read `README.md`, `forhumans.md`, `AGENTS.md`, `architecture.md`, `app.py`, and `talk_to_data` core modules to validate current architecture. Added new canonical architecture document `architecture.md` with end-to-end flow, module responsibilities, contracts, safety invariants, configuration boundaries, and mandatory architecture change log section. Updated `AGENTS.md` to require reading `architecture.md` before development and to mandate updating `architecture.md` when architecture changes. Ran `py -m compileall app.py talk_to_data` and ran `py -c "from app import build_app; build_app(); print('ok')"` for smoke validation.
+
+- 2026-03-14 - Codex: Read `README.md`, `forhumans.md`, `architecture.md`, `AGENTS.md`, `talk_to_data/sql_guardrails.py`, `talk_to_data/sql_judge.py`, and `talk_to_data/pipeline.py`. Added shared validator module `talk_to_data/sql_validation.py` for metadata-backed alias/column checks, integrated unknown `alias.column` blocking into `validate_sql_before_execution()`, and refactored SQL judge to reuse shared validation logic. Updated `README.md` and `architecture.md` (including architecture change log). Ran `py -m compileall app.py talk_to_data`, ran `py -c "from app import build_app; build_app(); print('ok')"`, and ran targeted `py -` regression check confirming `ppo.POLICE_SAYISI` is blocked while `ps.POLICE_SAYISI` passes.

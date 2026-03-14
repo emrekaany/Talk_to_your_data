@@ -51,6 +51,7 @@ def generate_sql_candidates(
         raise SQLGenerationError("LLM client is required for SQL generation.")
 
     required_filters = _required_filters(requirements, metadata)
+    period_policy = _build_period_policy(requirements, metadata)
     candidates = _generate_with_llm(
         llm_client=llm_client,
         user_request=user_request,
@@ -71,6 +72,7 @@ def generate_sql_candidates(
             idx=idx,
             required_filters=required_filters,
             llm_client=llm_client,
+            period_policy=period_policy,
         )
         if fixed is None:
             raise SQLGenerationError(
@@ -155,7 +157,7 @@ def _build_sql_prompt(
     required_filters: list[str],
 ) -> str:
     metadata_text = _metadata_prompt_text(metadata)
-    sql_rule_text = _sql_rule_prompt_text(requirements, required_filters)
+    sql_rule_text = _sql_rule_prompt_text(requirements, required_filters, metadata)
     return (
         "You are a senior SQL engineer. "
         "Your task is to generate three recommended SQL queries based strictly on "
@@ -385,6 +387,7 @@ def _validate_and_fix_candidate(
     idx: int,
     required_filters: list[str],
     llm_client: LLMClient,
+    period_policy: dict[str, Any],
 ) -> dict[str, str] | None:
     fixed = {
         "id": str(candidate.get("id") or f"option_{idx + 1}"),
@@ -399,20 +402,24 @@ def _validate_and_fix_candidate(
     }
 
     ok, reason = sanity_check_sql(fixed["sql"])
-    if ok:
+    period_reason = _period_policy_violation(fixed["sql"], period_policy)
+    if ok and period_reason is None:
         return fixed
+    failure_reason = reason if not ok else period_reason or "Unknown period policy error."
 
     repaired = _repair_candidate_with_llm(
         llm_client=llm_client,
         candidate=fixed,
-        failure_reason=reason,
+        failure_reason=failure_reason,
         required_filters=required_filters,
+        period_policy=period_policy,
     )
     if repaired is None:
         return None
 
     ok2, _ = sanity_check_sql(repaired["sql"])
-    if ok2:
+    period_reason2 = _period_policy_violation(repaired["sql"], period_policy)
+    if ok2 and period_reason2 is None:
         return repaired
     return None
 
@@ -423,12 +430,22 @@ def _repair_candidate_with_llm(
     candidate: dict[str, str],
     failure_reason: str,
     required_filters: list[str],
+    period_policy: dict[str, Any],
 ) -> dict[str, str] | None:
+    period_rule_text = ""
+    if period_policy.get("enforce_ek_tanzim"):
+        period_rule_text = (
+            "\n- For this request, period filtering must use EK TANZIM date basis.\n"
+            "- Do NOT use REPORT_PERIOD column predicates.\n"
+            "- Use :report_period with EK TANZIM context "
+            "(for example TANZIM_TARIH_ID or GNL_TARIH date joins).\n"
+        )
+
     prompt = (
         "Repair this SQL candidate to satisfy strict safety rules.\n"
         "Return strict JSON only with fields id, sql, rationale_short, risk_notes.\n"
         f"Rules: Oracle SQL, SELECT/CTE only, no SELECT *, include FETCH FIRST {DEFAULT_SQL_LIMIT} ROWS ONLY, "
-        "include required filters.\n"
+        f"include required filters.{period_rule_text}\n"
         f"Failure reason: {failure_reason}\n"
         f"Required filters: {compact_json(required_filters)}\n"
         f"Candidate: {compact_json(candidate)}"
@@ -660,7 +677,11 @@ def _short_metadata_text(value: Any, *, limit: int) -> str:
     return f"{text[: max(0, limit - 3)]}..."
 
 
-def _sql_rule_prompt_text(requirements: dict[str, Any], required_filters: list[str]) -> str:
+def _sql_rule_prompt_text(
+    requirements: dict[str, Any],
+    required_filters: list[str],
+    metadata: dict[str, Any],
+) -> str:
     lines: list[str] = [
         "- Oracle SQL dialect is mandatory.",
         f"- Every query must include FETCH FIRST {DEFAULT_SQL_LIMIT} ROWS ONLY.",
@@ -676,6 +697,15 @@ def _sql_rule_prompt_text(requirements: dict[str, Any], required_filters: list[s
     report_period = str(requirements.get("report_period", "")).strip()
     if report_period:
         lines.append(f"- Runtime hint report_period: {report_period}")
+        period_policy = _build_period_policy(requirements, metadata)
+        if period_policy.get("enforce_ek_tanzim"):
+            lines.append(
+                "- Uretim agent rule: use EK TANZIM date basis for period filtering."
+            )
+            lines.append(
+                "- Do not use REPORT_PERIOD column; use EK TANZIM context "
+                "(for example TANZIM_TARIH_ID / GNL_TARIH joins) with :report_period."
+            )
 
     time_range = requirements.get("time_range")
     if isinstance(time_range, dict):
@@ -758,3 +788,62 @@ def _normalize_filter_expression(filter_text: str) -> str:
     column = token_match.group(0).upper()
     bind_name = "report_period" if column.lower() == "report_period" else column.lower()
     return f"{column} = :{bind_name}"
+
+
+def _build_period_policy(
+    requirements: dict[str, Any],
+    metadata: dict[str, Any],
+) -> dict[str, Any]:
+    report_period = str(requirements.get("report_period", "")).strip()
+    if not report_period:
+        return {"enforce_ek_tanzim": False}
+    if not _is_uretim_metadata(metadata):
+        return {"enforce_ek_tanzim": False}
+    if not _metadata_prefers_ek_tanzim(metadata):
+        return {"enforce_ek_tanzim": False}
+    return {
+        "enforce_ek_tanzim": True,
+        "report_period": report_period,
+    }
+
+
+def _period_policy_violation(sql: str, period_policy: dict[str, Any]) -> str | None:
+    if not period_policy.get("enforce_ek_tanzim"):
+        return None
+
+    lowered = sql.lower()
+    if re.search(r"(?<!:)\breport_period\b", lowered):
+        return "Uretim period filters must not use REPORT_PERIOD column."
+
+    if ":report_period" not in lowered:
+        return "Uretim period filters must use :report_period bind variable."
+
+    if not any(token in lowered for token in ("tanzim_tarih_id", "ek_tanzim", "gnl_tarih")):
+        return (
+            "Uretim period filters must reference EK TANZIM date context "
+            "(TANZIM_TARIH_ID, EK_TANZIM alias, or GNL_TARIH)."
+        )
+
+    return None
+
+
+def _is_uretim_metadata(metadata: dict[str, Any]) -> bool:
+    retrieval_debug = metadata.get("retrieval_debug")
+    if isinstance(retrieval_debug, dict):
+        source = str(retrieval_debug.get("metadata_source", "")).lower()
+        if "uretim" in source:
+            return True
+    return False
+
+
+def _metadata_prefers_ek_tanzim(metadata: dict[str, Any]) -> bool:
+    texts: list[str] = _as_string_list(metadata.get("guardrails"))
+    relevant = metadata.get("relevant_items")
+    if isinstance(relevant, list):
+        for item in relevant:
+            if not isinstance(item, dict):
+                continue
+            texts.extend(_as_string_list(item.get("performance_rules")))
+
+    merged = _normalize_space(" ".join(texts)).lower()
+    return "ek tanzim" in merged

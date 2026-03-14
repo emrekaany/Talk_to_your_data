@@ -60,6 +60,16 @@ def save_result_preview(df: pd.DataFrame, run_dir: Path, max_rows: int = 200) ->
     return preview_path
 
 
+def save_result_interpretation(
+    run_dir: Path,
+    interpretation: dict[str, Any],
+) -> Path:
+    """Persist interpreted result summary and chart plan."""
+    output_path = run_dir / "result_interpretation.json"
+    _save_json(output_path, interpretation)
+    return output_path
+
+
 def _save_json(path: Path, payload: Any) -> None:
     path.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False),
