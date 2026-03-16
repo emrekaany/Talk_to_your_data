@@ -29,6 +29,9 @@ class ResultInterpretation:
     chart_plan: dict[str, Any]
     llm_used: bool
     chart_render_enabled: bool
+    summary_mode: str
+    fallback_reason: str | None
+    validation_errors: list[str]
 
 
 def summarize_result_to_text(
@@ -72,12 +75,20 @@ def summarize_result(
     heuristic_summary = _heuristic_summary_tr(df)
     disabled_reason = "Grafik uretimi konfigrasyonda devre disi."
 
-    if not _llm_summarizer_enabled(llm_enabled) or llm_client is None:
-        return ResultInterpretation(
-            summary_text=heuristic_summary,
-            chart_plan=_disabled_chart_plan(disabled_reason),
-            llm_used=False,
+    if not _llm_summarizer_enabled(llm_enabled):
+        return _heuristic_result(
+            heuristic_summary=heuristic_summary,
             chart_render_enabled=chart_render_enabled,
+            chart_disabled_reason=disabled_reason,
+            fallback_reason="LLM summarizer disabled by configuration.",
+        )
+
+    if llm_client is None:
+        return _heuristic_result(
+            heuristic_summary=heuristic_summary,
+            chart_render_enabled=chart_render_enabled,
+            chart_disabled_reason=disabled_reason,
+            fallback_reason="LLM client unavailable.",
         )
 
     payload = _summarize_with_llm(
@@ -89,20 +100,20 @@ def summarize_result(
         fallback_summary=heuristic_summary,
     )
     if payload is None:
-        return ResultInterpretation(
-            summary_text=heuristic_summary,
-            chart_plan=_disabled_chart_plan(disabled_reason),
-            llm_used=False,
+        return _heuristic_result(
+            heuristic_summary=heuristic_summary,
             chart_render_enabled=chart_render_enabled,
+            chart_disabled_reason=disabled_reason,
+            fallback_reason="LLM summary fallback due LLM error or invalid JSON.",
         )
 
     summary_text = _normalize_summary_text(
         payload.get("summary_tr"),
         fallback=heuristic_summary,
     )
-    chart_plan = _normalize_chart_plan(
+    chart_plan, validation_errors = validate_chart_plan(
         payload.get("chart_plan"),
-        fallback_reason="LLM chart plan verisi alinmadi.",
+        df,
     )
     if not chart_render_enabled:
         chart_plan = _force_chart_disabled(chart_plan, disabled_reason)
@@ -112,6 +123,9 @@ def summarize_result(
         chart_plan=chart_plan,
         llm_used=True,
         chart_render_enabled=chart_render_enabled,
+        summary_mode="llm",
+        fallback_reason=None,
+        validation_errors=validation_errors,
     )
 
 
@@ -265,6 +279,131 @@ def _build_result_profile(df: pd.DataFrame) -> dict[str, Any]:
     return profile
 
 
+def validate_chart_plan(
+    value: Any,
+    df: pd.DataFrame,
+) -> tuple[dict[str, Any], list[str]]:
+    """
+    Validate and normalize chart plan with DataFrame-aware checks.
+
+    Rules:
+    - chart_type in {bar,line,scatter,pie,none}
+    - draw_chart=true requires chart_type!=none
+    - bar/line/scatter/pie require x column existing in df
+    - sum/avg require y column existing and numeric
+    - count allows optional y; if provided it must exist
+    - top_n positive int and <= 200
+    """
+    fallback_reason = "LLM chart plan verisi alinmadi."
+    if not isinstance(value, dict):
+        return _disabled_chart_plan(fallback_reason), [fallback_reason]
+
+    errors: list[str] = []
+    columns = {str(col) for col in df.columns}
+
+    chart_type = str(value.get("chart_type", "none")).strip().lower()
+    if chart_type not in _CHART_TYPES:
+        errors.append(
+            f"Invalid chart_type '{chart_type}'. Allowed: {', '.join(sorted(_CHART_TYPES))}."
+        )
+        chart_type = "none"
+
+    aggregation = str(value.get("aggregation", "none")).strip().lower()
+    if aggregation not in _AGGREGATIONS:
+        errors.append(
+            f"Invalid aggregation '{aggregation}'. Allowed: {', '.join(sorted(_AGGREGATIONS))}."
+        )
+        aggregation = "none"
+
+    sort = str(value.get("sort", "none")).strip().lower()
+    if sort not in _SORT_ORDERS:
+        errors.append(
+            f"Invalid sort '{sort}'. Allowed: {', '.join(sorted(_SORT_ORDERS))}."
+        )
+        sort = "none"
+
+    draw_chart = bool(value.get("draw_chart", False))
+    if draw_chart and chart_type == "none":
+        errors.append("draw_chart=true requires chart_type other than 'none'.")
+
+    x = _optional_text(value.get("x"))
+    y = _optional_text(value.get("y"))
+
+    if chart_type in {"bar", "line", "scatter", "pie"}:
+        if not x:
+            errors.append(f"{chart_type} chart requires x column.")
+        elif x not in columns:
+            errors.append(f"x column '{x}' was not found in result columns.")
+
+    if aggregation in {"sum", "avg"}:
+        if not y:
+            errors.append(f"aggregation='{aggregation}' requires y column.")
+        elif y not in columns:
+            errors.append(f"y column '{y}' was not found in result columns.")
+        elif not pd.api.types.is_numeric_dtype(df[y]):
+            errors.append(
+                f"y column '{y}' must be numeric for aggregation '{aggregation}'."
+            )
+    elif aggregation == "count" and y and y not in columns:
+        errors.append(f"Optional count y column '{y}' was not found in result columns.")
+
+    top_n_raw = value.get("top_n")
+    top_n: int | None = None
+    if top_n_raw not in (None, ""):
+        try:
+            parsed = int(top_n_raw)
+        except (TypeError, ValueError):
+            errors.append("top_n must be an integer.")
+        else:
+            if parsed <= 0:
+                errors.append("top_n must be greater than zero.")
+            elif parsed > 200:
+                errors.append("top_n cannot exceed 200.")
+                top_n = 200
+            else:
+                top_n = parsed
+
+    plan = {
+        "draw_chart": draw_chart,
+        "chart_type": chart_type,
+        "x": x,
+        "y": y,
+        "aggregation": aggregation,
+        "top_n": top_n,
+        "sort": sort,
+        "title_tr": str(value.get("title_tr", "")).strip() or "Grafik plani",
+        "reason_tr": str(value.get("reason_tr", "")).strip() or fallback_reason,
+    }
+
+    if errors:
+        reason = "; ".join(errors)
+        return _disabled_chart_plan(reason), errors
+
+    if not plan["draw_chart"]:
+        reason = str(plan.get("reason_tr", "")).strip() or "draw_chart is false."
+        return _disabled_chart_plan(reason), []
+
+    return plan, []
+
+
+def _heuristic_result(
+    *,
+    heuristic_summary: str,
+    chart_render_enabled: bool,
+    chart_disabled_reason: str,
+    fallback_reason: str,
+) -> ResultInterpretation:
+    return ResultInterpretation(
+        summary_text=heuristic_summary,
+        chart_plan=_disabled_chart_plan(chart_disabled_reason),
+        llm_used=False,
+        chart_render_enabled=chart_render_enabled,
+        summary_mode="heuristic",
+        fallback_reason=fallback_reason,
+        validation_errors=[],
+    )
+
+
 def _disabled_chart_plan(reason: str) -> dict[str, Any]:
     return {
         "draw_chart": False,
@@ -289,53 +428,6 @@ def _force_chart_disabled(chart_plan: dict[str, Any], reason: str) -> dict[str, 
     else:
         forced["reason_tr"] = reason
     return forced
-
-
-def _normalize_chart_plan(value: Any, *, fallback_reason: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        return _disabled_chart_plan(fallback_reason)
-
-    chart_type = str(value.get("chart_type", "none")).strip().lower()
-    if chart_type not in _CHART_TYPES:
-        chart_type = "none"
-
-    aggregation = str(value.get("aggregation", "none")).strip().lower()
-    if aggregation not in _AGGREGATIONS:
-        aggregation = "none"
-
-    sort = str(value.get("sort", "none")).strip().lower()
-    if sort not in _SORT_ORDERS:
-        sort = "none"
-
-    draw_chart = bool(value.get("draw_chart", False))
-    if chart_type == "none":
-        draw_chart = False
-
-    top_n_raw = value.get("top_n")
-    top_n: int | None = None
-    try:
-        if top_n_raw not in (None, ""):
-            parsed = int(top_n_raw)
-            if parsed > 0:
-                top_n = min(parsed, 200)
-    except (TypeError, ValueError):
-        top_n = None
-
-    plan = {
-        "draw_chart": draw_chart,
-        "chart_type": chart_type,
-        "x": _optional_text(value.get("x")),
-        "y": _optional_text(value.get("y")),
-        "aggregation": aggregation,
-        "top_n": top_n,
-        "sort": sort,
-        "title_tr": str(value.get("title_tr", "")).strip() or "Grafik plani",
-        "reason_tr": str(value.get("reason_tr", "")).strip() or fallback_reason,
-    }
-
-    if not plan["draw_chart"]:
-        return _disabled_chart_plan(plan["reason_tr"])
-    return plan
 
 
 def _optional_text(value: Any) -> str | None:

@@ -70,6 +70,18 @@ def save_result_interpretation(
     return output_path
 
 
+def save_json_artifact(run_dir: Path, filename: str, payload: Any) -> Path:
+    """Persist additional JSON artifact under run directory."""
+    safe_name = str(filename).replace("\\", "/").split("/")[-1].strip()
+    if not safe_name:
+        raise ValueError("filename must not be empty.")
+    if not safe_name.lower().endswith(".json"):
+        raise ValueError("filename must end with .json.")
+    output_path = run_dir / safe_name
+    _save_json(output_path, payload)
+    return output_path
+
+
 def _save_json(path: Path, payload: Any) -> None:
     path.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False),

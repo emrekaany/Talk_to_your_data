@@ -9,7 +9,6 @@ from typing import Any
 from .llm_client import LLMClient, LLMError, compact_json
 from .sql_generator import sanity_check_sql
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
-from .sql_validation import find_unknown_alias_column_violations
 
 
 MAX_JUDGE_TOKENS = 32
@@ -34,6 +33,7 @@ def select_best_sql_option_id(
     metadata_used: dict[str, Any],
     candidates: list[dict[str, Any]],
     llm_client: LLMClient | None = None,
+    validation_catalog: dict[str, Any] | None = None,
 ) -> str:
     """Return best candidate id, using LLM judge first then deterministic fallback."""
     result = choose_best_sql_candidate(
@@ -41,6 +41,7 @@ def select_best_sql_option_id(
         metadata_used=metadata_used,
         candidates=candidates,
         llm_client=llm_client,
+        validation_catalog=validation_catalog,
     )
     return str(result["recommended_candidate_id"])
 
@@ -51,6 +52,7 @@ def choose_best_sql_candidate(
     metadata_used: dict[str, Any],
     candidates: list[dict[str, Any]],
     llm_client: LLMClient | None = None,
+    validation_catalog: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """
     Evaluate SQL candidates and return recommendation details.
@@ -61,6 +63,10 @@ def choose_best_sql_candidate(
       "recommended_canonical_id": "option_2",
       "selection_mode": "llm_judge" | "fallback",
       "fallback_reason": "...",
+      "judge_error_kind": "none|llm_error|parse_error|unavailable",
+      "all_candidates_disqualified": false,
+      "disqualified_count": 0,
+      "retry_recommended": false,
       "llm_raw_output": "...",
       "candidate_evaluations": [...]
     }
@@ -72,6 +78,10 @@ def choose_best_sql_candidate(
             "recommended_canonical_id": "option_1",
             "selection_mode": "fallback",
             "fallback_reason": "No candidates provided.",
+            "judge_error_kind": "none",
+            "all_candidates_disqualified": False,
+            "disqualified_count": 0,
+            "retry_recommended": False,
             "llm_raw_output": "",
             "candidate_evaluations": [],
         }
@@ -80,14 +90,22 @@ def choose_best_sql_candidate(
         user_request=user_request,
         metadata_used=metadata_used,
         candidates=normalized_candidates,
+        validation_catalog=validation_catalog,
     )
     evaluation_by_canonical = {
         str(item["canonical_id"]).lower(): item for item in evaluations
     }
+    disqualified_count = sum(
+        1 for item in evaluations if bool(item.get("hard_disqualified"))
+    )
+    all_candidates_disqualified = bool(evaluations) and disqualified_count == len(
+        evaluations
+    )
 
     llm_raw_output = ""
     llm_choice_canonical: str | None = None
     fallback_reason = ""
+    judge_error_kind = "none"
 
     if llm_client is not None:
         try:
@@ -106,12 +124,20 @@ def choose_best_sql_candidate(
                     fallback_reason = (
                         "LLM selected a hard-disqualified option; fallback applied."
                     )
+                    judge_error_kind = "parse_error"
             else:
                 fallback_reason = "LLM output could not be parsed; fallback applied."
+                judge_error_kind = "parse_error"
         except LLMError as exc:
             fallback_reason = f"LLM judge failed: {exc}"
+            judge_error_kind = "llm_error"
     else:
         fallback_reason = "LLM client unavailable; fallback applied."
+        judge_error_kind = "unavailable"
+
+    retry_recommended = bool(all_candidates_disqualified) or (
+        judge_error_kind in {"llm_error", "parse_error"}
+    )
 
     if llm_choice_canonical is not None:
         chosen = evaluation_by_canonical.get(llm_choice_canonical.lower())
@@ -121,6 +147,10 @@ def choose_best_sql_candidate(
                 "recommended_canonical_id": str(chosen["canonical_id"]),
                 "selection_mode": "llm_judge",
                 "fallback_reason": "",
+                "judge_error_kind": "none",
+                "all_candidates_disqualified": all_candidates_disqualified,
+                "disqualified_count": disqualified_count,
+                "retry_recommended": retry_recommended,
                 "llm_raw_output": llm_raw_output,
                 "candidate_evaluations": evaluations,
             }
@@ -133,6 +163,10 @@ def choose_best_sql_candidate(
             "recommended_canonical_id": str(first["canonical_id"]),
             "selection_mode": "fallback",
             "fallback_reason": fallback_reason or "No candidate evaluation available.",
+            "judge_error_kind": judge_error_kind,
+            "all_candidates_disqualified": all_candidates_disqualified,
+            "disqualified_count": disqualified_count,
+            "retry_recommended": retry_recommended,
             "llm_raw_output": llm_raw_output,
             "candidate_evaluations": evaluations,
         }
@@ -142,6 +176,10 @@ def choose_best_sql_candidate(
         "recommended_canonical_id": str(chosen["canonical_id"]),
         "selection_mode": "fallback",
         "fallback_reason": fallback_reason or "Fallback policy selected the best candidate.",
+        "judge_error_kind": judge_error_kind,
+        "all_candidates_disqualified": all_candidates_disqualified,
+        "disqualified_count": disqualified_count,
+        "retry_recommended": retry_recommended,
         "llm_raw_output": llm_raw_output,
         "candidate_evaluations": evaluations,
     }
@@ -248,8 +286,12 @@ def _evaluate_candidates(
     user_request: str,
     metadata_used: dict[str, Any],
     candidates: list[dict[str, str]],
+    validation_catalog: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
     required_filters = _normalized_filter_list(metadata_used.get("mandatory_rules"))
+    for flt in _normalized_filter_list(metadata_used.get("runtime_mandatory_rules")):
+        if flt not in required_filters:
+            required_filters.append(flt)
     request_tokens = _tokenize(user_request)
     needs_aggregation = _request_mentions_aggregation(user_request)
     needs_detail = _request_mentions_detail(user_request)
@@ -264,11 +306,15 @@ def _evaluate_candidates(
             reasons.append(f"Sanity check failed: {reason}")
 
         try:
-            validate_sql_before_execution(sql, metadata_used, llm_client=None)
+            validate_sql_before_execution(
+                sql,
+                metadata_used,
+                llm_client=None,
+                validation_catalog=validation_catalog,
+            )
         except SQLGuardrailError as exc:
             reasons.append(str(exc))
 
-        reasons.extend(_unknown_column_reasons(sql, metadata_used))
         reasons.extend(_security_violations(sql, metadata_used))
         reasons = _dedupe_strings(reasons)
 
@@ -290,18 +336,6 @@ def _evaluate_candidates(
         )
 
     return evaluations
-
-
-def _unknown_column_reasons(sql: str, metadata_used: dict[str, Any]) -> list[str]:
-    reasons = [
-        (
-            "Unsupported column "
-            f"'{violation.reference}' for metadata table '{violation.expected_table}'."
-        )
-        for violation in find_unknown_alias_column_violations(sql, metadata_used)
-    ]
-    return _dedupe_strings(reasons)
-
 
 def _security_violations(sql: str, metadata_used: dict[str, Any]) -> list[str]:
     restricted_columns: list[str] = []
@@ -432,15 +466,26 @@ def _fallback_pick(evaluations: list[dict[str, Any]]) -> dict[str, Any] | None:
         return None
     eligible = [item for item in evaluations if not bool(item["hard_disqualified"])]
     pool = eligible if eligible else evaluations
+    ranked = sorted(
+        pool,
+        key=lambda item: (
+            -float(item.get("fallback_score", float("-inf"))),
+            len(item.get("disqualify_reasons") or []),
+            _candidate_order(item),
+        ),
+    )
+    return ranked[0]
 
-    best = pool[0]
-    best_score = float(best.get("fallback_score", float("-inf")))
-    for item in pool[1:]:
-        score = float(item.get("fallback_score", float("-inf")))
-        if score > best_score:
-            best = item
-            best_score = score
-    return best
+
+def _candidate_order(item: dict[str, Any]) -> int:
+    canonical = str(item.get("canonical_id", ""))
+    match = re.search(r"option_(\d+)", canonical, flags=re.IGNORECASE)
+    if not match:
+        return 999
+    try:
+        return int(match.group(1))
+    except ValueError:
+        return 999
 
 
 def _request_mentions_aggregation(user_request: str) -> bool:

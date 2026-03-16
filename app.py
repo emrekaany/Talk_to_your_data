@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import os
-import re
 from typing import Any
 
 import gradio as gr
 
+from talk_to_data.db import render_sql_for_display
 from talk_to_data.pipeline import PipelineError, TalkToDataService
 
 
@@ -68,50 +69,6 @@ def _load_agent_choices() -> tuple[list[tuple[str, str]], str | None, str]:
     return choices, default_value, ""
 
 
-def _render_resolved_preview_sql(sql: str, requirements: dict[str, Any] | None) -> str:
-    """Render SQL with bind placeholders replaced for display only."""
-    if not sql:
-        return ""
-    if not isinstance(requirements, dict):
-        return sql
-
-    def repl(match: re.Match[str]) -> str:
-        bind_name = match.group(1)
-        value = _resolve_bind_value(bind_name, requirements)
-        if value is None:
-            return match.group(0)
-        return _to_sql_literal(value)
-
-    return re.sub(r":([A-Za-z_][A-Za-z0-9_]*)", repl, sql)
-
-
-def _resolve_bind_value(bind_name: str, requirements: dict[str, Any]) -> Any:
-    lowered = bind_name.lower()
-    if lowered == "report_period":
-        return requirements.get("report_period")
-    if lowered in ("start_date", "from_date", "date_start"):
-        time_range = requirements.get("time_range")
-        if isinstance(time_range, dict):
-            return time_range.get("start")
-        return None
-    if lowered in ("end_date", "to_date", "date_end"):
-        time_range = requirements.get("time_range")
-        if isinstance(time_range, dict):
-            return time_range.get("end")
-        return None
-    return requirements.get(bind_name)
-
-
-def _to_sql_literal(value: Any) -> str:
-    text = str(value).strip()
-    if not text or text.lower() == "none":
-        return "NULL"
-    if re.fullmatch(r"-?\d+(\.\d+)?", text):
-        return text
-    escaped = text.replace("'", "''")
-    return f"'{escaped}'"
-
-
 def generate_sql_options(
     user_request: str,
     agent_id: str | None = None,
@@ -130,6 +87,7 @@ def generate_sql_options(
             "",
             [],
             "",
+            "",
             None,
         )
 
@@ -145,6 +103,7 @@ def generate_sql_options(
             "",
             [],
             "",
+            "",
             None,
         )
 
@@ -159,6 +118,7 @@ def generate_sql_options(
             "",
             [],
             "",
+            "",
             None,
         )
 
@@ -170,12 +130,12 @@ def generate_sql_options(
     option_values: list[tuple[str, str, str, str, str]] = []
     for idx, candidate in enumerate(candidates, start=1):
         sql = str(candidate.get("sql", "")).strip()
-        resolved_sql = _render_resolved_preview_sql(sql, requirements)
+        final_sql = render_sql_for_display(sql, requirements)
         desc = str(candidate.get("description", "")).strip()
         rationale = str(candidate.get("rationale_short", "")).strip()
         risk = str(candidate.get("risk_notes", "")).strip()
         candidate_id = str(candidate.get("id", f"option_{idx}"))
-        option_values.append((sql, resolved_sql, desc, rationale, risk))
+        option_values.append((final_sql, "", desc, rationale, risk))
         radio_choices.append((f"{candidate_id}: {rationale or 'Candidate SQL'}", candidate_id))
 
     selected_agent_label = str(context.get("agent_label", "")).strip()
@@ -198,6 +158,7 @@ def generate_sql_options(
     run_status_text = ""
     result_preview: Any = []
     result_summary = ""
+    result_chart_plan = ""
     result_file_path: str | None = None
     if selected_default:
         connection = {
@@ -213,16 +174,32 @@ def generate_sql_options(
             )
             result_preview = auto_result.dataframe.head(500)
             result_summary = auto_result.summary
+            result_chart_plan = _format_chart_plan(auto_result.chart_plan)
             result_file_path = str(auto_result.excel_path)
+            llm_status = _llm_summary_status(
+                auto_result.summary_mode,
+                auto_result.fallback_reason,
+            )
             run_status_text = (
                 f"Auto-selected SQL '{selected_default}' executed successfully. "
-                f"Rows: {len(auto_result.dataframe)}"
+                f"Rows: {len(auto_result.dataframe)} | "
+                f"LLM summary: {llm_status}"
             )
+            final_sql = _find_candidate_display_sql(context, selected_default)
+            if final_sql:
+                run_status_text += f"\n\nFinal SQL:\n{final_sql}"
+            if auto_result.fallback_reason:
+                run_status_text += f"\nFallback reason: {auto_result.fallback_reason}"
+            if auto_result.validation_errors:
+                run_status_text += (
+                    "\nChart plan validation errors: "
+                    + "; ".join(auto_result.validation_errors)
+                )
         except PipelineError as exc:
-            sql_text = _find_candidate_sql(context, selected_default)
+            sql_text = _find_candidate_display_sql(context, selected_default)
             run_status_text = f"Auto-run failed for '{selected_default}': {exc}"
             if sql_text:
-                run_status_text += f"\n\nSQL:\n{sql_text}"
+                run_status_text += f"\n\nFinal SQL:\n{sql_text}"
     else:
         run_status_text = "Auto-run skipped: recommended SQL option was not resolved."
 
@@ -248,6 +225,7 @@ def generate_sql_options(
         run_status_text,
         result_preview,
         result_summary,
+        result_chart_plan,
         result_file_path,
     )
 
@@ -258,11 +236,12 @@ def run_selected_sql(
     jdbc_url: str,
     username: str,
     password: str,
-) -> tuple[str, Any, str, str | None]:
+) -> tuple[str, Any, str, str, str | None]:
     if not context:
         return (
             "No SQL context found. First click 'Generate SQL Options'.",
             [],
+            "",
             "",
             None,
         )
@@ -271,7 +250,7 @@ def run_selected_sql(
     if not selected:
         selected = str(context.get("recommended_candidate_id", "")).strip()
     if not selected:
-        return ("No SQL option resolved to run.", [], "", None)
+        return ("No SQL option resolved to run.", [], "", "", None)
 
     connection = {
         "dsn": jdbc_url.strip(),
@@ -286,14 +265,36 @@ def run_selected_sql(
             connection=connection,
         )
     except PipelineError as exc:
-        sql_text = _find_candidate_sql(context, selected)
+        sql_text = _find_candidate_display_sql(context, selected)
         error_message = f"Run failed: {exc}"
         if sql_text:
-            error_message += f"\n\nSQL:\n{sql_text}"
-        return (error_message, [], "", None)
+            error_message += f"\n\nFinal SQL:\n{sql_text}"
+        return (error_message, [], "", "", None)
 
     preview = result.dataframe.head(500)
-    return (f"Query executed successfully. Rows: {len(result.dataframe)}", preview, result.summary, str(result.excel_path))
+    llm_status = _llm_summary_status(result.summary_mode, result.fallback_reason)
+    status = (
+        f"Query executed successfully. Rows: {len(result.dataframe)} | "
+        f"LLM summary: {llm_status}"
+    )
+    final_sql = _find_candidate_display_sql(context, selected)
+    if final_sql:
+        status += f"\n\nFinal SQL:\n{final_sql}"
+    if result.fallback_reason:
+        status += f"\nFallback reason: {result.fallback_reason}"
+    if result.validation_errors:
+        status += (
+            "\nChart plan validation errors: "
+            + "; ".join(result.validation_errors)
+        )
+    chart_plan_text = _format_chart_plan(result.chart_plan)
+    return (
+        status,
+        preview,
+        result.summary,
+        chart_plan_text,
+        str(result.excel_path),
+    )
 
 
 def _find_candidate_sql(context: dict[str, Any], candidate_id: str) -> str:
@@ -304,6 +305,35 @@ def _find_candidate_sql(context: dict[str, Any], candidate_id: str) -> str:
         if isinstance(candidate, dict) and str(candidate.get("id")) == candidate_id:
             return str(candidate.get("sql", "")).strip()
     return ""
+
+
+def _find_candidate_display_sql(context: dict[str, Any], candidate_id: str) -> str:
+    sql = _find_candidate_sql(context, candidate_id)
+    if not sql:
+        return ""
+    requirements = context.get("requirements")
+    if not isinstance(requirements, dict):
+        requirements = {}
+    return render_sql_for_display(sql, requirements)
+
+
+def _llm_summary_status(summary_mode: str, fallback_reason: str | None) -> str:
+    mode = str(summary_mode).strip().lower()
+    if mode == "llm":
+        return "enabled"
+    reason = str(fallback_reason or "").strip().lower()
+    if "disabled" in reason:
+        return "disabled"
+    return "fallback"
+
+
+def _format_chart_plan(chart_plan: dict[str, Any] | None) -> str:
+    if not isinstance(chart_plan, dict):
+        return ""
+    try:
+        return json.dumps(chart_plan, ensure_ascii=False, indent=2)
+    except (TypeError, ValueError):
+        return ""
 
 
 def build_app() -> gr.Blocks:
@@ -362,30 +392,33 @@ def build_app() -> gr.Blocks:
             gr.Markdown("### Did you mean this?")
 
             with gr.Accordion("Option 1", open=False):
-                sql_1 = gr.Code(label="SQL", language="sql")
+                sql_1 = gr.Code(label="Final SQL (Bind-Resolved Preview)", language="sql")
                 resolved_sql_1 = gr.Code(
-                    label="Resolved Preview SQL (display only)",
+                    label="Unused",
                     language="sql",
+                    visible=False,
                 )
                 desc_1 = gr.Textbox(label="Explanation", lines=6)
                 rationale_1 = gr.Textbox(label="Rationale", lines=2)
                 risk_1 = gr.Textbox(label="Risk notes", lines=2)
 
             with gr.Accordion("Option 2", open=False):
-                sql_2 = gr.Code(label="SQL", language="sql")
+                sql_2 = gr.Code(label="Final SQL (Bind-Resolved Preview)", language="sql")
                 resolved_sql_2 = gr.Code(
-                    label="Resolved Preview SQL (display only)",
+                    label="Unused",
                     language="sql",
+                    visible=False,
                 )
                 desc_2 = gr.Textbox(label="Explanation", lines=6)
                 rationale_2 = gr.Textbox(label="Rationale", lines=2)
                 risk_2 = gr.Textbox(label="Risk notes", lines=2)
 
             with gr.Accordion("Option 3", open=False):
-                sql_3 = gr.Code(label="SQL", language="sql")
+                sql_3 = gr.Code(label="Final SQL (Bind-Resolved Preview)", language="sql")
                 resolved_sql_3 = gr.Code(
-                    label="Resolved Preview SQL (display only)",
+                    label="Unused",
                     language="sql",
+                    visible=False,
                 )
                 desc_3 = gr.Textbox(label="Explanation", lines=6)
                 rationale_3 = gr.Textbox(label="Rationale", lines=2)
@@ -404,6 +437,11 @@ def build_app() -> gr.Blocks:
             run_status = gr.Markdown(label="Execution status")
             result_table = gr.Dataframe(label="Result preview", wrap=True)
             summary_box = gr.Textbox(label="Human-readable summary", lines=10)
+            chart_plan_box = gr.Textbox(
+                label="Chart Plan (Deaktif)",
+                lines=12,
+                interactive=False,
+            )
             result_file = gr.File(label="Download Excel")
 
         generate_btn.click(
@@ -437,6 +475,7 @@ def build_app() -> gr.Blocks:
                 run_status,
                 result_table,
                 summary_box,
+                chart_plan_box,
                 result_file,
             ],
         )
@@ -450,7 +489,7 @@ def build_app() -> gr.Blocks:
                 oracle_user_box,
                 oracle_password_box,
             ],
-            outputs=[run_status, result_table, summary_box, result_file],
+            outputs=[run_status, result_table, summary_box, chart_plan_box, result_file],
         )
 
     return demo

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,7 @@ from .metadata_retriever import (
 from .requirements_extractor import RequirementsExtractionError, extract_requirements
 from .runs import (
     create_run_dir,
+    save_json_artifact,
     save_result_excel,
     save_result_interpretation,
     save_result_preview,
@@ -35,6 +37,7 @@ from .sql_explainer import describe_sql_candidate
 from .sql_generator import SQLGenerationError, generate_sql_candidates
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
 from .sql_judge import choose_best_sql_candidate
+from .sql_validation import build_validation_catalog
 from .summarizer import summarize_result
 
 
@@ -47,6 +50,9 @@ class CandidateRunResult:
     dataframe: pd.DataFrame
     summary: str
     chart_plan: dict[str, Any] | None
+    summary_mode: str
+    fallback_reason: str | None
+    validation_errors: list[str]
     excel_path: Path
 
 
@@ -93,6 +99,7 @@ class TalkToDataService:
             metadata_docs,
             metadata_path=agent.metadata_path,
         )
+        validation_catalog = build_validation_catalog(metadata_docs)
 
         try:
             requirements = extract_requirements(
@@ -120,55 +127,133 @@ class TalkToDataService:
             metadata_path=agent.metadata_path,
             top_k=200,
         )
+        run_dir = create_run_dir(self.config.runs_dir)
+        attempt_one_candidates: list[dict[str, Any]] | None = None
+        attempt_one_judge_result: dict[str, Any] | None = None
+        retry_decision: dict[str, Any] | None = None
 
-        try:
-            candidates = generate_sql_candidates(
+        final_candidates: list[dict[str, Any]] | None = None
+        final_judge_result: dict[str, Any] | None = None
+        final_attempt = 0
+        retry_context: dict[str, Any] | None = None
+
+        for attempt in (1, 2):
+            try:
+                candidates = generate_sql_candidates(
+                    user_request=request,
+                    requirements=requirements,
+                    metadata=metadata_used,
+                    llm_client=self.llm_client,
+                    retry_context=retry_context,
+                )
+            except SQLGenerationError as exc:
+                raise PipelineError(f"SQL generation failed: {exc}") from exc
+
+            for candidate in candidates:
+                candidate["description"] = describe_sql_candidate(
+                    candidate,
+                    metadata_used,
+                    llm_client=self.llm_client,
+                )
+
+            judge_result = choose_best_sql_candidate(
                 user_request=request,
-                requirements=requirements,
-                metadata=metadata_used,
+                metadata_used=metadata_used,
+                candidates=candidates,
                 llm_client=self.llm_client,
+                validation_catalog=validation_catalog,
             )
-        except SQLGenerationError as exc:
-            raise PipelineError(f"SQL generation failed: {exc}") from exc
-        for candidate in candidates:
-            candidate["description"] = describe_sql_candidate(
-                candidate,
-                metadata_used,
-                llm_client=self.llm_client,
-            )
+            recommended_candidate_id = str(
+                judge_result.get("recommended_candidate_id", "")
+            ).strip()
+            if not recommended_candidate_id and candidates:
+                recommended_candidate_id = str(candidates[0].get("id", "option_1")).strip()
+            for candidate in candidates:
+                candidate["recommended"] = (
+                    str(candidate.get("id", "")).strip() == recommended_candidate_id
+                )
 
-        judge_result = choose_best_sql_candidate(
-            user_request=request,
-            metadata_used=metadata_used,
-            candidates=candidates,
-            llm_client=self.llm_client,
-        )
+            retry_recommended = bool(judge_result.get("retry_recommended", False))
+            if attempt == 1 and retry_recommended:
+                attempt_one_candidates = deepcopy(candidates)
+                attempt_one_judge_result = deepcopy(judge_result)
+                retry_context = _build_retry_context(judge_result, candidates)
+                retry_decision = {
+                    "retry_triggered": True,
+                    "trigger_attempt": 1,
+                    "trigger_reason": _retry_reason(judge_result),
+                    "judge_error_kind": str(judge_result.get("judge_error_kind", "none")),
+                    "all_candidates_disqualified": bool(
+                        judge_result.get("all_candidates_disqualified", False)
+                    ),
+                    "disqualified_count": int(judge_result.get("disqualified_count", 0)),
+                }
+                continue
+
+            final_candidates = candidates
+            final_judge_result = judge_result
+            final_attempt = attempt
+            break
+
+        if final_candidates is None or final_judge_result is None:
+            raise PipelineError("SQL candidate generation did not produce a final result.")
+
         recommended_candidate_id = str(
-            judge_result.get("recommended_candidate_id", "")
+            final_judge_result.get("recommended_candidate_id", "")
         ).strip()
-        if not recommended_candidate_id and candidates:
-            recommended_candidate_id = str(candidates[0].get("id", "option_1")).strip()
-
-        for candidate in candidates:
+        if not recommended_candidate_id and final_candidates:
+            recommended_candidate_id = str(final_candidates[0].get("id", "option_1")).strip()
+        for candidate in final_candidates:
             candidate["recommended"] = (
                 str(candidate.get("id", "")).strip() == recommended_candidate_id
             )
 
-        run_dir = create_run_dir(self.config.runs_dir)
+        if (
+            final_attempt == 2
+            and bool(final_judge_result.get("all_candidates_disqualified", False))
+        ):
+            save_run_artifacts(
+                run_dir,
+                user_request=request,
+                requirements=requirements,
+                metadata_used=metadata_used,
+                sql_candidates=final_candidates,
+                agent_info={
+                    "id": agent.id,
+                    "label": agent.label,
+                    "description": agent.description,
+                    "metadata_path": str(agent.metadata_path),
+                },
+                judge_result=final_judge_result,
+            )
+            if attempt_one_candidates is not None and attempt_one_judge_result is not None:
+                save_json_artifact(run_dir, "sql_candidates_attempt_1.json", attempt_one_candidates)
+                save_json_artifact(run_dir, "judge_result_attempt_1.json", attempt_one_judge_result)
+            if retry_decision is not None:
+                save_json_artifact(run_dir, "retry_decision.json", retry_decision)
+            raise PipelineError(
+                "Auto-selection failed after one retry: all SQL candidates were disqualified."
+            )
+
         save_run_artifacts(
             run_dir,
             user_request=request,
             requirements=requirements,
             metadata_used=metadata_used,
-            sql_candidates=candidates,
+            sql_candidates=final_candidates,
             agent_info={
                 "id": agent.id,
                 "label": agent.label,
                 "description": agent.description,
                 "metadata_path": str(agent.metadata_path),
             },
-            judge_result=judge_result,
+            judge_result=final_judge_result,
         )
+        if attempt_one_candidates is not None and attempt_one_judge_result is not None:
+            save_json_artifact(run_dir, "sql_candidates_attempt_1.json", attempt_one_candidates)
+            save_json_artifact(run_dir, "judge_result_attempt_1.json", attempt_one_judge_result)
+        if retry_decision is not None:
+            save_json_artifact(run_dir, "retry_decision.json", retry_decision)
 
         return {
             "run_dir": str(run_dir),
@@ -178,10 +263,13 @@ class TalkToDataService:
             "agent_metadata_path": str(agent.metadata_path),
             "requirements": requirements,
             "metadata_used": metadata_used,
-            "candidates": candidates,
+            "validation_catalog": validation_catalog,
+            "candidates": final_candidates,
             "recommended_candidate_id": recommended_candidate_id,
-            "selection_mode": str(judge_result.get("selection_mode", "fallback")),
-            "judge_result": judge_result,
+            "selection_mode": str(final_judge_result.get("selection_mode", "fallback")),
+            "judge_result": final_judge_result,
+            "attempt_count": final_attempt,
+            "retry_attempted": final_attempt > 1,
             "llm_mode": "enabled" if self.llm_client is not None else "heuristic_fallback",
         }
 
@@ -223,12 +311,16 @@ class TalkToDataService:
         metadata_used = context.get("metadata_used")
         if not isinstance(metadata_used, dict):
             raise PipelineError("Metadata context is missing.")
+        validation_catalog = context.get("validation_catalog")
+        if not isinstance(validation_catalog, dict):
+            validation_catalog = None
 
         try:
             validate_sql_before_execution(
                 sql,
                 metadata_used,
                 llm_client=self.llm_client,
+                validation_catalog=validation_catalog,
             )
         except SQLGuardrailError as exc:
             raise PipelineError(f"Execution blocked by SQL guardrails: {exc}") from exc
@@ -238,7 +330,7 @@ class TalkToDataService:
             dataframe = execute_sql(sql, requirements, active_config)
         except DatabaseExecutionError as exc:
             hint = (
-                "Hint: check bind variables (:report_period, :start_date, :end_date, :n), "
+                "Hint: check bind variables (:report_period, :year_value, :date_value, :start_date, :end_date, :n), "
                 "mandatory filters, and Oracle object names."
             )
             raise PipelineError(f"Oracle execution error: {exc}. {hint}") from exc
@@ -256,6 +348,13 @@ class TalkToDataService:
             llm_enabled=self.config.llm_summarizer_enabled,
             chart_render_enabled=self.config.result_chart_render_enabled,
         )
+        if self.config.llm_summarizer_required and interpreted.summary_mode != "llm":
+            reason = interpreted.fallback_reason or "LLM summary was not produced."
+            raise PipelineError(
+                "LLM summary is required but unavailable. "
+                f"Reason: {reason}"
+            )
+
         summary = interpreted.summary_text
         chart_plan = interpreted.chart_plan
         excel_path = save_result_excel(dataframe, run_dir)
@@ -266,6 +365,9 @@ class TalkToDataService:
                 "summary": summary,
                 "chart_plan": chart_plan,
                 "llm_used": interpreted.llm_used,
+                "summary_mode": interpreted.summary_mode,
+                "fallback_reason": interpreted.fallback_reason,
+                "validation_errors": interpreted.validation_errors,
                 "chart_render_enabled": interpreted.chart_render_enabled,
                 "selected_candidate_id": selected_id,
                 "executed_sql": sql,
@@ -276,6 +378,9 @@ class TalkToDataService:
             dataframe=dataframe,
             summary=summary,
             chart_plan=chart_plan,
+            summary_mode=interpreted.summary_mode,
+            fallback_reason=interpreted.fallback_reason,
+            validation_errors=interpreted.validation_errors,
             excel_path=excel_path,
         )
 
@@ -335,3 +440,55 @@ def _normalize_oracle_dsn(dsn: str) -> str:
     if lower.startswith(prefix):
         return value[len(prefix) :].strip()
     return value
+
+
+def _retry_reason(judge_result: dict[str, Any]) -> str:
+    if bool(judge_result.get("all_candidates_disqualified", False)):
+        return "all_candidates_disqualified"
+    kind = str(judge_result.get("judge_error_kind", "")).strip().lower()
+    if kind in {"llm_error", "parse_error"}:
+        return kind
+    return "unspecified"
+
+
+def _build_retry_context(
+    judge_result: dict[str, Any],
+    candidates: list[dict[str, Any]],
+) -> dict[str, Any]:
+    disqualify_reasons: list[str] = []
+    blocked_sql_patterns: list[str] = []
+
+    candidate_evaluations = judge_result.get("candidate_evaluations")
+    if isinstance(candidate_evaluations, list):
+        for item in candidate_evaluations:
+            if not isinstance(item, dict):
+                continue
+            for reason in item.get("disqualify_reasons", []):
+                text = str(reason).strip()
+                if text and text not in disqualify_reasons:
+                    disqualify_reasons.append(text)
+
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        sql = str(candidate.get("sql", "")).strip()
+        if not sql:
+            continue
+        sql_low = sql.lower()
+        patterns = (
+            "select *",
+            ":report_period",
+            ":year_value",
+            ":date_value",
+            "report_period",
+            "tanzim_tarih_id",
+            "tarih_id",
+        )
+        for pattern in patterns:
+            if pattern in sql_low and pattern not in blocked_sql_patterns:
+                blocked_sql_patterns.append(pattern)
+
+    return {
+        "disqualify_reasons": disqualify_reasons[:20],
+        "blocked_sql_patterns": blocked_sql_patterns[:12],
+    }

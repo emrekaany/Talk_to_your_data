@@ -32,6 +32,7 @@ class AppConfig:
     llm_api_key: str
     llm_timeout_sec: int
     llm_summarizer_enabled: bool
+    llm_summarizer_required: bool
     result_chart_render_enabled: bool
     oracle_user: str
     oracle_password: str
@@ -54,6 +55,10 @@ class AppConfig:
             llm_api_key=os.getenv("LLM_API_KEY", "") or os.getenv("OPENAI_API_KEY", ""),
             llm_timeout_sec=_safe_int(os.getenv("LLM_TIMEOUT_SEC"), fallback=60),
             llm_summarizer_enabled=_safe_bool(os.getenv("LLM_SUMMARIZER_ENABLED"), False),
+            llm_summarizer_required=_safe_bool(
+                os.getenv("LLM_SUMMARIZER_REQUIRED"),
+                False,
+            ),
             result_chart_render_enabled=_safe_bool(
                 os.getenv("RESULT_CHART_RENDER_ENABLED"),
                 False,

@@ -78,6 +78,7 @@ def load_metadata_documents(metadata_path: Path) -> list[dict[str, Any]]:
             f"Metadata file '{metadata_path}' has no usable documents. "
             f"See '{stub_path}' for expected schema."
         )
+    _validate_join_key_columns(documents, metadata_path=metadata_path)
     return documents
 
 
@@ -184,6 +185,7 @@ def retrieve_relevant_metadata(
         "relevant_items": relevant_items,
         "guardrails": guardrails,
         "mandatory_rules": mandatory_rules,
+        "runtime_mandatory_rules": [],
         "retrieval_debug": {
             "selected_count": len(relevant_items),
             "total_documents": len(documents),
@@ -224,6 +226,106 @@ def _normalize_documents(documents: list[dict[str, Any]]) -> list[dict[str, Any]
     return normalized
 
 
+def _validate_join_key_columns(
+    documents: list[dict[str, Any]],
+    *,
+    metadata_path: Path,
+) -> None:
+    table_to_columns: dict[str, set[str]] = {}
+    bare_to_tables: dict[str, set[str]] = {}
+
+    for doc in documents:
+        table_name = _table_name(doc)
+        table_key = _normalize_table_name(table_name)
+        if not table_key:
+            continue
+        columns: set[str] = set()
+        raw_columns = doc.get("columns")
+        if isinstance(raw_columns, list):
+            for col in raw_columns:
+                if not isinstance(col, dict):
+                    continue
+                column_name = _normalize_column_name(col.get("name"))
+                if column_name:
+                    columns.add(column_name)
+        table_to_columns[table_key] = columns
+        bare_to_tables.setdefault(_table_bare_name(table_key), set()).add(table_key)
+
+    violations: list[str] = []
+    for doc in documents:
+        source_table = _normalize_table_name(_table_name(doc))
+        raw_joins = doc.get("joins")
+        if not isinstance(raw_joins, list):
+            continue
+        for index, join in enumerate(raw_joins, start=1):
+            if not isinstance(join, dict):
+                continue
+            left_table = _normalize_table_name(str(join.get("left_table", "")).strip())
+            right_table = _normalize_table_name(str(join.get("right_table", "")).strip())
+            left_column = _normalize_column_name(join.get("left_column"))
+            right_column = _normalize_column_name(join.get("right_column"))
+            if not left_table or not right_table or not left_column or not right_column:
+                continue
+
+            left_resolved, left_error = _resolve_join_table(left_table, table_to_columns, bare_to_tables)
+            right_resolved, right_error = _resolve_join_table(right_table, table_to_columns, bare_to_tables)
+            if left_error:
+                violations.append(
+                    f"{source_table or '<unknown>'} join[{index}] {left_error}"
+                )
+                continue
+            if right_error:
+                violations.append(
+                    f"{source_table or '<unknown>'} join[{index}] {right_error}"
+                )
+                continue
+            if left_resolved is None or right_resolved is None:
+                continue
+
+            left_columns = table_to_columns.get(left_resolved, set())
+            right_columns = table_to_columns.get(right_resolved, set())
+            if left_column not in left_columns:
+                violations.append(
+                    f"{source_table or '<unknown>'} join[{index}] unknown left column "
+                    f"'{left_table}.{left_column}' (resolved table: {left_resolved})."
+                )
+            if right_column not in right_columns:
+                violations.append(
+                    f"{source_table or '<unknown>'} join[{index}] unknown right column "
+                    f"'{right_table}.{right_column}' (resolved table: {right_resolved})."
+                )
+
+    if violations:
+        sample = "; ".join(violations[:8])
+        if len(violations) > 8:
+            sample += f"; ... (+{len(violations) - 8} more)"
+        raise MetadataFileError(
+            "Metadata join-key validation failed. "
+            f"Path: '{metadata_path}'. Details: {sample}"
+        )
+
+
+def _resolve_join_table(
+    table_name: str,
+    table_to_columns: dict[str, set[str]],
+    bare_to_tables: dict[str, set[str]],
+) -> tuple[str | None, str | None]:
+    if not table_name:
+        return None, "join table name is empty."
+    if table_name in table_to_columns:
+        return table_name, None
+
+    bare = _table_bare_name(table_name)
+    candidates = sorted(bare_to_tables.get(bare, set()))
+    if not candidates:
+        return None, f"join table '{table_name}' does not exist in metadata documents."
+    if len(candidates) > 1:
+        return None, (
+            f"join table '{table_name}' is ambiguous across schemas: {', '.join(candidates)}."
+        )
+    return candidates[0], None
+
+
 def _normalize_column(raw_column: dict[str, Any]) -> dict[str, Any]:
     normalized = dict(raw_column)
     if "Keywords" in normalized and "keywords" not in normalized:
@@ -246,6 +348,31 @@ def _table_name(doc: dict[str, Any]) -> str:
         return name
     identifier = str(doc.get("id", "")).strip()
     return identifier
+
+
+def _normalize_table_name(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    text = text.replace('"', "")
+    parts = [part.strip().lower() for part in text.split(".") if part.strip()]
+    if not parts:
+        return ""
+    if len(parts) >= 2:
+        return f"{parts[-2]}.{parts[-1]}"
+    return parts[0]
+
+
+def _table_bare_name(table_name: str) -> str:
+    normalized = _normalize_table_name(table_name)
+    if not normalized:
+        return ""
+    return normalized.split(".")[-1]
+
+
+def _normalize_column_name(value: Any) -> str:
+    text = str(value or "").strip().replace('"', "")
+    return text.upper() if text else ""
 
 
 def _doc_has_column(doc: dict[str, Any], column_name: str) -> bool:

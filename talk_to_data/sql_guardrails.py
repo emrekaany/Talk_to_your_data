@@ -8,7 +8,7 @@ from typing import Any
 
 from .llm_client import LLMClient, LLMError, compact_json
 from .sql_generator import sanity_check_sql
-from .sql_validation import find_unknown_alias_column_violations
+from .sql_validation import analyze_sql_column_validation
 
 
 class SQLGuardrailError(RuntimeError):
@@ -19,6 +19,7 @@ def validate_sql_before_execution(
     sql: str,
     metadata_used: dict[str, Any],
     llm_client: LLMClient | None = None,
+    validation_catalog: dict[str, Any] | None = None,
 ) -> None:
     """Validate SQL safety, allowlisted tables/columns, and filter obligations."""
     ok, reason = sanity_check_sql(sql)
@@ -41,14 +42,32 @@ def validate_sql_before_execution(
             f"Disallowed tables: {', '.join(disallowed)}"
         )
 
-    unknown_columns = find_unknown_alias_column_violations(sql, metadata_used)
-    if unknown_columns:
+    column_validation = analyze_sql_column_validation(
+        sql=sql,
+        metadata_used=metadata_used,
+        validation_catalog=validation_catalog,
+    )
+
+    if column_validation.ambiguous_table_references:
+        details = "; ".join(
+            (
+                f"{violation.scoped_reference} "
+                f"(candidate metadata tables: {', '.join(violation.candidate_tables)})"
+            )
+            for violation in column_validation.ambiguous_table_references
+        )
+        raise SQLGuardrailError(
+            "Column allowlist validation failed. "
+            f"Ambiguous table references: {details}"
+        )
+
+    if column_validation.unknown_columns:
         details = "; ".join(
             (
                 f"{violation.reference} "
                 f"(expected metadata table: {violation.expected_table})"
             )
-            for violation in unknown_columns
+            for violation in column_validation.unknown_columns
         )
         raise SQLGuardrailError(
             "Column allowlist validation failed. "
@@ -156,6 +175,7 @@ def _build_table_obligations(
                 obligation_map[table] = _dedupe(obligations)
 
     global_obligations = _as_string_list(metadata_used.get("mandatory_rules"))
+    global_obligations.extend(_as_string_list(metadata_used.get("runtime_mandatory_rules")))
     if global_obligations:
         obligation_map["__global__"] = _dedupe(global_obligations)
     return obligation_map
@@ -186,11 +206,17 @@ def _find_missing_obligations(
 
 
 def _obligation_satisfied(sql: str, obligation: str) -> bool:
+    if _matches_granular_time_obligation(sql, obligation):
+        return True
+
     normalized_sql = _normalize_space(sql).lower()
     normalized_obligation = _normalize_space(obligation).lower()
 
     if normalized_obligation and normalized_obligation in normalized_sql:
         return True
+
+    if _is_granular_time_obligation(obligation):
+        return False
 
     column = _extract_column_token(obligation)
     if column:
@@ -206,6 +232,82 @@ def _obligation_satisfied(sql: str, obligation: str) -> bool:
         ):
             return True
     return False
+
+
+def _is_granular_time_obligation(obligation: str) -> bool:
+    lowered = _normalize_space(obligation).lower()
+    if ":year_value" in lowered or ":date_value" in lowered:
+        return True
+    return ":report_period" in lowered and any(
+        token in lowered for token in ("to_char", "substr", "regexp_replace")
+    )
+
+
+def _matches_granular_time_obligation(sql: str, obligation: str) -> bool:
+    lowered = _normalize_space(obligation).lower()
+    if ":year_value" in lowered:
+        return _matches_to_char_bind(
+            sql,
+            "yyyy",
+            "year_value",
+        ) or _matches_numeric_date_like_bind(sql, "year_value", 4)
+    if ":date_value" in lowered:
+        return _matches_to_char_bind(
+            sql,
+            "yyyymmdd",
+            "date_value",
+        ) or _matches_numeric_date_like_bind(sql, "date_value", 8)
+    if ":report_period" in lowered and "to_char" in lowered:
+        return _matches_to_char_bind(
+            sql,
+            "yyyymm",
+            "report_period",
+        ) or _matches_numeric_date_like_bind(sql, "report_period", 6)
+    if ":report_period" in lowered and any(
+        token in lowered for token in ("substr", "regexp_replace")
+    ):
+        return _matches_numeric_date_like_bind(sql, "report_period", 6)
+    return False
+
+
+def _matches_to_char_bind(sql: str, format_mask: str, bind_name: str) -> bool:
+    expr_variants = (
+        r"[^,()]+(?:\s*\([^)]*\))?",
+        r"trunc\s*\(\s*[^)]*?\s*\)",
+        r"cast\s*\(\s*[^)]*?\s+as\s+(?:date|timestamp(?:\s*\(\d+\))?)\s*\)",
+        r"trunc\s*\(\s*cast\s*\(\s*[^)]*?\s+as\s+(?:date|timestamp(?:\s*\(\d+\))?)\s*\)\s*\)",
+    )
+    for expr_pattern in expr_variants:
+        to_char_pattern = (
+            rf"to_char\s*\(\s*{expr_pattern}\s*,\s*['\"]{re.escape(format_mask)}['\"]\s*\)"
+        )
+        left_pattern = rf"{to_char_pattern}\s*=\s*:{re.escape(bind_name)}\b"
+        right_pattern = rf":{re.escape(bind_name)}\b\s*=\s*{to_char_pattern}"
+        if re.search(left_pattern, sql, flags=re.IGNORECASE) or re.search(
+            right_pattern,
+            sql,
+            flags=re.IGNORECASE,
+        ):
+            return True
+    return False
+
+
+def _matches_numeric_date_like_bind(
+    sql: str,
+    bind_name: str,
+    expected_length: int,
+) -> bool:
+    digit_expr = (
+        r"substr\s*\(\s*regexp_replace\s*\(\s*(?:trim\s*\(\s*)?to_char\s*\(\s*[^)]+?\s*\)\s*\)?\s*,\s*'[^']+'\s*,\s*''\s*\)\s*,\s*1\s*,\s*"
+        + str(expected_length)
+        + r"\s*\)"
+    )
+    left_pattern = rf"{digit_expr}\s*=\s*:{re.escape(bind_name)}\b"
+    right_pattern = rf":{re.escape(bind_name)}\b\s*=\s*{digit_expr}"
+    return bool(
+        re.search(left_pattern, sql, flags=re.IGNORECASE)
+        or re.search(right_pattern, sql, flags=re.IGNORECASE)
+    )
 
 
 def _extract_column_token(obligation: str) -> str | None:

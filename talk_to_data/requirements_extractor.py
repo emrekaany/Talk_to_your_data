@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 import json
 import re
 from typing import Any
@@ -21,6 +22,8 @@ REQUIRED_KEYS = (
     "grain",
     "time_range",
     "report_period",
+    "time_granularity",
+    "time_value",
     "join_needs",
     "row_limit",
     "security_constraints",
@@ -47,6 +50,7 @@ def extract_requirements(
     request = user_request.strip()
     if not request:
         raise RequirementsExtractionError("Request is empty.")
+    _ensure_valid_calendar_tokens(request)
 
     if llm_client is None:
         return _heuristic_requirements(request, metadata_overview)
@@ -71,6 +75,7 @@ def extract_requirements(
         return _normalize_requirements(
             {"invalid_request": True, "intent": "unknown"},
             metadata_overview=metadata_overview,
+            user_request=request,
         )
 
     parsed = _try_parse_json(raw)
@@ -81,7 +86,11 @@ def extract_requirements(
             "Could not parse requirement JSON from model output."
         )
 
-    return _normalize_requirements(parsed, metadata_overview=metadata_overview)
+    return _normalize_requirements(
+        parsed,
+        metadata_overview=metadata_overview,
+        user_request=request,
+    )
 
 
 def _build_extraction_prompt(
@@ -96,6 +105,8 @@ def _build_extraction_prompt(
         '"grain":["POLICE_NO"],'
         '"time_range":{"start":"YYYY-MM-DD","end":"YYYY-MM-DD"},'
         '"report_period":"YYYYMM",'
+        '"time_granularity":"year|month|day|null",'
+        '"time_value":"YYYY|YYYYMM|YYYYMMDD|null",'
         '"join_needs":["AS_IFRS.TABLE_A -> AS_IFRS.TABLE_B"],'
         '"row_limit":200,'
         '"security_constraints":["PII_DISALLOWED"],'
@@ -114,7 +125,10 @@ def _build_extraction_prompt(
         "- If a mandatory filter is a column name (example REPORT_PERIOD), convert it to COLUMN = :column_bind.\n"
         "- If metadata overview has time_filter_policy=ek_tanzim_date, use ek tanzim date context for period filters and avoid REPORT_PERIOD column filters.\n"
         "- Do not invent REPORT_PERIOD filters unless metadata indicates REPORT_PERIOD exists or mandates it.\n"
-        "- If request contains a concrete period (YYYYMM), fill report_period with that value.\n"
+        "- If request contains concrete time tokens, extract them:\n"
+        "  * YYYY -> time_granularity=year, time_value=YYYY\n"
+        "  * YYYYMM or YYYY-MM -> time_granularity=month, time_value=YYYYMM, report_period=YYYYMM\n"
+        "  * YYYYMMDD or YYYY-MM-DD -> time_granularity=day, time_value=YYYYMMDD\n"
         "- If request cannot be answered, set invalid_request=true and provide reason in notes.\n\n"
         f"Schema:\n{schema_text}\n\n"
         f"Metadata overview:\n{overview}\n\n"
@@ -180,6 +194,7 @@ def _normalize_requirements(
     data: dict[str, Any],
     *,
     metadata_overview: dict[str, Any] | None = None,
+    user_request: str | None = None,
 ) -> dict[str, Any]:
     normalized: dict[str, Any] = {}
     normalized["intent"] = str(data.get("intent", "listing")).strip() or "listing"
@@ -197,10 +212,17 @@ def _normalize_requirements(
     row_limit = _safe_int(data.get("row_limit"), fallback=200)
     normalized["row_limit"] = max(1, min(row_limit, 5000))
 
-    report_period = data.get("report_period")
-    normalized["report_period"] = (
-        str(report_period).strip() if report_period not in (None, "", []) else None
+    normalized["report_period"] = _normalize_report_period(data.get("report_period"))
+    time_payload = _resolve_time_payload(
+        requested_time_granularity=data.get("time_granularity"),
+        requested_time_value=data.get("time_value"),
+        user_request=user_request or "",
+        report_period=normalized["report_period"],
     )
+    normalized["time_granularity"] = time_payload["time_granularity"]
+    normalized["time_value"] = time_payload["time_value"]
+    if time_payload["report_period"]:
+        normalized["report_period"] = time_payload["report_period"]
 
     time_range = data.get("time_range")
     if isinstance(time_range, dict):
@@ -233,7 +255,8 @@ def _heuristic_requirements(
     if any(token in request_lower for token in ("anomaly", "aykiri", "outlier")):
         intent = "anomaly"
 
-    report_period = _extract_report_period(user_request)
+    time_payload = _extract_time_payload_from_request(user_request)
+    report_period = time_payload["report_period"]
     row_limit = _extract_row_limit(user_request) or 200
 
     dimensions = _extract_named_tokens(user_request, prefixes=("by ", "gore "))
@@ -254,13 +277,19 @@ def _heuristic_requirements(
         "grain": [],
         "time_range": {"start": None, "end": None},
         "report_period": report_period,
+        "time_granularity": time_payload["time_granularity"],
+        "time_value": time_payload["time_value"],
         "join_needs": [],
         "row_limit": row_limit,
         "security_constraints": ["PII_DISALLOWED"],
         "invalid_request": False,
         "notes": warning or "Heuristic extraction was used.",
     }
-    return _normalize_requirements(data, metadata_overview=metadata_overview)
+    return _normalize_requirements(
+        data,
+        metadata_overview=metadata_overview,
+        user_request=user_request,
+    )
 
 
 def _extract_measure_candidates(user_request: str) -> list[str]:
@@ -282,10 +311,7 @@ def _extract_named_tokens(user_request: str, prefixes: tuple[str, ...]) -> list[
 
 
 def _extract_report_period(user_request: str) -> str | None:
-    match = re.search(r"\b(20\d{2}(0[1-9]|1[0-2]))\b", user_request)
-    if match:
-        return match.group(1)
-    return None
+    return _extract_time_payload_from_request(user_request)["report_period"]
 
 
 def _extract_row_limit(user_request: str) -> int | None:
@@ -366,6 +392,153 @@ def _normalize_optional_text(value: Any) -> str | None:
     return text
 
 
+def _resolve_time_payload(
+    *,
+    requested_time_granularity: Any,
+    requested_time_value: Any,
+    user_request: str,
+    report_period: str | None,
+) -> dict[str, str | None]:
+    provided_granularity = _normalize_time_granularity(requested_time_granularity)
+    provided_time_value = _normalize_time_value(
+        requested_time_value,
+        provided_granularity,
+    )
+
+    request_payload = _extract_time_payload_from_request(user_request)
+    granularity = request_payload["time_granularity"] or provided_granularity
+    time_value = request_payload["time_value"] or provided_time_value
+
+    normalized_report_period = _normalize_report_period(report_period)
+    if granularity == "month":
+        if not time_value and normalized_report_period:
+            time_value = normalized_report_period
+        normalized_report_period = _normalize_report_period(time_value)
+    elif not granularity and normalized_report_period:
+        granularity = "month"
+        time_value = normalized_report_period
+
+    if granularity and not time_value:
+        granularity = None
+
+    return {
+        "time_granularity": granularity,
+        "time_value": time_value,
+        "report_period": normalized_report_period,
+    }
+
+
+def _extract_time_payload_from_request(user_request: str) -> dict[str, str | None]:
+    if not user_request.strip():
+        return {"time_granularity": None, "time_value": None, "report_period": None}
+
+    matches: list[tuple[int, int, str, str]] = []
+    patterns = (
+        ("day", re.compile(r"(?<!\d)(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?!\d)")),
+        (
+            "day",
+            re.compile(
+                r"(?<!\d)(20\d{2})[-/.](0[1-9]|1[0-2])[-/.](0[1-9]|[12]\d|3[01])(?!\d)"
+            ),
+        ),
+        ("month", re.compile(r"(?<!\d)(20\d{2})(0[1-9]|1[0-2])(?!\d)")),
+        (
+            "month",
+            re.compile(r"(?<!\d)(20\d{2})[-/.](0[1-9]|1[0-2])(?![-/.]?\d)"),
+        ),
+        ("year", re.compile(r"(?<!\d)(20\d{2})(?!\d)")),
+    )
+
+    for granularity, pattern in patterns:
+        for match in pattern.finditer(user_request):
+            digits = "".join(group for group in match.groups() if group)
+            if not _is_time_value_valid(granularity, digits):
+                continue
+            matches.append(
+                (
+                    _time_granularity_priority(granularity),
+                    match.start(),
+                    granularity,
+                    digits,
+                )
+            )
+
+    if not matches:
+        return {"time_granularity": None, "time_value": None, "report_period": None}
+
+    matches.sort(key=lambda item: (-item[0], item[1]))
+    _, _, granularity, value = matches[0]
+    report_period = value if granularity == "month" else None
+    return {
+        "time_granularity": granularity,
+        "time_value": value,
+        "report_period": report_period,
+    }
+
+
+def _time_granularity_priority(value: str) -> int:
+    if value == "day":
+        return 3
+    if value == "month":
+        return 2
+    if value == "year":
+        return 1
+    return 0
+
+
+def _normalize_time_granularity(value: Any) -> str | None:
+    text = _normalize_optional_text(value)
+    if text is None:
+        return None
+    lowered = text.lower()
+    mapping = {
+        "year": "year",
+        "yyyy": "year",
+        "month": "month",
+        "yyyymm": "month",
+        "day": "day",
+        "yyyymmdd": "day",
+    }
+    return mapping.get(lowered)
+
+
+def _normalize_time_value(value: Any, granularity: str | None) -> str | None:
+    text = _normalize_optional_text(value)
+    if text is None or granularity is None:
+        return None
+    digits = re.sub(r"\D", "", text)
+    if _is_time_value_valid(granularity, digits):
+        return digits
+    return None
+
+
+def _normalize_report_period(value: Any) -> str | None:
+    text = _normalize_optional_text(value)
+    if text is None:
+        return None
+    digits = re.sub(r"\D", "", text)
+    if not _is_time_value_valid("month", digits):
+        return None
+    return digits
+
+
+def _is_time_value_valid(granularity: str, value: str) -> bool:
+    if granularity == "year":
+        return bool(re.fullmatch(r"20\d{2}", value))
+    if granularity == "month":
+        return bool(re.fullmatch(r"20\d{2}(0[1-9]|1[0-2])", value))
+    if granularity == "day":
+        match = re.fullmatch(r"(20\d{2})(\d{2})(\d{2})", value)
+        if not match:
+            return False
+        return _is_valid_calendar_date(
+            int(match.group(1)),
+            int(match.group(2)),
+            int(match.group(3)),
+        )
+    return False
+
+
 def _apply_report_period_policy(
     normalized: dict[str, Any],
     metadata_overview: dict[str, Any] | None,
@@ -420,3 +593,38 @@ def _can_use_report_period_column(metadata_overview: dict[str, Any]) -> bool:
         return True
     mandatory = _as_string_list(metadata_overview.get("mandatory_filters"))
     return any(_references_report_period_column(flt) for flt in mandatory)
+
+
+def _ensure_valid_calendar_tokens(user_request: str) -> None:
+    invalid = _find_invalid_calendar_token(user_request)
+    if invalid is None:
+        return
+    token, normalized = invalid
+    raise RequirementsExtractionError(
+        f"Invalid calendar date token in request: '{token}' (normalized: {normalized})."
+    )
+
+
+def _find_invalid_calendar_token(user_request: str) -> tuple[str, str] | None:
+    patterns = (
+        re.compile(r"(?<!\d)(20\d{2})(\d{2})(\d{2})(?!\d)"),
+        re.compile(r"(?<!\d)(20\d{2})[-/.](\d{2})[-/.](\d{2})(?!\d)"),
+    )
+    for pattern in patterns:
+        for match in pattern.finditer(user_request):
+            year = int(match.group(1))
+            month = int(match.group(2))
+            day = int(match.group(3))
+            if _is_valid_calendar_date(year, month, day):
+                continue
+            normalized = f"{year:04d}{month:02d}{day:02d}"
+            return match.group(0), normalized
+    return None
+
+
+def _is_valid_calendar_date(year: int, month: int, day: int) -> bool:
+    try:
+        date(year, month, day)
+    except ValueError:
+        return False
+    return True
