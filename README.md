@@ -65,6 +65,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Heuristic fallback when LLM is unavailable.
 - `talk_to_data/metadata_retriever.py`
   - Loads selected agent metadata JSON.
+  - Fails fast on metadata quality errors when join definitions reference missing table columns.
   - High-recall retrieval using Unicode-aware token cosine similarity.
   - Returns broader relevant payload (more tables/columns) and mandatory rules.
   - Initializes `runtime_mandatory_rules` container for generation-time obligations without mutating static metadata obligations.
@@ -74,6 +75,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Implements `generate_sql_candidates(...) -> list[dict]`.
   - Produces exactly 3 candidates.
   - Uses `talk_to_data/llm_client.py` for LLM calls.
+  - Accepts optional retry context (`retry_context`) so second-attempt prompts can avoid first-attempt disqualify patterns.
   - Builds LLM prompt with explicit `Metadata`, `Request`, and `Sql Rule` sections.
   - Builds granularity-aware mandatory filters for DATE/TIMESTAMP targets:
     - `TO_CHAR(<date_col>, 'yyyy') = :year_value`
@@ -86,6 +88,10 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Requests SQL-only output first, then normalizes/parses into app candidate format.
   - Applies SQL safety checks and regeneration/repair path.
   - Does not inject missing predicates directly into SQL text; enforces mandatory filters through validation + LLM repair + revalidation.
+  - Enforces strict granularity bind policy:
+    - `year` -> `:year_value` only
+    - `month` -> `:report_period` only
+    - `day` -> `:date_value` only
   - Fails with explicit error when model output cannot be normalized into 3 valid SQL candidates (no synthetic fallback SQL).
   - Normalizes mandatory filters (for example `REPORT_PERIOD` -> `REPORT_PERIOD = :report_period`) before enforcement.
   - Stores generation-time obligations in `runtime_mandatory_rules` to avoid mutating static `mandatory_rules`.
@@ -104,7 +110,8 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `talk_to_data/sql_judge.py`
   - Evaluates 3 SQL candidates and picks best option id.
   - Uses strict LLM judge prompt with `temperature=0.0` and `max_tokens=32`.
-  - Applies deterministic fallback (hard disqualify + local scoring + tie-break to option_1).
+  - Applies deterministic fallback (hard disqualify + local scoring + fewer-disqualify tie-break + stable option order).
+  - Emits judge outcome metadata: `judge_error_kind`, `all_candidates_disqualified`, `disqualified_count`, `retry_recommended`.
 - `talk_to_data/sql_explainer.py`
   - Implements `describe_sql_candidate(...) -> str`.
 - `talk_to_data/db.py`
@@ -124,6 +131,9 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `talk_to_data/pipeline.py`
   - End-to-end application service orchestration.
   - Builds and carries full metadata validation catalog for judge + execution guardrails.
+  - Runs generate+judge flow with at most one retry (`attempt_1` + `attempt_2`) when judge fails or all options are disqualified.
+  - Fail-fast blocks generation if second attempt still has all candidates disqualified.
+  - Persists retry observability artifacts when retry is used.
   - Exposes `list_agents()` and agent-aware `prepare_candidates(...)`.
 
 ### Core Data Contracts
@@ -132,10 +142,11 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - includes: `intent`, `required_filters`, `measures`, `dimensions`, `grain`, `time_range`, `report_period`, `time_granularity`, `time_value`, `join_needs`, `row_limit`, `security_constraints`.
 - `retrieve_relevant_metadata(requirements, user_request) -> dict`
   - includes: `relevant_items`, `guardrails`, `mandatory_rules`, `runtime_mandatory_rules`.
-- `generate_sql_candidates(...) -> list[dict]`
+- `generate_sql_candidates(user_request, requirements, metadata, llm_client, retry_context=None) -> list[dict]`
   - each: `{id, sql, rationale_short, risk_notes}`.
 - `describe_sql_candidate(candidate, metadata) -> str`
 - `select_best_sql_option_id(user_request, metadata_used, candidates, llm_client=None, validation_catalog=None) -> str`
+  - Judge details include: `judge_error_kind`, `all_candidates_disqualified`, `disqualified_count`, `retry_recommended`.
 - `summarize_result_to_text(df) -> str`
   - optional args: `user_request`, `sql`, `metadata_used`, `llm_client`, `llm_enabled`, `chart_render_enabled`
 - `summarize_result(df) -> ResultInterpretation`
@@ -151,8 +162,10 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `SELECT *` is blocked.
 - Row limit is always enforced with `FETCH FIRST 200 ROWS ONLY`.
 - Mandatory metadata filters are propagated and enforced.
+- Metadata loading blocks invalid join-key mappings before generation starts.
 - Granular time filters can be enforced via `TO_CHAR` predicates with binds (`:year_value`, `:report_period`, `:date_value`) when DATE/TIMESTAMP targets are available.
 - Controlled date-like NUMBER columns can be used for granular time filters only with strong metadata signals.
+- Granularity bind policy is strict (`year -> :year_value`, `month -> :report_period`, `day -> :date_value`).
 - Bare mandatory filter names are normalized to bind-safe predicates before SQL generation.
 - SQL output normalization rejects `INVALID_REQUEST` marker responses and keeps SQL-generation flow active.
 - SQL generation fails fast when 3 valid candidates cannot be produced after normalization/repair.
@@ -173,6 +186,9 @@ Each generation creates `runs/<timestamp>/` with:
 - `metadata_used.json`
 - `sql_candidates.json`
 - `judge_result.json`
+- `sql_candidates_attempt_1.json` (retry path only)
+- `judge_result_attempt_1.json` (retry path only)
+- `retry_decision.json` (retry path only)
 - `request.txt`
 - `agent_info.json` (when generation is agent-based)
 

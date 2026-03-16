@@ -700,14 +700,14 @@ def _required_filter_is_satisfied(
             if re.search(pattern, where_clause, flags=re.IGNORECASE):
                 return True
 
-    if bind_name and re.search(
+    if bind_name and not column_name and re.search(
         rf":{re.escape(bind_name)}\b",
         where_clause,
         flags=re.IGNORECASE,
     ):
         return True
 
-    if column_name and re.search(
+    if column_name and not bind_name and re.search(
         rf"(?:\b[A-Za-z_][A-Za-z0-9_$#]*\.)?{re.escape(column_name)}\b",
         where_clause,
         flags=re.IGNORECASE,

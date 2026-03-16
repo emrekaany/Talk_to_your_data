@@ -41,6 +41,10 @@ The system converts a natural-language analytics request into safe Oracle SQL op
 - `talk_to_data/pipeline.py`
   - Main orchestrator (`TalkToDataService`).
   - Coordinates extract -> retrieve -> generate -> explain -> execute.
+  - Runs generate+judge flow with max two attempts.
+  - Triggers second attempt when judge fails or all candidates are disqualified.
+  - Fail-fast blocks execution when second attempt still has all candidates disqualified.
+  - Persists retry attempt artifacts for observability.
 - `talk_to_data/agent_registry.py`
   - Loads and validates `metadata/agents/agents.json`.
   - Resolves selected/default agent and metadata path.
@@ -54,12 +58,15 @@ The system converts a natural-language analytics request into safe Oracle SQL op
   - Uses LLM path with retry/fix-json and heuristic fallback.
 - `talk_to_data/metadata_retriever.py`
   - Loads metadata JSON documents.
+  - Fails fast when metadata join definitions reference table columns that are absent in metadata.
   - Performs high-recall token/cosine retrieval (up to top 200).
   - Produces compact relevant metadata + static `mandatory_rules` + runtime `runtime_mandatory_rules` container + guardrails.
 - `talk_to_data/sql_generator.py`
   - Requires LLM and generates exactly 3 candidates.
+  - Accepts optional `retry_context` so second-attempt generation can avoid first-attempt failure patterns.
   - Enforces SQL safety constraints, mandatory filters, and row limit.
   - Enforces granularity-aware date filters via TO_CHAR patterns for DATE/TIMESTAMP targets and controlled date-like NUMBER predicates for strong metadata signals.
+  - Enforces strict granularity bind policy (`year -> :year_value`, `month -> :report_period`, `day -> :date_value`).
   - Prioritizes `TANZIM_TARIH_ID -> GNL_TARIH.TARIH` path for tanzim-period requests during date-target selection.
   - Repairs malformed/unsafe candidates via LLM normalization/repair path.
   - Uses validation+repair for missing mandatory filters; does not inject filter text directly into SQL.
@@ -75,6 +82,9 @@ The system converts a natural-language analytics request into safe Oracle SQL op
   - Builds full validation catalog from raw metadata documents.
   - Supports quoted/unquoted alias/column parsing and schema-qualified reference handling.
   - Detects ambiguous bare-table mappings and unknown alias.column references.
+- `talk_to_data/sql_judge.py`
+  - Evaluates candidates with LLM judge + deterministic fallback.
+  - Emits `judge_error_kind`, `all_candidates_disqualified`, `disqualified_count`, and `retry_recommended` for orchestration.
 - `talk_to_data/db.py`
   - Oracle driver access and SQL execution with bind mapping.
   - Resolves granular time binds (`:year_value`, `:date_value`) in addition to `:report_period`.
@@ -94,7 +104,7 @@ The system converts a natural-language analytics request into safe Oracle SQL op
 
 - `extract_requirements(user_request, llm_client, metadata_overview) -> dict`
 - `retrieve_relevant_metadata(requirements, user_request, documents, metadata_path, top_k) -> dict`
-- `generate_sql_candidates(user_request, requirements, metadata, llm_client) -> list[dict]`
+- `generate_sql_candidates(user_request, requirements, metadata, llm_client, retry_context=None) -> list[dict]`
 - `describe_sql_candidate(candidate, metadata, llm_client) -> str`
 - `choose_best_sql_candidate(user_request, metadata_used, candidates, llm_client, validation_catalog) -> dict`
 - `validate_sql_before_execution(sql, metadata_used, llm_client, validation_catalog) -> None`
@@ -111,7 +121,9 @@ The system converts a natural-language analytics request into safe Oracle SQL op
 - `SELECT *` is blocked.
 - SQL comments are blocked.
 - Mandatory filters from requirements/metadata are enforced.
+- Metadata load fails fast on invalid join-key references before SQL generation.
 - Granular time obligations are enforced with explicit bind+mask-aware pattern checks, not only token presence.
+- Granularity bind usage is strict (`year -> :year_value`, `month -> :report_period`, `day -> :date_value`).
 - Missing mandatory filters are corrected through candidate repair/revalidation, not by SQL text injection.
 - Oracle row limit is enforced: `FETCH FIRST 200 ROWS ONLY`.
 - Execution checks include:
@@ -142,6 +154,10 @@ Generation artifacts (`runs/<timestamp>/`):
 - `requirements.json`
 - `metadata_used.json`
 - `sql_candidates.json`
+- `judge_result.json`
+- `sql_candidates_attempt_1.json` (retry path only)
+- `judge_result_attempt_1.json` (retry path only)
+- `retry_decision.json` (retry path only)
 - `agent_info.json` (agent-based flow)
 
 Execution artifacts:
@@ -189,3 +205,4 @@ Entries:
 - 2026-03-15 - Codex: Added request-level time granularity extraction (`year|month|day`), SQL granularity-aware TO_CHAR mandatory filters, tanzim-path prioritization, and bind/guardrail support for `:year_value` + `:date_value` | Ensure temporal filters are explicit, bind-safe, and validated end-to-end | `talk_to_data/requirements_extractor.py`, `talk_to_data/sql_generator.py`, `talk_to_data/db.py`, `talk_to_data/sql_guardrails.py`, `talk_to_data/pipeline.py`, `architecture.md`
 - 2026-03-15 - Codex: Strengthened shared SQL validation with quoted identifier parsing, schema ambiguity blocking, and full-catalog execution checks; removed duplicate unknown-column reason path from judge | Close guardrail bypass/false-positive risks and keep judge disqualify reasons singular | `talk_to_data/sql_validation.py`, `talk_to_data/sql_guardrails.py`, `talk_to_data/sql_judge.py`, `talk_to_data/pipeline.py`, `architecture.md`
 - 2026-03-16 - Codex: Reworked mandatory-filter handling to validation+repair (no SQL text injection), added controlled date-like NUMBER targeting for granular time filters, introduced `runtime_mandatory_rules`, expanded guardrail granular pattern validation, and added extractor hard-fail for invalid calendar date tokens | Close SQL breakage/false-negative risks while preserving 3-candidate flow and strict temporal safety | `talk_to_data/requirements_extractor.py`, `talk_to_data/sql_generator.py`, `talk_to_data/sql_guardrails.py`, `talk_to_data/sql_judge.py`, `talk_to_data/metadata_retriever.py`, `README.md`, `architecture.md`
+- 2026-03-16 - Codex: Added metadata join-key quality gate, judge retry metadata contract, and one-shot generate+judge retry orchestration with fail-fast on second all-disqualified attempt; added retry artifacts and retry-aware SQL prompting | Improve auto-selection robustness under judge failures/disqualifications while keeping strict safety guarantees | `talk_to_data/metadata_retriever.py`, `talk_to_data/sql_judge.py`, `talk_to_data/sql_generator.py`, `talk_to_data/pipeline.py`, `talk_to_data/runs.py`, `README.md`, `architecture.md`
