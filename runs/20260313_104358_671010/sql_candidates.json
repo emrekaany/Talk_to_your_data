@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(fpp.BRUT_PRIM_TL) AS PRIM_TL  \nFROM AS_DWH.FACT_POL_POLICE_EK fpp  \nJOIN AS_DWH.POL_POLICE_OZET ppo ON fpp.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpp.POLICE_ID = ppo.POLICE_ID  \nWHERE REPORT_PERIOD = :report_period  \nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total gross premium (BRUT_PRIM_TL) for a specific reporting period?  \nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET  \nFilters: Only records matching the specified REPORT_PERIOD parameter are included.  \nGrouping/measures: The query sums the BRUT_PRIM_TL column from the joined tables.  \nExpected output columns: PRIM_TL (total gross premium)  \nAssumptions: The query assumes that the REPORT_PERIOD is valid and that the join keys between the two tables are correctly matched. It also assumes that BRUT_PRIM_TL represents gross premium in Turkish Lira.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(fpp.BRUT_PRIM_TL) AS PRIM_TL  \nFROM AS_DWH.FACT_POL_POLICE_EK fpp  \nJOIN AS_DWH.POL_POLICE_OZET ppo ON fpp.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpp.POLICE_ID = ppo.POLICE_ID  \nWHERE REPORT_PERIOD = :report_period  \nGROUP BY ppo.KAYNAK_SISTEM_ID  \nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total gross premium (BRUT_PRIM_TL) per source system (`KAYNAK_SISTEM_ID`) for a specific reporting period?  \nTables used: `AS_DWH.FACT_POL_POLICE_EK`, `AS_DWH.POL_POLICE_OZET`  \nFilters: Only records matching the specified `REPORT_PERIOD` parameter are included.  \nGrouping/measures: Summing `BRUT_PRIM_TL` and grouping by `KAYNAK_SISTEM_ID`.  \nExpected output columns: `PRIM_TL` (total gross premium per source system)  \nAssumptions: `REPORT_PERIOD` is provided as a parameter, and the query is intended to retrieve top 200 source systems by total gross premium.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(fpp.BRUT_PRIM_TL) AS PRIM_TL  \nFROM AS_DWH.FACT_POL_POLICE_EK fpp  \nJOIN AS_DWH.POL_POLICE_OZET ppo ON fpp.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpp.POLICE_ID = ppo.POLICE_ID  \nWHERE REPORT_PERIOD = :report_period  \nGROUP BY ppo.POLICE_ID  \nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total gross premium (BRUT_PRIM_TL) per policy for a specific reporting period?  \nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET  \nFilters: Only records matching the specified REPORT_PERIOD parameter are included.  \nGrouping/measures: The total BRUT_PRIM_TL is summed per POLICE_ID.  \nExpected output columns: PRIM_TL (total gross premium per policy)  \nAssumptions: The query assumes that the REPORT_PERIOD refers to the relevant period filter in the data model and that the join between the two tables is valid based on KAYNAK_SISTEM_ID and POLICE_ID.",
+    "recommended": false
+  }
+]

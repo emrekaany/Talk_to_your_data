@@ -1,0 +1,27 @@
+{
+  "intent": "listing",
+  "required_filters": [
+    "REPORT_PERIOD = :report_period"
+  ],
+  "measures": [
+    "PRIM_TL"
+  ],
+  "dimensions": [
+    "BRANS_KODU"
+  ],
+  "grain": [
+    "POLICE_NO"
+  ],
+  "join_needs": [],
+  "security_constraints": [
+    "PII_DISALLOWED"
+  ],
+  "invalid_request": false,
+  "notes": "Request assumes data availability for the specified period.",
+  "row_limit": 200,
+  "report_period": "202501",
+  "time_range": {
+    "start": "2025-01-01",
+    "end": "2025-12-31"
+  }
+}

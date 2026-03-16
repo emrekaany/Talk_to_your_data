@@ -1,0 +1,23 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(PRIM_TL) AS total_ifrs_prim_tl FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total primary insurance premium (in Turkish Lira) for the specified reporting period?  \nTables used: AS_IFRS.IFRS_PRIM_VERISI  \nFilters: REPORT_PERIOD = :report_period  \nGrouping/measures: SUM(PRIM_TL) as total_ifrs_prim_tl  \nExpected output columns: total_ifrs_prim_tl  \nAssumptions: The REPORT_PERIOD filter is provided and valid; only the first 200 rows are fetched, though grouping is not needed here."
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT PRIM_TL FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What are the first 200 premium amounts (`PRIM_TL`) recorded in the specified reporting period?  \nTables used: `AS_IFRS.IFRS_PRIM_VERISI`  \nFilters: Only records where `REPORT_PERIOD` matches the provided input (`:report_period`)  \nGrouping/measures: No grouping or aggregation is applied  \nExpected output columns: `PRIM_TL`  \nAssumptions: The `REPORT_PERIOD` filter is provided and valid; the query retrieves up to 200 rows to limit data volume."
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT REPORT_PERIOD, SUM(PRIM_TL) AS total_ifrs_prim_tl FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period GROUP BY REPORT_PERIOD FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total primary premium (`PRIM_TL`) for the specified reporting period?  \nTables used: `AS_IFRS.IFRS_PRIM_VERISI`  \nFilters: `REPORT_PERIOD = :report_period`  \nGrouping/measures: Grouped by `REPORT_PERIOD`, summing `PRIM_TL` as `total_ifrs_prim_tl`  \nExpected output columns: `REPORT_PERIOD`, `total_ifrs_prim_tl`  \nAssumptions: The `REPORT_PERIOD` filter is provided and valid; the table contains premium data for the given period."
+  }
+]

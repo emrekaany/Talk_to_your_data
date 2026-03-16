@@ -1,0 +1,23 @@
+{
+  "intent": "metric",
+  "required_filters": [],
+  "measures": [
+    "PRIM_TL"
+  ],
+  "dimensions": [],
+  "grain": [],
+  "join_needs": [],
+  "security_constraints": [
+    "PII_DISALLOWED"
+  ],
+  "invalid_request": false,
+  "notes": "",
+  "row_limit": 200,
+  "report_period": null,
+  "time_granularity": "year",
+  "time_value": "2025",
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

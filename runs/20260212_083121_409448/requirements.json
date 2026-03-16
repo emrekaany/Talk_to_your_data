@@ -1,0 +1,21 @@
+{
+  "intent": "listing",
+  "required_filters": [
+    "REPORT_PERIOD = :report_period"
+  ],
+  "measures": [],
+  "dimensions": [],
+  "grain": [],
+  "join_needs": [],
+  "security_constraints": [
+    "PII_DISALLOWED"
+  ],
+  "invalid_request": false,
+  "notes": "LLM unavailable, heuristic extraction used: LLM HTTP error 503: {\"error\":{\"message\":\"litellm.ServiceUnavailableError: ServiceUnavailableError: Hosted_vllmException - <html>\\r\\n  <head>\\r\\n    <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1\\\">\\r\\n\\r\\n    <style type=\\\"text/css\\\">\\r\\n      body {\\r\\n        font-family: \\\"Helvetica Neue\\\", He",
+  "row_limit": 200,
+  "report_period": "202512",
+  "time_range": {
+    "start": "None",
+    "end": "None"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "intent": "listing",
+  "required_filters": [
+    "REPORT_PERIOD",
+    "REPORT_PERIOD = :report_period"
+  ],
+  "measures": [
+    "BRANS_KODU",
+    "PRIM_TL"
+  ],
+  "dimensions": [],
+  "grain": [],
+  "join_needs": [],
+  "security_constraints": [
+    "PII_DISALLOWED"
+  ],
+  "invalid_request": false,
+  "notes": "Heuristic extraction was used.",
+  "row_limit": 200,
+  "report_period": null,
+  "time_range": {
+    "start": "None",
+    "end": "None"
+  }
+}

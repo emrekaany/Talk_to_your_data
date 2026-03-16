@@ -1,0 +1,1 @@
+BRANS_KODU bazinda toplam PRIM_TL getir

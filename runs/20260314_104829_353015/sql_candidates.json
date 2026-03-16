@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(fpe.BRUT_PRIM_TL) AS PRIM_TL  \nFROM AS_DWH.FACT_POL_POLICE_EK fpe  \nJOIN AS_DWH.POL_POLICE_OZET ppo ON fpe.POLICE_ID = ppo.POLICE_ID  \nJOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID  \nWHERE gt.TARIH = :report_period  \nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total gross premium (BRUT_PRIM_TL) for policies with a specific effective date (report_period)?  \nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH  \nFilters: Only policies with an effective date matching the specified report_period are included.  \nGrouping/measures: The query sums the BRUT_PRIM_TL column to calculate the total gross premium.  \nExpected output columns: PRIM_TL (total gross premium)  \nAssumptions: The report_period is a specific date provided as a parameter. The query assumes that the effective date is stored in the GNL_TARIH table and linked via TANZIM_TARIH_ID.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(fpta.VOP_TL) AS PRIM_TL  \nFROM AS_DWH.FACT_POL_POLICE_TEM_ASSET fpta  \nJOIN AS_DWH.POL_POLICE_OZET ppo ON fpta.POLICE_ID = ppo.POLICE_ID  \nJOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID  \nWHERE gt.TARIH = :report_period  \nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total primary value (VOP_TL) of policies for a specific reporting period?  \nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH  \nFilters: Only records where the date in GNL_TARIH matches the specified report period (:report_period)  \nGrouping/measures: Summing the VOP_TL column from the FACT_POL_POLICE_TEM_ASSET table  \nExpected output columns: PRIM_TL (total primary value)  \nAssumptions: The query assumes that the report_period input corresponds to a valid date in the GNL_TARIH table, and that VOP_TL represents a meaningful business metric like premium or value.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(fpe.BRUT_PRIM_TL) AS PRIM_TL  \nFROM AS_DWH.FACT_POL_POLICE_EK fpe  \nJOIN AS_DWH.POL_POLICE_OZET ppo ON fpe.POLICE_ID = ppo.POLICE_ID  \nJOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID  \nWHERE gt.TARIH = :report_period  \nGROUP BY ppo.KAYNAK_SISTEM_ID  \nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total gross premium (BRUT_PRIM_TL) for each source system (`KAYNAK_SISTEM_ID`) in a specific reporting period?  \nTables used: `AS_DWH.FACT_POL_POLICE_EK`, `AS_DWH.POL_POLICE_OZET`, `AS_DWH.GNL_TARIH`  \nFilters: Only records where the date (`TARIH`) matches the specified reporting period (`:report_period`)  \nGrouping/measures: Summing `BRUT_PRIM_TL` grouped by `KAYNAK_SISTEM_ID`  \nExpected output columns: `PRIM_TL` (total gross premium), `KAYNAK_SISTEM_ID`  \nAssumptions: The `:report_period` parameter refers to the effective date of policy arrangements (`TANZIM_TARIH_ID`), consistent with production reporting standards.",
+    "recommended": false
+  }
+]

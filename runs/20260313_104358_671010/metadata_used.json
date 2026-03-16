@@ -1,0 +1,1458 @@
+{
+  "dialect": "oracle sql",
+  "relevant_items": [
+    {
+      "score": 0.1655,
+      "table": "AS_DWH.FACT_POL_POLICE_EK",
+      "description": "Poliçe Ek seviyesinde Bazı Tutarsal Bilgileri Tutar",
+      "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+      "columns": [
+        {
+          "name": "BRUT_PRIM_TL",
+          "type": "NUMBER",
+          "description": "Brüt Prim TL Brüt Prim TL, bir sigorta poliçesi için müşteriden tahsil edilen toplam prim tutarının Türk Lirası (TL) cinsinden değerini ifade eder. Bu tutar, primin vergi ve yasal kesintiler dahil edilmiş halidir. Brüt Prim TL = Vergiler ve fonlar dahil müşterinin ödediği toplam prim. Net prim + Vergi TL rakamını içerir. Tablo baglami: Poliçe Ek seviyesinde Bazı Tutarsal Bilgileri Tutar",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Toplam Prim",
+            "Brüt Poliçe Primi",
+            "Toplam Prim Tutarı",
+            "Vergi Dahil Prim",
+            "Poliçe Brüt Primi",
+            "Brüt Prim TL"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID",
+        "AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID"
+      ],
+      "indexes": [
+        "AS_DWH.FACT_POL_POLICE_EK(KAYNAK_SISTEM_ID)",
+        "AS_DWH.FACT_POL_POLICE_EK(POLICE_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Brüt Prim TL",
+        "Üretim",
+        "AS_DWH.FACT_POL_POLICE_EK",
+        "Toplam Prim",
+        "Brüt Poliçe Primi",
+        "Toplam Prim Tutarı",
+        "Vergi Dahil Prim",
+        "Poliçe Brüt Primi"
+      ]
+    },
+    {
+      "score": 0.0837,
+      "table": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+      "description": "Poliçe Bilgilerini Tutan Tablo Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo Branş Tanımlarını İçeren Look Up Tablo TKZ Tanımlarını İçeren Look Up Tablo Poliçe Teminat (TKZ) seviyesinde Bazı Tutarsal Bilgileri Tutar",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası; veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+      "columns": [
+        {
+          "name": "VOP_TL",
+          "type": "NUMBER",
+          "description": "Vergi Öncesi Prim TL Vergi Öncesi Prim TL, bir sigorta poliçesi için hesaplanan prim tutarının vergiler ve yasal kesintiler eklenmeden önceki Türk Lirası (TL) cinsinden değerini ifade eder. Vergi Öncesi Prim TL = Poliçenin vergiler eklenmeden önceki prim tutarı Tablo baglami: Poliçe Teminat (TKZ) seviyesinde Bazı Tutarsal Bilgileri Tutar",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Net Prim Tutarı",
+            "Vergisiz Prim",
+            "Prim Tutarı (Vergi Hariç)",
+            "Net Poliçe Primi",
+            "VOP TL",
+            "Vergi Öncesi Prim TL"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID"
+      ],
+      "indexes": [
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET(KAYNAK_SISTEM_ID)",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET(POLICE_ID)",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET(REF_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe No",
+        "Üretim",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+        "Poliçe Numarası",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası",
+        "Yenileme No",
+        "Poliçe Yenileme Numarası",
+        "Poliçe Yenileme Sayısı",
+        "Tecdit No",
+        "Tecdit Numarası",
+        "Ek No",
+        "Zeyil Numarası",
+        "Poliçe Ek Numarası",
+        "Zeyil Sıra Numarası",
+        "Ek İşlem Numarası",
+        "Ek Numarası",
+        "Poliçe Ek No",
+        "Poliçe Döviz Cinsi"
+      ]
+    },
+    {
+      "score": 0.0369,
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "description": "Poliçe Bilgilerini Tutan Tablo Genel Tarih Bilgileri Tutan Takvim Tablosu. Join üzerinden ilgili ID ile istenilen tarih bilgisi elde edilir. Poliçenin Yürürlükte mi ; İptal Mi Yoksa Süresini mi tamamladı gibi durum bilgisini veren tablo Poliçe verisinin hangi kaynak sistemden (1-AS400/2-ASOS/15-ASTRA) geldiğini gösteren tablodur. Poliçe Satış Kanallarını İçeren Look Up Tablo Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir. Ürünlere ait bilgileri tutan tablo Branş Tanımlarını İçeren Look Up Tablo TKZ Tanımlarını İçeren Look Up Tablo Müşteri Bilgilerini İçeren Tablo Poliçe Teminat (TKZ) seviyesinde Bazı Tutarsal Bilgileri Tutar Poliçe Ek seviyesinde Bazı Tutarsal Bilgileri Tutar Poliçe Sayısı Bilgisini Tutar",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası; veri_seviyesi=Acente Kodu; degisim_seviyesi=Acente Kodu; veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+      "columns": [
+        {
+          "name": "POLICE_DOVIZ_CINSI",
+          "type": "VARCHAR2",
+          "description": "Poliçe Döviz Cinsi Poliçe priminin döviz cinsini ifade eder. Poliçe Döviz Cinsi, bir sigorta poliçesinde yer alan prim, teminat ve diğer finansal tutarların hangi para birimi üzerinden ifade edildiğini gösteren bilgidir. Kolon icerigi: Para Birimi Kısaltmalarını İçerir. (YTL, TL Para Birimi TRY ile ifade edilmelidir.) Select çekilirken TRIM ile boşlukları kontrol edilmelidir. Tablo baglami: Poliçe Bilgilerini Tutan Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Para Birimi",
+            "Poliçe Kur Cinsi",
+            "Poliçe Döviz Türü",
+            "Poliçe Para Cinsi",
+            "Poliçe Currency Bilgisi",
+            "Poliçe Döviz Cinsi"
+          ]
+        },
+        {
+          "name": "POLICE_EK_NO",
+          "type": "VARCHAR2",
+          "description": "Ek No Ek No, bir sigorta poliçesine sonradan yapılan değişikliklerin sıra numarasını ifade eder. Ek No = Poliçeye yapılan ek işlemin (zeyilin) kaçıncı değişiklik olduğunu gösteren numara Tablo baglami: Poliçe Bilgilerini Tutan Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Zeyil Numarası",
+            "Poliçe Ek Numarası",
+            "Zeyil Sıra Numarası",
+            "Ek İşlem Numarası",
+            "Ek No",
+            "Ek Numarası",
+            "Poliçe Ek No"
+          ]
+        },
+        {
+          "name": "POLICE_NO",
+          "type": "VARCHAR2",
+          "description": "Poliçe No Poliçe numarası bilgisini tutar Tablo baglami: Poliçe Bilgilerini Tutan Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Numarası",
+            "Poliçe No",
+            "Pol No",
+            "Pol Numarası",
+            "Sigorta Poliçe Numarası"
+          ]
+        },
+        {
+          "name": "POLICE_YENILEME_NO",
+          "type": "VARCHAR2",
+          "description": "Yenileme No Yenileme No, bir sigorta poliçesinin aynı teminat ve sözleşme yapısıyla kaçıncı kez yenilendiğini gösteren numaradır. Yenileme No = Poliçenin kaçıncı kez yenilendiğini gösteren sayı Tablo baglami: Poliçe Bilgilerini Tutan Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Yenileme Numarası",
+            "Poliçe Yenileme Sayısı",
+            "Tecdit No",
+            "Tecdit Numarası",
+            "Yenileme No"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID",
+        "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID",
+        "AS_DWH.POL_POLICE_OZET.NEW_FPOLK = AGGR.AS400_YENI_URUN.NEW_FPOLK",
+        "AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_KODU",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID",
+        "AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.URUN_KODU = AS_DWH.POL_URUN.URUN_KODU"
+      ],
+      "indexes": [
+        "AS_DWH.POL_POLICE_OZET(ACENTE_ID)",
+        "AS_DWH.POL_POLICE_OZET(ANA_POLICE_BASLANGIC_TARIH_ID)",
+        "AS_DWH.POL_POLICE_OZET(ANA_POLICE_BITIS_TARIH_ID)",
+        "AS_DWH.POL_POLICE_OZET(ANA_POLICE_TANZIM_TARIH_ID)",
+        "AS_DWH.POL_POLICE_OZET(BASLANGIC_TARIH_ID)",
+        "AS_DWH.POL_POLICE_OZET(BITIS_TARIH_ID)",
+        "AS_DWH.POL_POLICE_OZET(KAYNAK_SISTEM_ID)",
+        "AS_DWH.POL_POLICE_OZET(MUSTERI_ID)",
+        "AS_DWH.POL_POLICE_OZET(NEW_FPOLK)",
+        "AS_DWH.POL_POLICE_OZET(POLICE_DURUMU_KODU_AS400)",
+        "AS_DWH.POL_POLICE_OZET(POLICE_ID)",
+        "AS_DWH.POL_POLICE_OZET(POLICE_KOD_ID)",
+        "AS_DWH.POL_POLICE_OZET(SATIS_KANALI_ID)",
+        "AS_DWH.POL_POLICE_OZET(TANZIM_TARIH_ID)",
+        "AS_DWH.POL_POLICE_OZET(URUN_KODU)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+        "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+        "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe No",
+        "Üretim",
+        "AS_DWH.POL_POLICE_OZET",
+        "Poliçe Numarası",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası",
+        "Ana Poliçe Tanzim Tarihi",
+        "Poliçe Tanzim Tarihi",
+        "Tanzim Tarihi",
+        "Tan Tarih",
+        "Tanzim Trh",
+        "Tan Trh",
+        "Bas Tarih",
+        "Bas Trh",
+        "Poliçe Düzenleme Tarihi",
+        "Ana Poliçe Düzenleme Tarihi",
+        "Poliçe Oluşturma Tarihi",
+        "Poliçe Kayıt Tarihi",
+        "Ek Tanzim Tarihi"
+      ]
+    },
+    {
+      "score": 0.0176,
+      "table": "AS_DWH.POL_POLICE_KIRILIM",
+      "description": "Branş Tanımlarını İçeren Look Up Tablo TKZ Tanımlarını İçeren Look Up Tablo",
+      "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+      "columns": [],
+      "joins": [
+        "AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID",
+        "AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID",
+        "AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID",
+        "AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID",
+        "AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID",
+        "AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID"
+      ],
+      "indexes": [
+        "AS_DWH.POL_POLICE_KIRILIM(BRANS_ID)",
+        "AS_DWH.POL_POLICE_KIRILIM(KAYNAK_SISTEM_ID)",
+        "AS_DWH.POL_POLICE_KIRILIM(POLICE_ID)",
+        "AS_DWH.POL_POLICE_KIRILIM(TKZ_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Branş",
+        "Üretim",
+        "AS_DWH.POL_POLICE_KIRILIM",
+        "Sigorta Branşı",
+        "Sigorta Türü",
+        "Poliçe Branşı",
+        "Branş Açıklama",
+        "Hayır",
+        "TKZ Kodu",
+        "Tarife Kodu",
+        "Teminat Kodu",
+        "Ürün Tarife Kodu",
+        "Tarife Tanımlama Kodu",
+        "TKZ Kodu Açıklaması",
+        "TKZ Tanımı",
+        "Tarife Kodu Açıklaması"
+      ]
+    },
+    {
+      "score": 0.0109,
+      "table": "AS_DWH.GNL_KAYNAK_SISTEM",
+      "description": "Poliçe Bilgilerini Tutan Tablo Poliçe verisinin hangi kaynak sistemden (1-AS400/2-ASOS/15-ASTRA) geldiğini gösteren tablodur.",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası",
+      "columns": [
+        {
+          "name": "KAYNAK_SISTEM_ID",
+          "type": "VARCHAR2",
+          "description": "Kaynak Sistem Poliçe verisinin hangi kaynak sistemden (1-AS400/2-ASOS/15-ASTRA) geldiğini gösteren objedir. Kaynak Sistem, bir verinin ilk üretildiği veya alındığı sistemi ifade eder. Kaynak sistem = Verinin geldiği ana sistem Kolon icerigi: Kaynak Sistem ID Kaynak Sistem Adı '-99 N/A 1 AS400 2 ASOS 3 RH 4 ASHOP 5 Winsure 6 ICM 7 METE 8 CSV, TXT, Excel tipindeki dosyalar 9 AS Karlılık dahili hesaplama 10 CAT_XL exceli 11 FRRDAG 12 ART 13 Muhasebe 14 FHRDAG 15 ASTRA Tablo baglami: Poliçe verisinin hangi kaynak sistemden (1-AS400/2-ASOS/15-ASTRA) geldiğini gösteren tablodur.",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Veri Kaynağı",
+            "Kaynak Uygulama",
+            "Kaynak Platform",
+            "Kaynak Sistem Adı",
+            "Veri Üretim Sistemi",
+            "Kaynak Sistem"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID"
+      ],
+      "indexes": [
+        "AS_DWH.GNL_KAYNAK_SISTEM(KAYNAK_SISTEM_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe No",
+        "Üretim",
+        "AS_DWH.GNL_KAYNAK_SISTEM",
+        "Poliçe Numarası",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası",
+        "Yenileme No",
+        "Poliçe Yenileme Numarası",
+        "Poliçe Yenileme Sayısı",
+        "Tecdit No",
+        "Tecdit Numarası",
+        "Ek No",
+        "Zeyil Numarası",
+        "Poliçe Ek Numarası",
+        "Zeyil Sıra Numarası",
+        "Ek İşlem Numarası",
+        "Ek Numarası",
+        "Poliçe Ek No",
+        "Kaynak Sistem"
+      ]
+    },
+    {
+      "score": 0.0072,
+      "table": "AS_DWH.POL_TKZ",
+      "description": "TKZ Tanımlarını İçeren Look Up Tablo",
+      "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+      "columns": [
+        {
+          "name": "TKZ_ADI",
+          "type": "VARCHAR2",
+          "description": "TKZ Kodu Açıklaması TKZ Kodu Açıklaması, sigorta sistemlerinde kullanılan TKZ kodunun neyi ifade ettiğini açıklayan metinsel bilgidir. TKZ kodu açıklaması = TKZ kodunun hangi tarife, kapsam veya ürün tanımına karşılık geldiğini açıklayan bilgi Kolon icerigi: TKZ_ID TKZ_KODU TKZ_ADI KAYNAK_SISTEM_ID -99 -99 N/A -99 1 702 KAR KAYBI 1 2 0 1 3 701 YANGIN 1 4 704 MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA 1 5 711 KIYMET 1 6 703 ZORUNLU DEPREM 1 7 715 KTK ZMSS (Trafik)(Yeşil Kart Dahil) 1 8 710 EMTEA 1 9 717 KASKO 1 10 712 TEKNE 1 11 719 İŞVEREN MALİ SORUMLULUK 1 12 714 ZORUNLU KARAYOLU TASIMACILIK MALİ SORUMLULUK 1 13 720 ÜÇÜNCÜ ŞAHISLARA KARŞI MS 1 14 716 İHTİYARİ MALİ SORUMLULUK 1 15 724 HIRSIZLIK 1 16 718 KARAYOLU YOLCU TAŞIMACILIĞI ZORUNLU KOLTUK FERDİ KAZA 1 17 726 TEHLİKE MADDELER ZORUNLU SORUMLULUK 1 18 721 ASANSÖR KAZA 3. ŞAHIS MS 1 19 728 UÇAK MALİ MESULİYET 1 20 723 CAM KIRILMASI 1 21 731 ÖZEL GÜVENLİK MSS 1 22 725 TÜPGAZ ZORUNLU SORUMLULUK 1 23 733 MESLEKİ SORUMLULUK 1 24 727 UÇAK TEKNE 1 25 755 KREDİ 1 26 729 UÇAK YOLCU KAZA 1 27 760 HUKUKSAL KORUMA 1 28 730 TIBBI KÖTÜ UYGULAMAYA İLİŞKİN ZMSS 1 29 766 MONTAJ 1 30 734 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MS 1 31 768 ELEKTRONİK CİHAZ 1 32 750 FERDİ KAZA 1 33 773 GENEL ZARARLAR 1 34 756 İHRACAT KREDİ 1 35 775 DOLU SERA 1 36 765 MAKİNE KIRILMASI 1 37 777 DEVLET DESTEKLİ BİTKİSEL ÜRÜN 1 38 767 İNŞAAT 1 39 779 DEVLET DESTEKLİ HAYVAN HAYAT 1 40 770 DENİZ YOLU YOLCU TAŞIMACILIĞI ZMS 1 41 780 HAYVAN HAYAT 1 42 776 DEVLET DESTEKLİ SERA 1 43 782 DEVLET DESTEKLİ KÜMES HAYVAN HAYAT 1 44 778 DEVLET DESTEKLİ SU ÜRÜNLERİ 1 45 786 SEYAHAT SAĞLIK 1 46 783 DEVLET DESTEKLİ KÜÇÜKBAŞ HAYVAN HAYAT 1 47 785 SAĞLIK 1 48 759 DİĞER FİNANSAL KAYIPLAR 1 49 736 DOĞRUDAN KEFALET 1 50 706 DOLAYLI KEFALET 1 51 722 ÇEVRE KİRLİLİĞİ MALİ SORUMLULUK 1 146 707 DEVLET DESTEKLİ TİCARİ ALACAK SİGORTASI 1 147 771 ÜRÜN SORUMLULUK SİGORTASI 1 148 784 HASTALIK 1 149 705 DOĞRUDAN KEFALET 1 150 708 BİNA TAMAMLAMA 1 226 713 RAYLI ARAÇLAR 1 227 740 İHTİYARİ DEPREM 1 228 732 ZORUNLU SERTİFİKA MS 1 229 741 SEL 1 230 735 TEKNE SORUMLULUK 1 231 742 DEPREM VE SEL DIŞINDAKİ DOĞAL AFETLER 1 232 737 MOTORLU KARA TAŞITLARI DIŞINDAKİ KARA TAŞITLARI 1 233 743 NÜKLEER ENERJİ 1 234 738 NEHİR ARAÇLARI 1 235 744 TOPRAK KAYMASI 1 236 739 GÖL ARAÇLARI 1 237 745 TASİTLİ KREDİ 1 238 752 HAVA ŞARTLARI 1 239 746 UZUN VADELİ KONUT KREDİSİ 1 240 753 GENEL GİDERLER 1 241 747 TARIM KREDİSİ 1 242 754 BEKLENMEYEN TİCARİ GİDERLER 1 243 748 İSTİHDAM 1 244 757 PİYASA DEĞERİNDEKİ KAYIP 1 245 749 GELİR YETERSİZLİĞİ 1 246 758 KİRA VE GELİR KAYBI 1 247 761 PATLAMA 1 248 774 SU ÜRÜNLERİ 1 249 769 YAPI DENETİMİ ZORUNLU MS 1 250 781 KÜMES HAYVAN. HAYAT 1 251 751 UZUN SÜRELİ FERDİ KAZA 15 252 789 SEYAHAT ARAÇ DESTEK 15 253 798 DESTEK GENEL 15 Tablo baglami: TKZ Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "TKZ Tanımı",
+            "Tarife Kodu Açıklaması",
+            "TKZ Kodu Açıklaması"
+          ]
+        },
+        {
+          "name": "TKZ_KODU",
+          "type": "VARCHAR2",
+          "description": "TKZ Kodu TKZ Kodu, sigortacılıkta bir poliçenin veya işlemin tarife, kapsam veya özel ürün sınıflandırmasını belirlemek için kullanılan tanımlayıcı koddur. TKZ Kodu = Poliçenin hangi tarife veya kapsam grubuna ait olduğunu gösteren kod. Kolon icerigi: TKZ_ID TKZ_KODU TKZ_ADI KAYNAK_SISTEM_ID -99 -99 N/A -99 1 702 KAR KAYBI 1 2 0 1 3 701 YANGIN 1 4 704 MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA 1 5 711 KIYMET 1 6 703 ZORUNLU DEPREM 1 7 715 KTK ZMSS (Trafik)(Yeşil Kart Dahil) 1 8 710 EMTEA 1 9 717 KASKO 1 10 712 TEKNE 1 11 719 İŞVEREN MALİ SORUMLULUK 1 12 714 ZORUNLU KARAYOLU TASIMACILIK MALİ SORUMLULUK 1 13 720 ÜÇÜNCÜ ŞAHISLARA KARŞI MS 1 14 716 İHTİYARİ MALİ SORUMLULUK 1 15 724 HIRSIZLIK 1 16 718 KARAYOLU YOLCU TAŞIMACILIĞI ZORUNLU KOLTUK FERDİ KAZA 1 17 726 TEHLİKE MADDELER ZORUNLU SORUMLULUK 1 18 721 ASANSÖR KAZA 3. ŞAHIS MS 1 19 728 UÇAK MALİ MESULİYET 1 20 723 CAM KIRILMASI 1 21 731 ÖZEL GÜVENLİK MSS 1 22 725 TÜPGAZ ZORUNLU SORUMLULUK 1 23 733 MESLEKİ SORUMLULUK 1 24 727 UÇAK TEKNE 1 25 755 KREDİ 1 26 729 UÇAK YOLCU KAZA 1 27 760 HUKUKSAL KORUMA 1 28 730 TIBBI KÖTÜ UYGULAMAYA İLİŞKİN ZMSS 1 29 766 MONTAJ 1 30 734 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MS 1 31 768 ELEKTRONİK CİHAZ 1 32 750 FERDİ KAZA 1 33 773 GENEL ZARARLAR 1 34 756 İHRACAT KREDİ 1 35 775 DOLU SERA 1 36 765 MAKİNE KIRILMASI 1 37 777 DEVLET DESTEKLİ BİTKİSEL ÜRÜN 1 38 767 İNŞAAT 1 39 779 DEVLET DESTEKLİ HAYVAN HAYAT 1 40 770 DENİZ YOLU YOLCU TAŞIMACILIĞI ZMS 1 41 780 HAYVAN HAYAT 1 42 776 DEVLET DESTEKLİ SERA 1 43 782 DEVLET DESTEKLİ KÜMES HAYVAN HAYAT 1 44 778 DEVLET DESTEKLİ SU ÜRÜNLERİ 1 45 786 SEYAHAT SAĞLIK 1 46 783 DEVLET DESTEKLİ KÜÇÜKBAŞ HAYVAN HAYAT 1 47 785 SAĞLIK 1 48 759 DİĞER FİNANSAL KAYIPLAR 1 49 736 DOĞRUDAN KEFALET 1 50 706 DOLAYLI KEFALET 1 51 722 ÇEVRE KİRLİLİĞİ MALİ SORUMLULUK 1 146 707 DEVLET DESTEKLİ TİCARİ ALACAK SİGORTASI 1 147 771 ÜRÜN SORUMLULUK SİGORTASI 1 148 784 HASTALIK 1 149 705 DOĞRUDAN KEFALET 1 150 708 BİNA TAMAMLAMA 1 226 713 RAYLI ARAÇLAR 1 227 740 İHTİYARİ DEPREM 1 228 732 ZORUNLU SERTİFİKA MS 1 229 741 SEL 1 230 735 TEKNE SORUMLULUK 1 231 742 DEPREM VE SEL DIŞINDAKİ DOĞAL AFETLER 1 232 737 MOTORLU KARA TAŞITLARI DIŞINDAKİ KARA TAŞITLARI 1 233 743 NÜKLEER ENERJİ 1 234 738 NEHİR ARAÇLARI 1 235 744 TOPRAK KAYMASI 1 236 739 GÖL ARAÇLARI 1 237 745 TASİTLİ KREDİ 1 238 752 HAVA ŞARTLARI 1 239 746 UZUN VADELİ KONUT KREDİSİ 1 240 753 GENEL GİDERLER 1 241 747 TARIM KREDİSİ 1 242 754 BEKLENMEYEN TİCARİ GİDERLER 1 243 748 İSTİHDAM 1 244 757 PİYASA DEĞERİNDEKİ KAYIP 1 245 749 GELİR YETERSİZLİĞİ 1 246 758 KİRA VE GELİR KAYBI 1 247 761 PATLAMA 1 248 774 SU ÜRÜNLERİ 1 249 769 YAPI DENETİMİ ZORUNLU MS 1 250 781 KÜMES HAYVAN. HAYAT 1 251 751 UZUN SÜRELİ FERDİ KAZA 15 252 789 SEYAHAT ARAÇ DESTEK 15 253 798 DESTEK GENEL 15 Tablo baglami: TKZ Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Tarife Kodu",
+            "Teminat Kodu",
+            "Ürün Tarife Kodu",
+            "Tarife Tanımlama Kodu",
+            "TKZ Kodu"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID",
+        "AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID"
+      ],
+      "indexes": [
+        "AS_DWH.POL_TKZ(TKZ_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "TKZ Kodu",
+        "Üretim",
+        "AS_DWH.POL_TKZ",
+        "Tarife Kodu",
+        "Teminat Kodu",
+        "Ürün Tarife Kodu",
+        "Tarife Tanımlama Kodu",
+        "TKZ Kodu Açıklaması",
+        "TKZ Tanımı",
+        "Tarife Kodu Açıklaması"
+      ]
+    },
+    {
+      "score": 0.0058,
+      "table": "AS_DWH.POL_POLICE_DURUMU",
+      "description": "Poliçe Bilgilerini Tutan Tablo Poliçenin Yürürlükte mi ; İptal Mi Yoksa Süresini mi tamamladı gibi durum bilgisini veren tablo",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası",
+      "columns": [
+        {
+          "name": "POLICE_DURUMU_ADI",
+          "type": "VARCHAR2",
+          "description": "Poliçe Durumu Poliçenin güncel durum açıklamalarını içerir.(Yürürlükte, başlangıcından iptal vb.) Kolon icerigi: POLİÇE DURUM ADI Hasardan İptal N/A Mali İptal Diğer Başlangıcından İptal Yürürlükte İptal-İade İptal Tablo baglami: Poliçenin Yürürlükte mi ; İptal Mi Yoksa Süresini mi tamamladı gibi durum bilgisini veren tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Statüsü",
+            "Poliçe Geçerlilik Durumu",
+            "Poliçe Aktiflik Durumu",
+            "Poliçe Durumu"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_KODU",
+        "AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_KODU"
+      ],
+      "indexes": [
+        "AS_DWH.POL_POLICE_DURUMU(POLICE_DURUMU_KODU)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe No",
+        "Üretim",
+        "AS_DWH.POL_POLICE_DURUMU",
+        "Poliçe Numarası",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası",
+        "Yenileme No",
+        "Poliçe Yenileme Numarası",
+        "Poliçe Yenileme Sayısı",
+        "Tecdit No",
+        "Tecdit Numarası",
+        "Ek No",
+        "Zeyil Numarası",
+        "Poliçe Ek Numarası",
+        "Zeyil Sıra Numarası",
+        "Ek İşlem Numarası",
+        "Ek Numarası",
+        "Poliçe Ek No",
+        "Poliçe Durumu"
+      ]
+    },
+    {
+      "score": 0.0054,
+      "table": "AS_DWH.POL_POLICE_SATIS_KANALI",
+      "description": "Poliçe Bilgilerini Tutan Tablo Poliçe Satış Kanallarını İçeren Look Up Tablo",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası",
+      "columns": [
+        {
+          "name": "SATIS_KANALI",
+          "type": "VARCHAR2",
+          "description": "Satış Kanalı Asos ürünlerine ait satış kanalı bilgisidir. Satış Kanalı, bir sigorta poliçesinin hangi dağıtım yolu veya aracılık yöntemi üzerinden satıldığını gösteren bilgidir. Satış kanalı = Poliçenin müşteriye hangi yol üzerinden ulaştırıldığını gösteren bilgi Kolon icerigi: SATIS_KANALI_ID SATIS_KANALI_KODU SATIS_KANALI 1 2235234 ANADOLU_WEB 2 4004117 ASENTA 3 2235235 ISBANK_WEB 4 4004872 DAP 5 2235236 AGENCY_WEB 6 4004873 BIREYSELSUBE 7 2235237 ISBANK_ATM 8 4004874 POLICEMHAZIR 9 2235238 ISBANK_SUBE 10 4004875 SIGORTAMCEPTE 11 2235239 Kullanıcı Arayüzü 12 4004876 TICARISUBE 13 9622985 ISBANK_ATM2 14 4004877 MOBILWEB 15 9622986 ISBANK_WEB2 16 4004878 CALL 17 9622987 ISBANK_MOBIL 18 9622990 ISBANK_OTHER 19 9622988 ISBANK_AUTOPAY 20 20001130 SBMTEKLIF 21 9622989 ISBANK_KIOSK 22 20001727 COMP_SITES 23 10000863 SAGLIGIMCEPTE 24 25000547 Digiform 25 10000864 DIGITALFORM 26 10000905 DIGIPART 27 25000850 ISLOGINSC 28 25000792 İŞCEPSS 29 25000851 ISLOGINBS 30 25005629 JUNO 31 25000852 OFISIMCEPTE 32 25006537 ZUBIZU 33 25001446 MAXIMOBIL 34 25008454 CHATBOT 35 25006391 POSMYS 36 25006725 CALLPART 37 25008455 CHATBOT 38 25016081 INSTAGRAM 39 25008456 WHATSAPP 40 25016289 ISBANK_ERISIM 41 25008457 GOOGLE_ASISTANT 42 25017245 RH 43 25012246 PAZARAMA 44 25017736 ISLOGINTS 45 25012618 ASOSISCAGRI 46 25018222 JUNOWEB 47 25012619 VODAFONE 48 61357414 ISBANK_ROBOT 49 25015924 ETS 50 61361709 ISWEBSS 51 25016745 SADİM 52 61364066 JUNO/AHE 53 25016746 ASMED 54 61368033 HDS 55 25017033 MIP 56 61369580 İMECE 57 61351292 Hepsi 58 61369581 SÜTBİR 59 61354349 COLENDI 60 61376125 ASOS_CROSS_SALE 61 61362508 SBMACENTEKLIF 62 61376269 PAZARAMA TATİL 63 61362541 RH 64 61362542 Arac Ekle-Kendisi 65 61362543 Arac Ekle-3.Kisi 66 61369577 BAŞKENT KART 67 61369578 TURAN 68 61369579 HAYHAY 69 61376270 YEMEK SEPETİ 70 61376271 ANADOLU HAYAT EMEKLİLİK 71 61376272 PAPARA Tablo baglami: Poliçe Satış Kanallarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Satış Dağıtım Kanalı",
+            "Poliçe Satış Kanalı",
+            "Dağıtım Kanalı",
+            "Satış Platformu",
+            "Satış Kanalı"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID",
+        "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID"
+      ],
+      "indexes": [
+        "AS_DWH.POL_POLICE_SATIS_KANALI(SATIS_KANALI_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe No",
+        "Üretim",
+        "AS_DWH.POL_POLICE_SATIS_KANALI",
+        "Poliçe Numarası",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası",
+        "Yenileme No",
+        "Poliçe Yenileme Numarası",
+        "Poliçe Yenileme Sayısı",
+        "Tecdit No",
+        "Tecdit Numarası",
+        "Ek No",
+        "Zeyil Numarası",
+        "Poliçe Ek Numarası",
+        "Zeyil Sıra Numarası",
+        "Ek İşlem Numarası",
+        "Ek Numarası",
+        "Poliçe Ek No",
+        "Poliçe Döviz Cinsi"
+      ]
+    },
+    {
+      "score": 0.0033,
+      "table": "AS_DWH.MUS_MUSTERI",
+      "description": "Poliçe Bilgilerini Tutan Tablo Müşteri Bilgilerini İçeren Tablo",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası; veri_seviyesi=Müşteri; degisim_seviyesi=Müşteri",
+      "columns": [
+        {
+          "name": "MUSTERI_ADI",
+          "type": "VARCHAR2",
+          "description": "Müşteri Adı Müşteri Adı, sigorta poliçesinin sahibi olan kişinin veya kurumun adı ya da ticari unvanını ifade eder. Müşteri adı = Sigorta poliçesinin ait olduğu kişi veya şirketin adı Tablo baglami: Müşteri Bilgilerini İçeren Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigortalı Adı",
+            "Müşteri Unvanı",
+            "Müşteri İsmi",
+            "Müşteri Adı"
+          ]
+        },
+        {
+          "name": "MUSTERI_NUMARASI",
+          "type": "VARCHAR2",
+          "description": "Müşteri No Müşteri No, bir sigorta şirketinin sistemlerinde her müşteriyi benzersiz şekilde tanımlamak için verilen özel numaradır. Müşteri No = Müşteriyi sistemde tanıtan kimlik numarası Tablo baglami: Müşteri Bilgilerini İçeren Tablo Müşteri Sayısı Müşteri Sayısı, belirli bir sistemde, poliçede, portföyde veya analiz kapsamında toplam kaç müşterinin bulunduğunu gösteren sayısal bilgidir. Müşteri sayısı = Belirli bir kapsam içindeki toplam müşteri adedi",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Müşteri Numarası",
+            "Müşteri ID",
+            "Müşteri Tanımlama Numarası",
+            "Müşteri No",
+            "Toplam Müşteri Adedi",
+            "Müşteri Adedi",
+            "Müşteri Miktarı",
+            "Müşteri Sayısı"
+          ]
+        },
+        {
+          "name": "MUSTERI_SOYADI",
+          "type": "VARCHAR2",
+          "description": "Müşteri Soyadı Müşteri Soyadı, sigorta poliçesine sahip olan bireysel müşterinin aile adını (soyadını) ifade eder. Müşteri Soyadı = Sigortalı kişinin soyadı Tablo baglami: Müşteri Bilgilerini İçeren Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Soyadı",
+            "Sigortalı Soyadı",
+            "Müşteri Soyadı"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID",
+        "AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID",
+        "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID",
+        "AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID"
+      ],
+      "indexes": [
+        "AS_DWH.MUS_MUSTERI(MUSTERI_CINSIYET_ID)",
+        "AS_DWH.MUS_MUSTERI(MUSTERI_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+        "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+        "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+      ],
+      "security": {
+        "restricted": true,
+        "pii_columns": [
+          "MUSTERI_ADI",
+          "MUSTERI_NUMARASI",
+          "MUSTERI_SOYADI"
+        ],
+        "note": "Contains customer-identifying fields; apply least-privilege and masking in broad extracts."
+      },
+      "keywords": [
+        "Poliçe No",
+        "Üretim",
+        "AS_DWH.MUS_MUSTERI",
+        "Poliçe Numarası",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası",
+        "Yenileme No",
+        "Poliçe Yenileme Numarası",
+        "Poliçe Yenileme Sayısı",
+        "Tecdit No",
+        "Tecdit Numarası",
+        "Ek No",
+        "Zeyil Numarası",
+        "Poliçe Ek Numarası",
+        "Zeyil Sıra Numarası",
+        "Ek İşlem Numarası",
+        "Ek Numarası",
+        "Poliçe Ek No",
+        "Poliçe Döviz Cinsi"
+      ]
+    },
+    {
+      "score": 0.0032,
+      "table": "AS_DWH.GNL_TARIH",
+      "description": "Poliçe Bilgilerini Tutan Tablo Genel Tarih Bilgileri Tutan Takvim Tablosu. Join üzerinden ilgili ID ile istenilen tarih bilgisi elde edilir.",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası",
+      "columns": [
+        {
+          "name": "TARIH",
+          "type": "NUMBER",
+          "description": "Ana Poliçe Tanzim Tarihi Tanzim tarihi = Poliçe Belgesinin oluşturulduğu / yazıldığı tarih Poliçenin hazırlandığı ve düzenlendiği gün Belgenin düzenlendiği tarih Sistemde poliçenin oluşturulduğu tarih Tablo baglami: Genel Tarih Bilgileri Tutan Takvim Tablosu. Join üzerinden ilgili ID ile istenilen tarih bilgisi elde edilir. Ek Tanzim Tarihi Ekin Oluşturulduğu Tanzim Tarihi bilgisidir. Poliçeye sonradan yapılan değişikliğin düzenlendiği tarih. Sigortacılıkta ek tanzim tarihi, mevcut bir poliçeye sonradan yapılan ek işlemin (zeyilname) düzenlendiği tarihtir Ana Poliçe Başlangıç Tarihi Sigortacılıkta Ana Poliçe Başlangıç Tarihi, poliçenin ilk kez yürürlüğe girip sigorta teminatının başladığı tarihtir. Ana poliçe başlangıç tarihi = Sigorta korumasının ilk başladığı gün. Ana poliçe başlangıç tarihi → Sigorta teminatının fiilen başladığı gün Ek Başlangıç Tarihi Sigortacılıkta Ek Başlangıç Tarihi, poliçeye sonradan yapılan bir değişikliğin yürürlüğe girdiği tarihi ifade eder. Ek başlangıç tarihi = Poliçeye yapılan ek değişikliğin geçerli olmaya başladığı tarih. Ek tanzim tarihi → Değişikliğin düzenlendiği gün Ek başlangıç tarihi → Değişikliğin yürürlüğe girdiği gün Ana Poliçe Bitiş Tarihi Poliçe yenileme bazında 0. ekin poliçe bitiş tarihini içerir. Sigortacılıkta Ana Poliçe Bitiş Tarihi, poliçenin ilk sözleşmesine göre sigorta teminatının sona erdiği tarihi ifade eder. Ana poliçe bitiş tarihi = Sigorta korumasının sona erdiği gün Ek Bitiş Tarihi Sigortacılıkta Ek Bitiş Tarihi, poliçeye sonradan yapılan bir değişikliğin (zeyilin) geçerliliğinin sona erdiği tarihi ifade eder. Ek bitiş tarihi = Poliçeye yapılan ek değişikliğin geçerliliğinin bittiği tarih",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Poliçe Tanzim Tarihi",
+            "Tanzim Tarihi",
+            "Tan Tarih",
+            "Tanzim Trh",
+            "Tan Trh",
+            "Bas Tarih",
+            "Bas Trh",
+            "Poliçe Düzenleme Tarihi"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID"
+      ],
+      "indexes": [
+        "AS_DWH.GNL_TARIH(TARIH_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+        "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+        "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe No",
+        "Üretim",
+        "AS_DWH.GNL_TARIH",
+        "Poliçe Numarası",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası",
+        "Ana Poliçe Tanzim Tarihi",
+        "Poliçe Tanzim Tarihi",
+        "Tanzim Tarihi",
+        "Tan Tarih",
+        "Tanzim Trh",
+        "Tan Trh",
+        "Bas Tarih",
+        "Bas Trh",
+        "Poliçe Düzenleme Tarihi",
+        "Ana Poliçe Düzenleme Tarihi",
+        "Poliçe Oluşturma Tarihi",
+        "Poliçe Kayıt Tarihi",
+        "Ek Tanzim Tarihi"
+      ]
+    },
+    {
+      "score": 0.0026,
+      "table": "AS_DWH.ACE_ACENTE",
+      "description": "Poliçe Bilgilerini Tutan Tablo Acentelere ait adres bilgilerini tutar. AS_DWH.ACE_ACENTE tablosuna ACENTE_ID ile bağlanır Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir. Acente bölgelerine ait bilgileri tutan tablo. SATIS_MUDURLUGU_ID üzerinden bağlanarak bilgilere erişilir.",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası; veri_seviyesi=Acente Kodu; degisim_seviyesi=Acente Kodu",
+      "columns": [
+        {
+          "name": "ACENTE_ADI",
+          "type": "VARCHAR2",
+          "description": "Acente Unvanı Acente Unvanı, sigorta acentesinin resmî ticari adını veya işletme unvanını ifade eder. Acente unvanı = Sigorta acentesinin resmî şirket adı Kolon icerigi: Acente Bilgileri Sheetinde Yer Alan Bilgiler Tablo baglami: Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir. Acente Bilgileri sheet column: ACENTE_ADI",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Adı",
+            "Acente Unvanı",
+            "ACENTE_ADI"
+          ]
+        },
+        {
+          "name": "ACENTE_ID",
+          "type": "NUMBER",
+          "description": "Acente Bilgileri sheet column: ACENTE_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "ACENTE_ID"
+          ]
+        },
+        {
+          "name": "ACENTE_KODU",
+          "type": "VARCHAR2",
+          "description": "Acente İl Adı Kanalın faaliyet adresine ilişkin il adıdır. Acente İl Adı, sigorta acentesinin faaliyet gösterdiği veya kayıtlı olduğu ilin adını ifade eder. Acente İl Adı = Sigorta acentesinin bulunduğu şehrin adı Tablo baglami: Acentelere ait adres bilgilerini tutar. AS_DWH.ACE_ACENTE tablosuna ACENTE_ID ile bağlanır Acente Bilgileri sheet column: ACENTE_KODU",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Şehri",
+            "Acente İl Bilgisi",
+            "Acente Konum İli",
+            "Acente İl Adı",
+            "ACENTE_KODU"
+          ]
+        },
+        {
+          "name": "ACENTE_KODU_NUMERIC",
+          "type": "VARCHAR2",
+          "description": "Acente Kodu Acente Kodu, sigorta şirketi sistemlerinde her acenteyi benzersiz şekilde tanımlamak için verilen özel numara veya koddur. Acente kodu = Sigorta acentesini sistemde tanıtan özel kimlik numarası Kolon icerigi: Acente Bilgileri Sheetinde Yer Alan Bilgiler Tablo baglami: Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir.",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acenta Tanımlama Kodu",
+            "Acenta Referans Kodu",
+            "Acenta Numarası",
+            "Satış Acentesi Kodu",
+            "Acente Kodu"
+          ]
+        },
+        {
+          "name": "ACENTE_MODEL_KODU",
+          "type": "VARCHAR2",
+          "description": "Acente Tipi Acente tipi = Acentenin hangi tür acente olduğunu gösteren bilgi Kolon icerigi: Acente Bilgileri Sheetinde Yer Alan Bilgiler Tablo baglami: Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir. Acente Bilgileri sheet column: ACENTE_MODEL_KODU",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Türü",
+            "Acente Sınıfı",
+            "Acente Sınıflandırması",
+            "Acente Tipi",
+            "ACENTE_MODEL_KODU"
+          ]
+        },
+        {
+          "name": "DAGITIM_KANALI",
+          "type": "VARCHAR2",
+          "description": "Dağıtım Kanalı Acente, Banka , Broker vs. kırılımda dağıtım kanalı bilgisini getirir.",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Dağıtım Kanalı"
+          ]
+        },
+        {
+          "name": "SATIS_MUDURLUGU",
+          "type": "VARCHAR2",
+          "description": "Satış Müdürlüğü Kanalın bağlı olduğu satış müdürlüğü bilgisidir. Satış Müdürlüğü, sigorta şirketi içinde satış faaliyetlerini yöneten ve belirli bir bölge, kanal veya acente grubundan sorumlu olan yönetim birimini ifade eder. Satış Müdürlüğü = Belirli bir bölgedeki veya kanal grubundaki satışları yöneten birim Kolon icerigi: Acente Bilgileri Sheetinde Yer Alan Bilgiler Tablo baglami: Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir. Acente Bilgileri sheet column: SATIS_MUDURLUGU",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Satış Bölge Müdürlüğü",
+            "Bölge Satış Birimi",
+            "Satış Müdürlüğü",
+            "SATIS_MUDURLUGU"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID",
+        "AS_DWH.ACE_ACENTE_ADRES.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+        "AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+        "AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID",
+        "AS_DWH.ACE_ACENTE_ADRES.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+        "AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID"
+      ],
+      "indexes": [
+        "AS_DWH.ACE_ACENTE(ACENTE_ID)",
+        "AS_DWH.ACE_ACENTE(BOLGE_MUDURLUGU_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+        "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+        "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe No",
+        "Üretim",
+        "AS_DWH.ACE_ACENTE",
+        "Poliçe Numarası",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası",
+        "Acente İl Adı",
+        "Kanal",
+        "Acente Şehri",
+        "Acente İl Bilgisi",
+        "Acente Konum İli",
+        "Yenileme No",
+        "Poliçe Yenileme Numarası",
+        "Poliçe Yenileme Sayısı",
+        "Tecdit No",
+        "Tecdit Numarası",
+        "Ek No",
+        "Zeyil Numarası",
+        "Poliçe Ek Numarası"
+      ]
+    },
+    {
+      "score": 0.0025,
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "description": "Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo Branş Tanımlarını İçeren Look Up Tablo TKZ Tanımlarını İçeren Look Up Tablo Poliçe Teminat (TKZ) seviyesinde Bazı Tutarsal Bilgileri Tutar",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+      "columns": [
+        {
+          "name": "BRANS_ADI",
+          "type": "VARCHAR2",
+          "description": "Branş Açıklama Üretim branş açıklaması bilgisidir. Branş Açıklama, sigortacılıkta bir poliçenin ait olduğu sigorta branşının adını veya tanımını açıklayıcı şekilde gösteren bilgidir. Branş açıklama = Sigorta branşının adının veya detaylı tanımının yazıldığı alan Kolon icerigi: BRANS_ID BRANS_KODU BRANS_ADI KAYNAK_SISTEM_ID -99 -99 N/A -99 2 101 DOLU 1 3 102 SERA 1 4 103 HAYVAN HAYAT 1 5 104 BESİ 1 6 111 BİTKİSEL ÜRÜN 1 7 112 SERA POLİÇESİ 1 8 113 ARICILIK 1 9 114 HAYVAN HAYAT 1 10 115 KÜÇÜKBAŞ HAYVAN HAYAT 1 11 116 KÜMES HAYVANLARI 1 12 210 HUKUKSAL KORUMA 1 13 118 SU ÜRÜNLERİ POLİÇESİ 1 14 330 KIYMET TAŞIMA 1 15 220 HUKUKSAL KORUMA 1 16 340 NAKLİYECİ SORUMLULUK 1 19 240 HUKUKSAL KORUMA TAŞINMAZ 1 20 410 TRAFİK 1 21 250 KREDİ SİGORTALARI 1 22 414 ZORUNLU TAŞIMACI SORUMLULUK 1 25 310 EMTEA TAŞIMA 1 26 431 ÜÇÜNCÜ KİŞİ SORUMLULUK 1 27 370 TEKNE 1 28 433 KIYI TESİSLERİ 1 29 411 MESLEKİ FAALİYET 1 30 435 ÜRÜN SORUMLULUK 1 31 415 YEŞİL KART (TRAMER) 1 32 437 TÜPGAZ ZORUNLU SORUMLULUK 1 33 419 ANADOLU HİZMET 1 34 439 ZORUNLU HEKİM SORUMLULUK 1 35 420 KASKO 1 36 441 KOLTUK FERDİ KAZA 1 37 430 ARTAN MALİ SORUMLULUK 1 38 460 CAM KIRILMASI 1 39 432 İŞVEREN SORUMLULUK 1 40 470 UÇAK KASKO 1 41 434 ASANSÖR SORUMLULUK 1 42 472 UÇAK KOLTUK FERDİ 1 43 436 MESLEKİ SORUMLULUK 1 44 474 UÇAK KASKO MUAFİYET 1 45 438 TEHLİKELİ MADDELER 1 46 490 MUHTELİF RİSKLER 1 47 440 FERDİ KAZA 1 49 442 KOLTUK FERDİ KAZA 1 50 610 İNŞAAT 1 51 444 VİZE 1 52 800 ZORUNLU DEPREM 1 53 450 HIRSIZLIK 1 54 471 UÇAK SORUMLULUK 1 55 473 UÇAK MUHTELİF RİSKLER 1 56 475 DENİZ YOLU YOLCU TAŞIMACILIĞI 1 57 500 YANGIN 1 58 620 DOĞALGAZ 1 59 630 MAKİNA KIRILMASI 1 60 640 ELEKTRONİK CİHAZ 1 61 704 FERDİ KAZA 1 62 900 SAĞLIK 1 63 0 SAĞLIK 1 64 120 1 65 100 1 66 400 1 67 230 1 68 600 1 69 300 1 70 200 HUKUKSAL KORUMA 1 71 421 1 72 482 BİREYSEL SİBER GÜVENLİK 1 73 706 DOLAYLI KEFALET 1 74 951 SAĞLIK 1 75 484 TİCARİ SİBER GÜVENLİK 1 76 722 KONUT 1 77 736 DOĞRUDAN KEFALET 1 78 486 UÇUŞ GECİKME 1 364 476 YÖNETİCİ SORUMLULUK 1 365 252 DEVLET DESTEKLI KOBI 1 366 443 ÜÇÜNCÜ KİŞİ ÜRÜN SORUMLULUK 1 367 416 YEŞIL KART 1 368 710 YURTDIŞI SEYAHAT 1 369 488 PARAMETRIK SALGIN HASTALIK SIGORTASI 1 370 447 ZORUNLU KOLTUK FERDI KAZA 1 371 255 PATIM GÜVENDE SIGORTASI 1 372 487 BILETIM GÜVENDE SIGORTASI 1 373 478 HAVA ARACI YEDEK PARÇA 1 374 477 HAVA ARACI GÖVDE SAVAŞ 1 375 632 MAKİNA KIRILMASI 1 376 428 PATİM GÜVENDE 1 377 505 TICARI YANGIN 1 378 760 KASKO 1 379 261 BİNA TAMAMLAMA 15 380 251 İHRACAT KREDİ 15 381 491 DOLAYLI KEFALET 15 382 811 TARSİM BİTKİSEL - DON DIŞINDAKİ RİSKLER 15 383 253 FİNANSAL KAYIP 15 384 81100 TARSİM BİTKİSEL - DON DIŞINDAKİ RİSKLER(DD) 15 385 810 TARSİM BİTKİSEL DON 15 386 840 ARICILIK 15 387 81000 TARSİM BİTKİSEL DON(DD) 15 388 850 BÜYÜK BAŞ HAYVANLAR 15 389 84000 ARICILIK(DD) 15 390 85000 BÜYÜK BAŞ HAYVANLAR(DD) 15 391 851 BÜYÜK BAŞ HAYVAN HAYAT - DAR 15 392 852 KÜÇÜK BAŞ HAYVAN HAYAT 15 393 85100 BÜYÜK BAŞ HAYVAN HAYAT - DAR(DD) 15 394 85200 KÜÇÜK BAŞ HAYVAN HAYAT(DD) 15 395 860 KÜÇÜK BAŞ HAYVAN HAYAT - DAR 15 396 86000 KÜÇÜK BAŞ HAYVAN HAYAT - DAR(DD) 15 397 870 KÜMES HAYVANLARI 15 398 871 KÜMES HAYVAN HAYAT - DAR 15 399 87000 KÜMES HAYVANLARI(DD) 15 400 87100 KÜMES HAYVAN HAYAT - DAR(DD) 15 401 890 SERA 15 402 895 TARSİM BİTKİSEL DON 15 403 89000 SERA(DD) 15 404 784 TARSİM BİTKİSEL - GÜNEŞ YANIKLIĞI 15 405 78400 TARSİM BİTKİSEL - GÜNEŞ YANIKLIĞI (DD) 15 406 786 TARSİM BİTKİSEL - TEMEL PAKET 15 407 78600 TARSİM BİTKİSEL - TEMEL PAKET (DD) 15 408 906 MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA 15 409 785 TARSİM BİTKİSE - KIŞ DONU 15 410 78500 TARSİM BİTKİSE - KIŞ DONU (DD) 15 411 560 HUKUKSAL KORUMA 15 Tablo baglami: Branş Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Hayır",
+            "Branş Açıklama"
+          ]
+        },
+        {
+          "name": "BRANS_KODU",
+          "type": "VARCHAR2",
+          "description": "Branş Üretim branşı bilgisidir. Branş, sigortacılıkta bir poliçenin ait olduğu sigorta türünü veya faaliyet alanını ifade eder. Branş = Poliçenin hangi sigorta alanına ait olduğunu gösteren sınıflandırma Kolon icerigi: BRANS_ID BRANS_KODU BRANS_ADI KAYNAK_SISTEM_ID -99 -99 N/A -99 2 101 DOLU 1 3 102 SERA 1 4 103 HAYVAN HAYAT 1 5 104 BESİ 1 6 111 BİTKİSEL ÜRÜN 1 7 112 SERA POLİÇESİ 1 8 113 ARICILIK 1 9 114 HAYVAN HAYAT 1 10 115 KÜÇÜKBAŞ HAYVAN HAYAT 1 11 116 KÜMES HAYVANLARI 1 12 210 HUKUKSAL KORUMA 1 13 118 SU ÜRÜNLERİ POLİÇESİ 1 14 330 KIYMET TAŞIMA 1 15 220 HUKUKSAL KORUMA 1 16 340 NAKLİYECİ SORUMLULUK 1 19 240 HUKUKSAL KORUMA TAŞINMAZ 1 20 410 TRAFİK 1 21 250 KREDİ SİGORTALARI 1 22 414 ZORUNLU TAŞIMACI SORUMLULUK 1 25 310 EMTEA TAŞIMA 1 26 431 ÜÇÜNCÜ KİŞİ SORUMLULUK 1 27 370 TEKNE 1 28 433 KIYI TESİSLERİ 1 29 411 MESLEKİ FAALİYET 1 30 435 ÜRÜN SORUMLULUK 1 31 415 YEŞİL KART (TRAMER) 1 32 437 TÜPGAZ ZORUNLU SORUMLULUK 1 33 419 ANADOLU HİZMET 1 34 439 ZORUNLU HEKİM SORUMLULUK 1 35 420 KASKO 1 36 441 KOLTUK FERDİ KAZA 1 37 430 ARTAN MALİ SORUMLULUK 1 38 460 CAM KIRILMASI 1 39 432 İŞVEREN SORUMLULUK 1 40 470 UÇAK KASKO 1 41 434 ASANSÖR SORUMLULUK 1 42 472 UÇAK KOLTUK FERDİ 1 43 436 MESLEKİ SORUMLULUK 1 44 474 UÇAK KASKO MUAFİYET 1 45 438 TEHLİKELİ MADDELER 1 46 490 MUHTELİF RİSKLER 1 47 440 FERDİ KAZA 1 49 442 KOLTUK FERDİ KAZA 1 50 610 İNŞAAT 1 51 444 VİZE 1 52 800 ZORUNLU DEPREM 1 53 450 HIRSIZLIK 1 54 471 UÇAK SORUMLULUK 1 55 473 UÇAK MUHTELİF RİSKLER 1 56 475 DENİZ YOLU YOLCU TAŞIMACILIĞI 1 57 500 YANGIN 1 58 620 DOĞALGAZ 1 59 630 MAKİNA KIRILMASI 1 60 640 ELEKTRONİK CİHAZ 1 61 704 FERDİ KAZA 1 62 900 SAĞLIK 1 63 0 SAĞLIK 1 64 120 1 65 100 1 66 400 1 67 230 1 68 600 1 69 300 1 70 200 HUKUKSAL KORUMA 1 71 421 1 72 482 BİREYSEL SİBER GÜVENLİK 1 73 706 DOLAYLI KEFALET 1 74 951 SAĞLIK 1 75 484 TİCARİ SİBER GÜVENLİK 1 76 722 KONUT 1 77 736 DOĞRUDAN KEFALET 1 78 486 UÇUŞ GECİKME 1 364 476 YÖNETİCİ SORUMLULUK 1 365 252 DEVLET DESTEKLI KOBI 1 366 443 ÜÇÜNCÜ KİŞİ ÜRÜN SORUMLULUK 1 367 416 YEŞIL KART 1 368 710 YURTDIŞI SEYAHAT 1 369 488 PARAMETRIK SALGIN HASTALIK SIGORTASI 1 370 447 ZORUNLU KOLTUK FERDI KAZA 1 371 255 PATIM GÜVENDE SIGORTASI 1 372 487 BILETIM GÜVENDE SIGORTASI 1 373 478 HAVA ARACI YEDEK PARÇA 1 374 477 HAVA ARACI GÖVDE SAVAŞ 1 375 632 MAKİNA KIRILMASI 1 376 428 PATİM GÜVENDE 1 377 505 TICARI YANGIN 1 378 760 KASKO 1 379 261 BİNA TAMAMLAMA 15 380 251 İHRACAT KREDİ 15 381 491 DOLAYLI KEFALET 15 382 811 TARSİM BİTKİSEL - DON DIŞINDAKİ RİSKLER 15 383 253 FİNANSAL KAYIP 15 384 81100 TARSİM BİTKİSEL - DON DIŞINDAKİ RİSKLER(DD) 15 385 810 TARSİM BİTKİSEL DON 15 386 840 ARICILIK 15 387 81000 TARSİM BİTKİSEL DON(DD) 15 388 850 BÜYÜK BAŞ HAYVANLAR 15 389 84000 ARICILIK(DD) 15 390 85000 BÜYÜK BAŞ HAYVANLAR(DD) 15 391 851 BÜYÜK BAŞ HAYVAN HAYAT - DAR 15 392 852 KÜÇÜK BAŞ HAYVAN HAYAT 15 393 85100 BÜYÜK BAŞ HAYVAN HAYAT - DAR(DD) 15 394 85200 KÜÇÜK BAŞ HAYVAN HAYAT(DD) 15 395 860 KÜÇÜK BAŞ HAYVAN HAYAT - DAR 15 396 86000 KÜÇÜK BAŞ HAYVAN HAYAT - DAR(DD) 15 397 870 KÜMES HAYVANLARI 15 398 871 KÜMES HAYVAN HAYAT - DAR 15 399 87000 KÜMES HAYVANLARI(DD) 15 400 87100 KÜMES HAYVAN HAYAT - DAR(DD) 15 401 890 SERA 15 402 895 TARSİM BİTKİSEL DON 15 403 89000 SERA(DD) 15 404 784 TARSİM BİTKİSEL - GÜNEŞ YANIKLIĞI 15 405 78400 TARSİM BİTKİSEL - GÜNEŞ YANIKLIĞI (DD) 15 406 786 TARSİM BİTKİSEL - TEMEL PAKET 15 407 78600 TARSİM BİTKİSEL - TEMEL PAKET (DD) 15 408 906 MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA 15 409 785 TARSİM BİTKİSE - KIŞ DONU 15 410 78500 TARSİM BİTKİSE - KIŞ DONU (DD) 15 411 560 HUKUKSAL KORUMA 15 Tablo baglami: Branş Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigorta Branşı",
+            "Sigorta Türü",
+            "Poliçe Branşı",
+            "Branş"
+          ]
+        },
+        {
+          "name": "POLICE_ADI_DETAY",
+          "type": "VARCHAR2",
+          "description": "Poliçe Adı Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisini (Güvenli Gelecek, Sınırsız Trafik, VW Kasko vb.) içerir. Kolon icerigi: POLICE_KODU(NEW_FPOLK) YENI_FPOLK POLICE_KOD_ADI (YENI_FPOLAC) -781 -781 KASKO VE ÜÇÜNCÜ ŞAHIS YÜKÜMLÜLÜK SİGORTASI -99 -99 N/A 101 101 DOLU SİGORTA POLİÇESİ 102 102 SERA SİGORTA POLİÇESİ 103 103 HAYVAN HAYAT SİGORTA POLİÇESİ 104 104 BESİ SİGORTA POLİÇESİ 105 105 KEDİ KÖPEK KAZA SİGORTA POLİÇESİ 111 111 DEVLET DESTEKLİ BİTKİSEL ÜRÜN SİGORTALARI POLİÇESİ 112 112 SERA POLİÇESİ 113 113 ARICILIK(ARI KOVANI) 114 114 BÜYÜKBAŞ HAYVAN POLİÇESİ 115 115 KÜÇÜKBAŞ HAYVAN POLİÇESİ 116 116 KÜMES HAYVANLARI POLİÇESİ 118 118 SU ÜRÜNLERİ POLİÇESİ 210 210 MOTORLU ARACA BAGLI HUKUKSAL KORUMA POLİÇESİ 220 220 SÜRÜCÜ HUKUKSAL KORUMA POLİÇESİ 230 230 KİŞİ-AİLE HUKUKSAL KORUMA POLİÇESİ 240 240 TAŞINMAZA BAĞLI HUKUKSAL KORUMA POLİÇESİ 250 250 YURTİÇİ KREDİ SİGORTA POLİÇESİ 251 251 İHRACAT KREDİ SİGORTA POLİÇESİ 252 252 KOBİLER İÇİN DEVLET DESTEKLİ 253 253 FİNANSAL KAYIP SİGORTASI 255 255 PATIM GÜVENDE SIGORTASI 261 261 BİNA TAMAMLAMA SİGORTASI POLİÇESİ 310 310 EMTEA TAŞIMA SİGORTA POLİÇESİ 311 311 NAKLİYAT EMTEA PAKET POLİÇESİ 312 312 NAKLİYAT EMTEA BLOK SİGORTA POLİÇESİ 313 313 NAKLİYAT ARACISI / KOMİSYONCUSU YASAL SORUMLULUK SİGORTA POLİÇESİ 314 314 DEPOCU YASAL SORUMLULUK SİGORTA POLİÇESİ 315 315 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK BLOK POLİÇESİ 330 330 KIYMET TAŞIMA SİGORTA POLİÇESİ 340 340 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 341 341 YURTİÇİ NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 370 370 TEKNE SİGORTA POLİÇESİ 371 371 TEKNE HARP VE GREV SİGORTA POLİÇESİ 372 372 TEKNE İNŞAAT SİGORTA POLİÇESİ 373 373 TEKNE REHİNLİ ALACAKLI SİGORTA POLİÇESİ 374 374 TEKNE KAZANÇ/KİRA KAYBI SİGORTA POLİÇESİ 375 375 TEKNE ARTAN DEĞER SİGORTASI 380 380 GEZİNTİ TEKNELERİ SİGORTA POLİÇESİ 381 381 GEZİNTİ TEKNELERİ İNŞAAT POLİÇESİ 390 390 LİMAN VE TERMİNAL İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 391 391 GEMİ TAMİRCİLERİ SORUMLULUK SİGORTA POLİÇESİ 392 392 MARİNA İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 410 410 TRAFİK SİGORTA POLİÇESİ 411 411 MOTORLU ARAÇLARLA İLGİLİ MESLEKİ FAALİYET SİGORTA POLİÇESİ 414 414 ZORUNLU KARAYOLU TAŞIMACILIK MALİ SORUMLULUK SİGORTA POLİÇESİ 415 415 YEŞİLKART SİGORTA POLİÇESİ 416 416 YEŞİLKART SİGORTA POLİÇESİ (TRAMER) 420 420 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ 421 421 MOTORLU KARA TAŞIT ARAÇLARI KASKO SİGORTA POLİÇESİ 428 428 PATİM GÜVENDE SİGORTA POLİÇESİ 429 429 TAMAMLAYICI HEKİM SORUMLULUK SİGORTASI 430 430 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 431 431 ÜÇÜNCÜ KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 432 432 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 433 433 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MALİ SORUMLULUK SİGORTA POL. 434 434 ASANSÖR KAZALARINDA 3.KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 435 435 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 436 436 MESLEKİ SORUMLULUK SİGORTA POLİÇESİ 437 437 TÜPGAZ ZORUNLU SORUMLULUK SİGORTA POLİÇESİ 438 438 TEHLİKELİ MADDELER VE TEHLİKELİ ATIK ZORUNLU MALİ SORUMLULUK POLİÇESİ 439 439 TIBBİ KÖTÜ UYGULAMAYA İLİŞKİN ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 440 440 FERDİ KAZA SİGORTA POLİÇESİ 441 441 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 442 442 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 443 443 KREDİ KARTI FERDİ KAZA SİGORTA POLİÇESİ 444 444 VİZE SİGORTA POLİÇESİ 446 446 SERVİS ARAÇLARI KOLTUK FERDİ KAZA SİGORTA POLİÇESİ 447 447 KARAYOLU YOLCU TAŞIMACILIĞI ZORUNLU KOLTUK FERDİ KAZA SİG. 448 448 FERDİ KAZA SİGORTA POLİÇESİ 449 449 ÖZEL GÜVENLİK ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 450 450 İŞYERİ HIRSIZLIK SİGORTA POLİÇESİ 451 451 KASA HIRSIZLIK SİGORTA POLİÇESİ 452 452 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 453 453 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 454 454 KONUT HIRSIZLIK SİGORTA POLİÇESİ 455 455 KREDİ KARTI HIRSIZLIK SİGORTA POLİÇESİ 456 456 KART KORUMA SİGORTA POLİÇESİ 457 457 KART KORUMA SİGORTA POLİÇESİ 458 458 KART KORUMA SİGORTA POLİÇESİ 460 460 CAM KIRILMASI SİGORTA POLİÇESİ 463 463 TELEFONUM GÜVENDE SIGORTASI 475 475 DENİZ YOLU YOLCU TAŞIMACILIĞI ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 476 476 DENİZ ARAÇLARI ZORUNLU MALİ SORUMLULUK SİGORTASI POLİÇESİ 480 480 KAZA SİGORTA POLİÇESİ 481 481 MUHTELİF SORUMLULUK SİGORTALARI POLİÇESİ 482 482 TİCARİ SİBER RİSK POLİÇESİ 483 483 BİREYSEL SİBER GÜVENLİK POLİÇESİ 484 484 Ticari Siber Güvenlik Paket Poliçesi 485 485 KEFALET SİGORTASI POLİÇESİ 486 486 UÇUŞ GECİKME SİGORTASI 487 487 BILETIM GÜVENDE SIGORTASI 488 488 PARAMETRIK SALGIN HASTALIK SIGORTASI 490 490 KASKO SİGORTA POLİÇESİ 491 491 ÜÇÜNCÜ ŞAHIS SORUMLULUK SİGORTA POLİÇESİ 492 492 FERDİ KAZA SİGORTA POLİÇESİ 493 493 HIRSIZLIK SİGORTA POLİÇESİ 494 494 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 495 495 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 496 496 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 497 497 KASA HIRSIZLIK SİGORTA POLİÇESİ 498 498 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 499 499 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 501 501 YANGIN SİGORTA POLİÇESİ 502 502 YANGIN SİGORTA POLİÇESİ 503 503 YANGIN MALİ SORUMLULUK SİGORTA POLİÇESİ 504 504 KİRA KAYBI SİGORTA POLİÇESİ 505 505 KAR KAYBI SİGORTA POLİÇESİ 520 520 YANGIN ABONMAN SİGORTA POLİÇESİ 590 590 YANGIN MUHTELİF SİGORTA POLİÇESİ 610 610 İNŞAAT SİGORTA POLİÇESİ 620 620 MONTAJ SİGORTA POLİÇESİ 630 630 MAKİNA KIRILMASI SİGORTA POLİÇESİ 631 631 OTO ARIZA SİGORTA POLİÇESİ 632 632 İŞ VE İNŞAAT MAKİNALARI SİGORTA POLİÇESİ 633 633 MAKİNE KIRILMASI LEASİNG ALL RİSK SİGORTASI 634 634 İŞ VE İNŞAAT MAKİNELERİ LEASİNG ALL RİSK SİGORTASI 640 640 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 641 641 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 642 642 KONUT ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 643 643 ELEKTRONİK CİHAZ LEASİNG ALL RİSK SİGORTASI 644 644 ÖDEME KAYDEDİCİ CİHAZ SİGORTASI 645 645 CİHAZIM GÜVENDE SİGORTA POLİÇESİ 701 701 MOTORLU KARA TAŞITLARI BİRLEŞİK KASKO SİGORTA POLİÇESİ 702 702 MAKSİMUM TRAFİK SİGORTA POLİÇESİ 703 703 DOĞALGAZ SİGORTA POLİÇESİ 704 704 SEYAHAT SİGORTA POLİÇESİ 705 705 AİLE SİGORTA POLİÇESİ 706 706 UCAK 707 707 SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 708 708 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 709 709 DOĞALGAZ PAKET SİGORTA POLİÇESİ 710 710 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 711 711 MEHMETÇİK KASKO POLİÇESİ 712 712 MEHMETÇİK YAŞAM POLİÇESİ 713 713 BALIKÇI TEKNELERİ SİGORTA POLİÇESİ 714 714 KAMU KASKO SİGORTA POLİÇESİ 715 715 KAMU MAKSİMUM TRAFİK SİGORTA POLİÇESİ 716 716 PLAZA KASKO SİGORTA POLİÇESİ 717 717 KAMU SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 718 718 HESAPLI KASKO SİGORTA POLİÇESİ 720 720 İŞYERİ ABONMAN SİGORTA POLİÇESİ 721 721 İŞYERİ SİGORTA POLİÇESİ 722 722 KONUT SİGORTA POLİÇESİ 723 723 MARKET SİGORTA POLİÇESİ 724 724 TURİSTİK TESİS SİGORTA POLİÇESİ 725 725 KOBİ PAKET POLİÇESİ 726 726 İŞYERİ SİGORTA POLİÇESİ 727 727 KONUT SİGORTA POLİÇESİ 728 728 KOBİ PAKET POLİÇESİ 729 729 AKARYAKIT PAKET POLİÇESİ 730 730 HAREKETLİ İŞ MAKİNALARI POLİÇESİ 732 732 YENI NESIL KONUT PAKETLERI 733 733 TICARI YANGIN 734 734 ÇOKGEZEN YURTDIŞI SEYAHAT SAĞLIK SIGORTASI 735 735 YURTDIŞI EĞİTİM SİGORTA POLİÇESİ 736 736 BSMV İSTISNALI KONUT PAKET SIGORTASI 737 737 KIBRIS KONUT PAKET SIGORTASI 738 738 ESI KONUT PAKET SIGORTASI 739 739 SITE YÖNETIMI ORTAK ALAN PAKET SIGORTASI 740 740 TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM) 741 741 AUDİ KASKO SİGORTASI 742 742 SKODA KASKO SİGORTASI 743 743 DIJITAL TICARI YANGIN 744 744 FORD KASKO SİGORTASI 745 745 MOTOSİKLET KASKO SİGORTASI 746 746 İŞ BANK KASKO SİGORTASI 747 747 MOTIFKART KASKO 748 748 KOMPLIKASYON SIGORTASI 749 749 FIAT KASKO 750 750 VOLKSWAGEN KASKO 751 751 ALFA ROMEO KASKO 752 752 JEEP KASKO 753 753 SEAT KASKO 756 756 HONDA KASKO 757 757 DEV KASKO 758 758 MEHMETÇIK HESAPLI KASKO 759 759 SCANIA KASKO 760 760 ELEKTRIKLI ARAÇ KASKO 761 761 M KASKO 762 762 BAŞKA KASKO 765 765 HONDA MOTOSIKLET KASKO 770 770 BYD KASKO 777 777 ANADOLU 75 SİGORTA POLİÇESİ 778 778 TÜRKİYE SEYAHAT SİGORTA POLİÇESİ 780 780 ANADOLU PAKET SİGORTA POLİÇESİ 781 781 KASKO SİGORTASI 782 782 TRAFİK SİGORTASI 785 785 RENAULT KASKO 790 790 DACIA KASKO 791 791 İŞYERİ SİGORTA POLİÇESİ 792 792 KONUT SİGORTA POLİÇESİ 794 794 TURİSTİK TESİS SİGORTA POLİÇESİ 795 795 ALPINE KASKO 800 800 ZORUNLU DEPREM SİGORTA POLİÇESİ 850 850 HIRSIZLIK SİGORTA POLİÇESİ 860 860 CAM KIRILMASI SİGORTA POLİÇESİ 901 901 MOTORLU KARA TAŞIT ARAÇLARI BİRLEŞİK SİGORTA POLİÇESİ (GRUP) 902 902 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ (GRUP) 903 903 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ (GRUP) 904 904 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ (GRUP) 905 905 FERDİ KAZA SİGORTA POLİÇESİ (GRUP) 906 906 Maden Çalışanları Zorunlu Ferdi Kaza Poliçesi 910 910 YURTDIŞI GRUP SEYAHAT SİGORTA POLİÇESİ 930 930 FİLO SİGORTA POLİÇESİ 935 935 YURTDIŞI GRUP EĞİTİM SİGORTA POLİÇESİ 951 951 Bireysel Sağlık 952 952 Kurumsal Sağlık 953 953 BIREYSEL NEFES 954 954 SAĞLIK SİGORTA POLİÇESİ (GRUP) 955 955 YABANCI UYRUKLULAR SAĞLIK SIGORTASI 956 956 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (BIREYSEL) 957 957 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (KURUMSAL) 958 958 ASO 959 959 KURUMSAL NEFES 960 960 MEHMETÇIK TAMAMLAYICI SAĞLIK SIGORTASI 961 961 YABANCI UYRUKLULAR SAĞLIK SİGORTASI (Uzun Dönem) 962 962 ANADOLU RİSKLİ HASTALIKLAR SİGORTASI 963 963 CANIM KENDIM 965 965 KOBI TSS 966 966 AILEM GÜVENDE TAMAMLAYICI SAĞLIK SIGORTASI 971 971 SAĞLIK SİGORTA POLİÇESİ (FERDİ) 972 972 SAĞLIK SİGORTA POLİÇESİ (KURUMSAL) 990 990 YANGIN SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 KAZA SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 NAKLİYAT SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 TARIM SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 MÜHENDİSLİK SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 991 991 ABONMAN SİGORTA SÖZLEŞMESİ 992 992 CMR-KARAYOLU ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA SÖZLEŞMESİ 41001 410* TRAFIK (YENI) 41002 410** EKSTRA TRAFIK STANDART 41003 410*** SUPER TRAFIK 41004 410**** SINIRSIZ TRAFIK 41005 410***** TAM BAKIM PAKETI 41006 410****** TRAFIK YOL YARDIM 41007 410******* EKSTRA TRAFIK MINI 41008 410******** EKSTRA TRAFIK PLUS 41009 410********* HUKUKSAL KORUMA 42000 420* PERT KASKO %60 42001 420* PERT PLUS KASKO %50 42002 420* PERT PLUS KASKO %40 44001 440-1 GUVENLI GELECEK PLUS 44002 440-2 GUVENLI GELECEK MAXI PLUS 44003 440-3 GUVENLI GELECEK 44004 440-4 GUVENLI GELECEK MAXI 44005 440-5 GUVENLI GELECEK GOLD 44006 440-6 GUVENLI GELECEK GOLD PLUS 44007 440-7 GUVENLI GELECEK GOLD MAXI 44008 440-8 GUVENLI GELECEK GOLD MAXI PLUS 44009 440-9 GULUMSETEN PAKET 44010 440-10 SMS FERDI KAZA 44011 440-11 GUVENLI BIZ MAXI BTSO 44012 440-12 GUVENLI BIZ GOLD PLUS BTSO 44013 440-13 ISYERIMDE GUVENDEYIM PAKET-1 44014 440-14 ISYERIMDE GUVENDEYIM PAKET-2 44015 440-15 ISYERIMDE GUVENDEYIM PAKET-3 44016 440-16 ISYERIMDE GUVENDEYIM PAKET-4 44017 440-17 1.SINIF FAALIYETLER 44018 440-18 2.SINIF FAALIYETLER 44019 440-19 3.SINIF FAALIYETLER 44020 440-20 IS TE TICARI KORUMA 44021 440-21 IS TE CIFTCI KORUMA 44022 440-22 KARMA/IS TE KORUMA 44023 440-23 IS TE ÖZEL KORUMA 44024 440-24 IS TE MAXIMUM KORUMA 44025 440-25 PROFESYONEL FUTBOLCU 1.TEMINAT GRUBU 44026 440-26 PROFESYONEL FUTBOLCU 2.TEMINAT GRUBU 44027 440-27 PROFESYONEL FUTBOLCU 3.TEMINAT GRUBU 44028 440-28 PAKET 1 44029 440-29 PAKET 2 44030 440-30 PAKET 3 44031 440-31 PAKET 4 44032 440-32 PROFESYONEL SPORCU 44033 440-33 BASIDAV-1 44034 440-34 BASIDAV-2 44035 440-35 BASIDAV-3 44036 440-36 BASIDAV-4 44037 440-37 BASIDAV-5 44038 440* ELİT PAKET 64501 645* Ekstra Garanti Sigortası 64502 645* Dört Dörtlük Cihaz Koruma ve Kazaen Kırılma Sigortası 64503 645* Ekstra Garanti ve Kazaen Kırılma Sigortası 64504 645* Dört Dörtlük Cihaz Koruma Sigortası 70101 701-1 DEV KASKO 71601 716* VOLKSWAGEN KASKO SIGORTA POLIÇESI 71602 716** AUDİ KASKO SİGORTASI 71603 716*** SKODA KASKO SİGORTASI 71604 716**** SCANIA KASKO SİGORTA POLİÇESİ 71605 716***** HONDA KASKO SİGORTA POLİÇESİ 71801 718* HESAPLI STANDART 71802 718** HESAPLI PLUS 71803 718*** HESAPLI MİNİ 73201 732* YENI NESIL HESAPLI KONUT PAKET 73202 732** YENI NESIL STANDART KONUT PAKET 73203 732*** YENI NESIL ELIT KONUT PAKET 74001 740* TÜRKIYE' YE SEYAHAT SIGORTASI 74002 732** TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM) Tablo baglami: Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Adı Detay"
+          ]
+        },
+        {
+          "name": "POLICE_KODU_DETAY",
+          "type": "VARCHAR2",
+          "description": "Poliçe Kodu Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisinin kodu (410*,420-1 vb.) içerir. Kolon icerigi: POLICE_KODU(NEW_FPOLK) YENI_FPOLK POLICE_KOD_ADI (YENI_FPOLAC) -781 -781 KASKO VE ÜÇÜNCÜ ŞAHIS YÜKÜMLÜLÜK SİGORTASI -99 -99 N/A 101 101 DOLU SİGORTA POLİÇESİ 102 102 SERA SİGORTA POLİÇESİ 103 103 HAYVAN HAYAT SİGORTA POLİÇESİ 104 104 BESİ SİGORTA POLİÇESİ 105 105 KEDİ KÖPEK KAZA SİGORTA POLİÇESİ 111 111 DEVLET DESTEKLİ BİTKİSEL ÜRÜN SİGORTALARI POLİÇESİ 112 112 SERA POLİÇESİ 113 113 ARICILIK(ARI KOVANI) 114 114 BÜYÜKBAŞ HAYVAN POLİÇESİ 115 115 KÜÇÜKBAŞ HAYVAN POLİÇESİ 116 116 KÜMES HAYVANLARI POLİÇESİ 118 118 SU ÜRÜNLERİ POLİÇESİ 210 210 MOTORLU ARACA BAGLI HUKUKSAL KORUMA POLİÇESİ 220 220 SÜRÜCÜ HUKUKSAL KORUMA POLİÇESİ 230 230 KİŞİ-AİLE HUKUKSAL KORUMA POLİÇESİ 240 240 TAŞINMAZA BAĞLI HUKUKSAL KORUMA POLİÇESİ 250 250 YURTİÇİ KREDİ SİGORTA POLİÇESİ 251 251 İHRACAT KREDİ SİGORTA POLİÇESİ 252 252 KOBİLER İÇİN DEVLET DESTEKLİ 253 253 FİNANSAL KAYIP SİGORTASI 255 255 PATIM GÜVENDE SIGORTASI 261 261 BİNA TAMAMLAMA SİGORTASI POLİÇESİ 310 310 EMTEA TAŞIMA SİGORTA POLİÇESİ 311 311 NAKLİYAT EMTEA PAKET POLİÇESİ 312 312 NAKLİYAT EMTEA BLOK SİGORTA POLİÇESİ 313 313 NAKLİYAT ARACISI / KOMİSYONCUSU YASAL SORUMLULUK SİGORTA POLİÇESİ 314 314 DEPOCU YASAL SORUMLULUK SİGORTA POLİÇESİ 315 315 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK BLOK POLİÇESİ 330 330 KIYMET TAŞIMA SİGORTA POLİÇESİ 340 340 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 341 341 YURTİÇİ NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 370 370 TEKNE SİGORTA POLİÇESİ 371 371 TEKNE HARP VE GREV SİGORTA POLİÇESİ 372 372 TEKNE İNŞAAT SİGORTA POLİÇESİ 373 373 TEKNE REHİNLİ ALACAKLI SİGORTA POLİÇESİ 374 374 TEKNE KAZANÇ/KİRA KAYBI SİGORTA POLİÇESİ 375 375 TEKNE ARTAN DEĞER SİGORTASI 380 380 GEZİNTİ TEKNELERİ SİGORTA POLİÇESİ 381 381 GEZİNTİ TEKNELERİ İNŞAAT POLİÇESİ 390 390 LİMAN VE TERMİNAL İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 391 391 GEMİ TAMİRCİLERİ SORUMLULUK SİGORTA POLİÇESİ 392 392 MARİNA İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 410 410 TRAFİK SİGORTA POLİÇESİ 411 411 MOTORLU ARAÇLARLA İLGİLİ MESLEKİ FAALİYET SİGORTA POLİÇESİ 414 414 ZORUNLU KARAYOLU TAŞIMACILIK MALİ SORUMLULUK SİGORTA POLİÇESİ 415 415 YEŞİLKART SİGORTA POLİÇESİ 416 416 YEŞİLKART SİGORTA POLİÇESİ (TRAMER) 420 420 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ 421 421 MOTORLU KARA TAŞIT ARAÇLARI KASKO SİGORTA POLİÇESİ 428 428 PATİM GÜVENDE SİGORTA POLİÇESİ 429 429 TAMAMLAYICI HEKİM SORUMLULUK SİGORTASI 430 430 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 431 431 ÜÇÜNCÜ KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 432 432 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 433 433 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MALİ SORUMLULUK SİGORTA POL. 434 434 ASANSÖR KAZALARINDA 3.KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 435 435 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 436 436 MESLEKİ SORUMLULUK SİGORTA POLİÇESİ 437 437 TÜPGAZ ZORUNLU SORUMLULUK SİGORTA POLİÇESİ 438 438 TEHLİKELİ MADDELER VE TEHLİKELİ ATIK ZORUNLU MALİ SORUMLULUK POLİÇESİ 439 439 TIBBİ KÖTÜ UYGULAMAYA İLİŞKİN ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 440 440 FERDİ KAZA SİGORTA POLİÇESİ 441 441 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 442 442 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 443 443 KREDİ KARTI FERDİ KAZA SİGORTA POLİÇESİ 444 444 VİZE SİGORTA POLİÇESİ 446 446 SERVİS ARAÇLARI KOLTUK FERDİ KAZA SİGORTA POLİÇESİ 447 447 KARAYOLU YOLCU TAŞIMACILIĞI ZORUNLU KOLTUK FERDİ KAZA SİG. 448 448 FERDİ KAZA SİGORTA POLİÇESİ 449 449 ÖZEL GÜVENLİK ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 450 450 İŞYERİ HIRSIZLIK SİGORTA POLİÇESİ 451 451 KASA HIRSIZLIK SİGORTA POLİÇESİ 452 452 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 453 453 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 454 454 KONUT HIRSIZLIK SİGORTA POLİÇESİ 455 455 KREDİ KARTI HIRSIZLIK SİGORTA POLİÇESİ 456 456 KART KORUMA SİGORTA POLİÇESİ 457 457 KART KORUMA SİGORTA POLİÇESİ 458 458 KART KORUMA SİGORTA POLİÇESİ 460 460 CAM KIRILMASI SİGORTA POLİÇESİ 463 463 TELEFONUM GÜVENDE SIGORTASI 475 475 DENİZ YOLU YOLCU TAŞIMACILIĞI ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 476 476 DENİZ ARAÇLARI ZORUNLU MALİ SORUMLULUK SİGORTASI POLİÇESİ 480 480 KAZA SİGORTA POLİÇESİ 481 481 MUHTELİF SORUMLULUK SİGORTALARI POLİÇESİ 482 482 TİCARİ SİBER RİSK POLİÇESİ 483 483 BİREYSEL SİBER GÜVENLİK POLİÇESİ 484 484 Ticari Siber Güvenlik Paket Poliçesi 485 485 KEFALET SİGORTASI POLİÇESİ 486 486 UÇUŞ GECİKME SİGORTASI 487 487 BILETIM GÜVENDE SIGORTASI 488 488 PARAMETRIK SALGIN HASTALIK SIGORTASI 490 490 KASKO SİGORTA POLİÇESİ 491 491 ÜÇÜNCÜ ŞAHIS SORUMLULUK SİGORTA POLİÇESİ 492 492 FERDİ KAZA SİGORTA POLİÇESİ 493 493 HIRSIZLIK SİGORTA POLİÇESİ 494 494 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 495 495 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 496 496 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 497 497 KASA HIRSIZLIK SİGORTA POLİÇESİ 498 498 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 499 499 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 501 501 YANGIN SİGORTA POLİÇESİ 502 502 YANGIN SİGORTA POLİÇESİ 503 503 YANGIN MALİ SORUMLULUK SİGORTA POLİÇESİ 504 504 KİRA KAYBI SİGORTA POLİÇESİ 505 505 KAR KAYBI SİGORTA POLİÇESİ 520 520 YANGIN ABONMAN SİGORTA POLİÇESİ 590 590 YANGIN MUHTELİF SİGORTA POLİÇESİ 610 610 İNŞAAT SİGORTA POLİÇESİ 620 620 MONTAJ SİGORTA POLİÇESİ 630 630 MAKİNA KIRILMASI SİGORTA POLİÇESİ 631 631 OTO ARIZA SİGORTA POLİÇESİ 632 632 İŞ VE İNŞAAT MAKİNALARI SİGORTA POLİÇESİ 633 633 MAKİNE KIRILMASI LEASİNG ALL RİSK SİGORTASI 634 634 İŞ VE İNŞAAT MAKİNELERİ LEASİNG ALL RİSK SİGORTASI 640 640 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 641 641 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 642 642 KONUT ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 643 643 ELEKTRONİK CİHAZ LEASİNG ALL RİSK SİGORTASI 644 644 ÖDEME KAYDEDİCİ CİHAZ SİGORTASI 645 645 CİHAZIM GÜVENDE SİGORTA POLİÇESİ 701 701 MOTORLU KARA TAŞITLARI BİRLEŞİK KASKO SİGORTA POLİÇESİ 702 702 MAKSİMUM TRAFİK SİGORTA POLİÇESİ 703 703 DOĞALGAZ SİGORTA POLİÇESİ 704 704 SEYAHAT SİGORTA POLİÇESİ 705 705 AİLE SİGORTA POLİÇESİ 706 706 UCAK 707 707 SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 708 708 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 709 709 DOĞALGAZ PAKET SİGORTA POLİÇESİ 710 710 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 711 711 MEHMETÇİK KASKO POLİÇESİ 712 712 MEHMETÇİK YAŞAM POLİÇESİ 713 713 BALIKÇI TEKNELERİ SİGORTA POLİÇESİ 714 714 KAMU KASKO SİGORTA POLİÇESİ 715 715 KAMU MAKSİMUM TRAFİK SİGORTA POLİÇESİ 716 716 PLAZA KASKO SİGORTA POLİÇESİ 717 717 KAMU SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 718 718 HESAPLI KASKO SİGORTA POLİÇESİ 720 720 İŞYERİ ABONMAN SİGORTA POLİÇESİ 721 721 İŞYERİ SİGORTA POLİÇESİ 722 722 KONUT SİGORTA POLİÇESİ 723 723 MARKET SİGORTA POLİÇESİ 724 724 TURİSTİK TESİS SİGORTA POLİÇESİ 725 725 KOBİ PAKET POLİÇESİ 726 726 İŞYERİ SİGORTA POLİÇESİ 727 727 KONUT SİGORTA POLİÇESİ 728 728 KOBİ PAKET POLİÇESİ 729 729 AKARYAKIT PAKET POLİÇESİ 730 730 HAREKETLİ İŞ MAKİNALARI POLİÇESİ 732 732 YENI NESIL KONUT PAKETLERI 733 733 TICARI YANGIN 734 734 ÇOKGEZEN YURTDIŞI SEYAHAT SAĞLIK SIGORTASI 735 735 YURTDIŞI EĞİTİM SİGORTA POLİÇESİ 736 736 BSMV İSTISNALI KONUT PAKET SIGORTASI 737 737 KIBRIS KONUT PAKET SIGORTASI 738 738 ESI KONUT PAKET SIGORTASI 739 739 SITE YÖNETIMI ORTAK ALAN PAKET SIGORTASI 740 740 TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM) 741 741 AUDİ KASKO SİGORTASI 742 742 SKODA KASKO SİGORTASI 743 743 DIJITAL TICARI YANGIN 744 744 FORD KASKO SİGORTASI 745 745 MOTOSİKLET KASKO SİGORTASI 746 746 İŞ BANK KASKO SİGORTASI 747 747 MOTIFKART KASKO 748 748 KOMPLIKASYON SIGORTASI 749 749 FIAT KASKO 750 750 VOLKSWAGEN KASKO 751 751 ALFA ROMEO KASKO 752 752 JEEP KASKO 753 753 SEAT KASKO 756 756 HONDA KASKO 757 757 DEV KASKO 758 758 MEHMETÇIK HESAPLI KASKO 759 759 SCANIA KASKO 760 760 ELEKTRIKLI ARAÇ KASKO 761 761 M KASKO 762 762 BAŞKA KASKO 765 765 HONDA MOTOSIKLET KASKO 770 770 BYD KASKO 777 777 ANADOLU 75 SİGORTA POLİÇESİ 778 778 TÜRKİYE SEYAHAT SİGORTA POLİÇESİ 780 780 ANADOLU PAKET SİGORTA POLİÇESİ 781 781 KASKO SİGORTASI 782 782 TRAFİK SİGORTASI 785 785 RENAULT KASKO 790 790 DACIA KASKO 791 791 İŞYERİ SİGORTA POLİÇESİ 792 792 KONUT SİGORTA POLİÇESİ 794 794 TURİSTİK TESİS SİGORTA POLİÇESİ 795 795 ALPINE KASKO 800 800 ZORUNLU DEPREM SİGORTA POLİÇESİ 850 850 HIRSIZLIK SİGORTA POLİÇESİ 860 860 CAM KIRILMASI SİGORTA POLİÇESİ 901 901 MOTORLU KARA TAŞIT ARAÇLARI BİRLEŞİK SİGORTA POLİÇESİ (GRUP) 902 902 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ (GRUP) 903 903 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ (GRUP) 904 904 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ (GRUP) 905 905 FERDİ KAZA SİGORTA POLİÇESİ (GRUP) 906 906 Maden Çalışanları Zorunlu Ferdi Kaza Poliçesi 910 910 YURTDIŞI GRUP SEYAHAT SİGORTA POLİÇESİ 930 930 FİLO SİGORTA POLİÇESİ 935 935 YURTDIŞI GRUP EĞİTİM SİGORTA POLİÇESİ 951 951 Bireysel Sağlık 952 952 Kurumsal Sağlık 953 953 BIREYSEL NEFES 954 954 SAĞLIK SİGORTA POLİÇESİ (GRUP) 955 955 YABANCI UYRUKLULAR SAĞLIK SIGORTASI 956 956 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (BIREYSEL) 957 957 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (KURUMSAL) 958 958 ASO 959 959 KURUMSAL NEFES 960 960 MEHMETÇIK TAMAMLAYICI SAĞLIK SIGORTASI 961 961 YABANCI UYRUKLULAR SAĞLIK SİGORTASI (Uzun Dönem) 962 962 ANADOLU RİSKLİ HASTALIKLAR SİGORTASI 963 963 CANIM KENDIM 965 965 KOBI TSS 966 966 AILEM GÜVENDE TAMAMLAYICI SAĞLIK SIGORTASI 971 971 SAĞLIK SİGORTA POLİÇESİ (FERDİ) 972 972 SAĞLIK SİGORTA POLİÇESİ (KURUMSAL) 990 990 YANGIN SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 KAZA SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 NAKLİYAT SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 TARIM SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 MÜHENDİSLİK SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 991 991 ABONMAN SİGORTA SÖZLEŞMESİ 992 992 CMR-KARAYOLU ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA SÖZLEŞMESİ 41001 410* TRAFIK (YENI) 41002 410** EKSTRA TRAFIK STANDART 41003 410*** SUPER TRAFIK 41004 410**** SINIRSIZ TRAFIK 41005 410***** TAM BAKIM PAKETI 41006 410****** TRAFIK YOL YARDIM 41007 410******* EKSTRA TRAFIK MINI 41008 410******** EKSTRA TRAFIK PLUS 41009 410********* HUKUKSAL KORUMA 42000 420* PERT KASKO %60 42001 420* PERT PLUS KASKO %50 42002 420* PERT PLUS KASKO %40 44001 440-1 GUVENLI GELECEK PLUS 44002 440-2 GUVENLI GELECEK MAXI PLUS 44003 440-3 GUVENLI GELECEK 44004 440-4 GUVENLI GELECEK MAXI 44005 440-5 GUVENLI GELECEK GOLD 44006 440-6 GUVENLI GELECEK GOLD PLUS 44007 440-7 GUVENLI GELECEK GOLD MAXI 44008 440-8 GUVENLI GELECEK GOLD MAXI PLUS 44009 440-9 GULUMSETEN PAKET 44010 440-10 SMS FERDI KAZA 44011 440-11 GUVENLI BIZ MAXI BTSO 44012 440-12 GUVENLI BIZ GOLD PLUS BTSO 44013 440-13 ISYERIMDE GUVENDEYIM PAKET-1 44014 440-14 ISYERIMDE GUVENDEYIM PAKET-2 44015 440-15 ISYERIMDE GUVENDEYIM PAKET-3 44016 440-16 ISYERIMDE GUVENDEYIM PAKET-4 44017 440-17 1.SINIF FAALIYETLER 44018 440-18 2.SINIF FAALIYETLER 44019 440-19 3.SINIF FAALIYETLER 44020 440-20 IS TE TICARI KORUMA 44021 440-21 IS TE CIFTCI KORUMA 44022 440-22 KARMA/IS TE KORUMA 44023 440-23 IS TE ÖZEL KORUMA 44024 440-24 IS TE MAXIMUM KORUMA 44025 440-25 PROFESYONEL FUTBOLCU 1.TEMINAT GRUBU 44026 440-26 PROFESYONEL FUTBOLCU 2.TEMINAT GRUBU 44027 440-27 PROFESYONEL FUTBOLCU 3.TEMINAT GRUBU 44028 440-28 PAKET 1 44029 440-29 PAKET 2 44030 440-30 PAKET 3 44031 440-31 PAKET 4 44032 440-32 PROFESYONEL SPORCU 44033 440-33 BASIDAV-1 44034 440-34 BASIDAV-2 44035 440-35 BASIDAV-3 44036 440-36 BASIDAV-4 44037 440-37 BASIDAV-5 44038 440* ELİT PAKET 64501 645* Ekstra Garanti Sigortası 64502 645* Dört Dörtlük Cihaz Koruma ve Kazaen Kırılma Sigortası 64503 645* Ekstra Garanti ve Kazaen Kırılma Sigortası 64504 645* Dört Dörtlük Cihaz Koruma Sigortası 70101 701-1 DEV KASKO 71601 716* VOLKSWAGEN KASKO SIGORTA POLIÇESI 71602 716** AUDİ KASKO SİGORTASI 71603 716*** SKODA KASKO SİGORTASI 71604 716**** SCANIA KASKO SİGORTA POLİÇESİ 71605 716***** HONDA KASKO SİGORTA POLİÇESİ 71801 718* HESAPLI STANDART 71802 718** HESAPLI PLUS 71803 718*** HESAPLI MİNİ 73201 732* YENI NESIL HESAPLI KONUT PAKET 73202 732** YENI NESIL STANDART KONUT PAKET 73203 732*** YENI NESIL ELIT KONUT PAKET 74001 740* TÜRKIYE' YE SEYAHAT SIGORTASI 74002 732** TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM) Tablo baglami: Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Kodu Detay"
+          ]
+        },
+        {
+          "name": "POLICE_KOD_ADI",
+          "type": "VARCHAR2",
+          "description": "Poliçe Adı Poliçe kodunun açıklamasını içerir. Ürünün Adını verin Kolon icerigi: POLICE_KOD_ID KAYNAK_SISTEM_ID POLICE_KOD_ADI -99 1 N/A 1 1 KASKO VE ÜÇÜNCÜ ŞAHIS YÜKÜMLÜLÜK SİGORTASI 2 1 SERA SİGORTA POLİÇESİ 3 1 DOLU SİGORTA POLİÇESİ 4 1 BESİ SİGORTA POLİÇESİ 5 1 HAYVAN HAYAT SİGORTA POLİÇESİ 6 1 DEVLET DESTEKLİ BİTKİSEL ÜRÜN SİGORTALARI POLİÇESİ 7 1 KEDİ KÖPEK KAZA SİGORTA POLİÇESİ 8 1 ARICILIK(ARI KOVANI) 9 1 SERA POLİÇESİ 10 1 KÜÇÜKBAŞ HAYVAN POLİÇESİ 11 1 BÜYÜKBAŞ HAYVAN POLİÇESİ 12 1 KÜMES HAYVANLARI POLİÇESİ 13 1 MOTORLU ARACA BAGLI HUKUKSAL KORUMA POLİÇESİ 14 1 SU ÜRÜNLERİ POLİÇESİ 15 1 KİŞİ-AİLE HUKUKSAL KORUMA POLİÇESİ 16 1 SÜRÜCÜ HUKUKSAL KORUMA POLİÇESİ 17 1 YURTİÇİ KREDİ SİGORTA POLİÇESİ 18 1 TAŞINMAZA BAĞLI HUKUKSAL KORUMA POLİÇESİ 19 1 NAKLİYAT EMTEA PAKET POLİÇESİ 20 1 İHRACAT KREDİ SİGORTA POLİÇESİ 21 1 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 22 1 EMTEA TAŞIMA SİGORTA POLİÇESİ 23 1 TEKNE HARP VE GREV SİGORTA POLİÇESİ 24 1 NAKLİYAT EMTEA BLOK SİGORTA POLİÇESİ 25 1 TEKNE REHİNLİ ALACAKLI SİGORTA POLİÇESİ 26 1 KIYMET TAŞIMA SİGORTA POLİÇESİ 27 2 Gezinti Teknesi 28 1 YURTİÇİ NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 29 1 GEMİ TAMİRCİLERİ SORUMLULUK SİGORTA POLİÇESİ 30 1 TEKNE SİGORTA POLİÇESİ 31 1 MOTORLU ARAÇLARLA İLGİLİ MESLEKİ FAALİYET SİGORTA POLİÇESİ 32 1 TEKNE İNŞAAT SİGORTA POLİÇESİ 33 1 YEŞİLKART SİGORTA POLİÇESİ 34 1 TEKNE KAZANÇ/KİRA KAYBI SİGORTA POLİÇESİ 35 2 Kasko 36 1 GEZİNTİ TEKNELERİ İNŞAAT POLİÇESİ 37 1 ÜÇÜNCÜ KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 38 1 LİMAN VE TERMİNAL İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 39 1 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MALİ SORUMLULUK SİGORTA POL. 40 1 MARİNA İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 41 1 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 42 2 Trafik Sigortası 43 1 TÜPGAZ ZORUNLU SORUMLULUK SİGORTA POLİÇESİ 44 1 ZORUNLU KARAYOLU TAŞIMACILIK MALİ SORUMLULUK SİGORTA POLİÇESİ 45 1 TIBBİ KÖTÜ UYGULAMAYA İLİŞKİN ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 46 2 Yeşil Kart 47 2 Bireysel Ferdi Kaza Sigortası 48 2 Pert Kasko 49 1 VİZE SİGORTA POLİÇESİ 50 1 TAMAMLAYICI HEKİM SORUMLULUK SİGORTASI 51 2 Servis Araçları Koltuk Ferdi Kaza 52 1 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 53 1 FERDİ KAZA SİGORTA POLİÇESİ 54 1 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 55 1 KASA HIRSIZLIK SİGORTA POLİÇESİ 56 1 ASANSÖR KAZALARINDA 3.KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 57 1 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 58 1 MESLEKİ SORUMLULUK SİGORTA POLİÇESİ 59 1 KREDİ KARTI HIRSIZLIK SİGORTA POLİÇESİ 60 1 TEHLİKELİ MADDELER VE TEHLİKELİ ATIK ZORUNLU MALİ SORUMLULUK POLİÇESİ 61 1 KART KORUMA SİGORTA POLİÇESİ 62 2 Koltuk Ferdi Kaza 63 1 CAM KIRILMASI SİGORTA POLİÇESİ 64 1 KREDİ KARTI FERDİ KAZA SİGORTA POLİÇESİ 65 1 DENİZ YOLU YOLCU TAŞIMACILIĞI ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 66 2 Zorunlu Koltuk Ferdi Kaza 67 1 KAZA SİGORTA POLİÇESİ 68 1 ÖZEL GÜVENLİK ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 69 1 ÜÇÜNCÜ ŞAHIS SORUMLULUK SİGORTA POLİÇESİ 70 1 İŞYERİ HIRSIZLIK SİGORTA POLİÇESİ 71 1 HIRSIZLIK SİGORTA POLİÇESİ 72 1 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 73 1 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 74 1 KONUT HIRSIZLIK SİGORTA POLİÇESİ 75 1 KASA HIRSIZLIK SİGORTA POLİÇESİ 76 1 KART KORUMA SİGORTA POLİÇESİ 77 1 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 78 1 KART KORUMA SİGORTA POLİÇESİ 79 1 YANGIN SİGORTA POLİÇESİ 80 1 DENİZ ARAÇLARI ZORUNLU MALİ SORUMLULUK SİGORTASI POLİÇESİ 81 1 YANGIN MALİ SORUMLULUK SİGORTA POLİÇESİ 82 1 MUHTELİF SORUMLULUK SİGORTALARI POLİÇESİ 83 1 KAR KAYBI SİGORTA POLİÇESİ 84 1 KASKO SİGORTA POLİÇESİ 85 1 YANGIN MUHTELİF SİGORTA POLİÇESİ 86 1 FERDİ KAZA SİGORTA POLİÇESİ 87 1 MONTAJ SİGORTA POLİÇESİ 88 1 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 89 1 OTO ARIZA SİGORTA POLİÇESİ 90 1 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 91 1 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 92 1 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 93 1 KONUT ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 94 1 YANGIN SİGORTA POLİÇESİ 95 2 Birleşik Kasko 96 1 KİRA KAYBI SİGORTA POLİÇESİ 97 1 DOĞALGAZ SİGORTA POLİÇESİ 98 1 YANGIN ABONMAN SİGORTA POLİÇESİ 99 1 AİLE SİGORTA POLİÇESİ 100 1 İNŞAAT SİGORTA POLİÇESİ 101 1 SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 102 1 MAKİNA KIRILMASI SİGORTA POLİÇESİ 103 1 DOĞALGAZ PAKET SİGORTA POLİÇESİ 104 1 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 105 2 Bireysel Yurtdışı Seyahat Sigortası 106 1 MAKSİMUM TRAFİK SİGORTA POLİÇESİ 107 2 Mehmetçik Yaşam Poliçesi 108 1 SEYAHAT SİGORTA POLİÇESİ 109 1 KAMU KASKO SİGORTA POLİÇESİ 110 1 HAVA ARACI YEDEK PARÇA SİGORTA POLİÇESİ 111 2 Plaza Kasko 112 1 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 113 2 Hesaplı Kasko 114 2 Mehmetçik Kasko 115 1 İŞYERİ SİGORTA POLİÇESİ 116 1 BALIKÇI TEKNELERİ SİGORTA POLİÇESİ 117 1 MARKET SİGORTA POLİÇESİ 118 1 KAMU MAKSİMUM TRAFİK SİGORTA POLİÇESİ 119 1 KOBİ PAKET POLİÇESİ 120 1 KAMU SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 121 1 KONUT SİGORTA POLİÇESİ 122 1 İŞYERİ ABONMAN SİGORTA POLİÇESİ 123 1 AKARYAKIT PAKET POLİÇESİ 124 2 Modüler Konut Paket Sigortası 125 1 HAREKETLİ İŞ MAKİNALARI POLİÇESİ 126 1 TURİSTİK TESİS SİGORTA POLİÇESİ 127 1 KASKO SİGORTASI 128 1 İŞYERİ SİGORTA POLİÇESİ 129 1 KONUT SİGORTA POLİÇESİ 130 1 KOBİ PAKET POLİÇESİ 131 1 TURİSTİK TESİS SİGORTA POLİÇESİ 132 2 Bireysel Yurtdışı Eğitim Sigortası 133 1 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ (GRUP) 134 1 ANADOLU 75 SİGORTA POLİÇESİ 135 1 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ (GRUP) 136 1 ANADOLU PAKET SİGORTA POLİÇESİ 137 2 Maden Çalışanları Zorunlu Ferdi Kaza 138 1 TRAFİK SİGORTASI 139 1 YURTDIŞI GRUP EĞİTİM SİGORTA POLİÇESİ 140 1 İŞYERİ SİGORTA POLİÇESİ 141 2 Bireysel Sağlık 142 2 Zorunlu Deprem Sigorta Poliçesi 143 2 Bireysel Nefes 144 1 MOTORLU KARA TAŞIT ARAÇLARI BİRLEŞİK SİGORTA POLİÇESİ (GRUP) 145 2 Yabancı Uyruklular Sağlık Sigortası 146 1 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ (GRUP) 147 2 Anadolu Tamamlayıcı Sağlık Sigortası (Kurumsal) 148 1 FERDİ KAZA SİGORTA POLİÇESİ (GRUP) 149 2 Kurumsal Nefes 150 1 YURTDIŞI GRUP SEYAHAT SİGORTA POLİÇESİ 151 1 ABONMAN SİGORTA SÖZLEŞMESİ 152 1 FİLO SİGORTA POLİÇESİ 153 2 Kurumsal Sağlık 154 2 SAĞLIK SİGORTA POLİÇESİ (GRUP) 155 2 Anadolu Tamamlayıcı Sağlık Sigortası (Bireysel) 156 2 ASO 157 1 MÜHENDİSLİK SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 158 1 CMR-KARAYOLU ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA SÖZLEŞMESİ 159 1 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 160 2 Mehmetçik Tamamlayıcı Sağlık Sigortası 161 1 NAKLİYAT ARACISI / KOMİSYONCUSU YASAL SORUMLULUK SİGORTA POLİÇESİ 162 1 DEPOCU YASAL SORUMLULUK SİGORTA POLİÇESİ 163 1 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK BLOK POLİÇESİ 164 2 Yabancı Uyruklular Sağlık Sigortası(Uzun Dönem) 165 2 BSMV İstisnalı Konut Paket Sigortası 166 2 Site Yönetimi Ortak Alan Paket Sigortası 167 2 ESI Konut Paket Sigortası 168 1 BİREYSEL SİBER GÜVENLİK POLİÇESİ 169 1 TİCARİ SİBER RİSK POLİÇESİ 170 1 KEFALET SİGORTASI POLİÇESİ 171 2 Kıbrıs Konut Paket Sigortası 172 2 Ticari Siber Güvenlik Paket Poliçesi 173 2 Uçuşum Güvende Sigortası 174 1 BİNA TAMAMLAMA SİGORTASI POLİÇESİ 501 2 Yeni Nesil Konut Paketleri 502 2 Devlet Destekli Alacak Sigortasi 503 2 Audi Kasko 504 2 Dijital Ticari Yangın 505 2 Motosiklet Kasko 506 2 Motifkart Kasko 507 2 Skoda Kasko 508 1 FORD KASKO SİGORTASI 509 2 Aile İşi Kasko 510 2 Türkiye' ye Seyahat Sigortası (Uzun Dönem) 511 2 DEV Kasko 512 2 Volkswagen Kasko 513 2 Anadolu Riskli Hastalıklar Sigortası 514 2 Mehmetçik Hesaplı Kasko 515 2 Honda Kasko 516 2 Scania Kasko 517 2 Seat Kasko 518 1 TÜRKİYE SEYAHAT SİGORTA POLİÇESİ 519 2 Telefonum Güvende Sigortası 520 2 Parametrik Salgın Hastalık Sigortası 521 2 Elektrikli Araç Kasko 522 2 Patim Güvende Sigortası 523 2 M Kasko 524 2 Biletim Güvende Sigortası 525 2 Canım Kendim 526 1 İŞ VE İNŞAAT MAKİNALARI SİGORTA POLİÇESİ 527 2 Ticari Yangın 528 1 PATİM GÜVENDE SİGORTA POLİÇESİ 529 2 Başka Kasko 530 1 SAĞLIK SİGORTA POLİÇESİ (FERDİ) 531 1 SAĞLIK SİGORTA POLİÇESİ (KURUMSAL) 532 2 Çokgezen Yurtdışı Seyahat Sağlık Sigortası 533 2 FIAT Kasko 534 2 Alfa Romeo Kasko 535 2 Jeep Kasko 536 1 CİHAZIM GÜVENDE SİGORTA POLİÇESİ 537 1 CAM KIRILMASI SİGORTA POLİÇESİ 538 1 HIRSIZLIK SİGORTA POLİÇESİ 539 2 Honda Motosiklet Kasko 540 2 Kobi TSS 542 2 BYD Kasko 543 2 Ailem Güvende Tamamlayıcı Sağlık Sigortası 544 15 ÖDEME KAYDEDİCİ CİHAZ SİGORTASI 545 15 İŞ VE İNŞAAT MAKİNELERİ LEASİNG ALL RİSK SİGORTASI 546 15 ELEKTRONİK CİHAZ LEASİNG ALL RİSK SİGORTASI 547 15 MAKİNE KIRILMASI LEASİNG ALL RİSK SİGORTASI 548 15 TEKNE ARTAN DEĞER SİGORTASI 549 2 Komplikasyon Sigortası 550 15 FİNANSAL KAYIP SİGORTASI 551 2 Alpine Kasko 552 2 Renault Kasko 553 2 Dacia Kasko Tablo baglami: Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo Poliçe Kodu Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisinin kodu (410*,420-1 vb.) içerir. Kolon icerigi: POLICE_KODU(NEW_FPOLK) YENI_FPOLK POLICE_KOD_ADI (YENI_FPOLAC) -781 -781 KASKO VE ÜÇÜNCÜ ŞAHIS YÜKÜMLÜLÜK SİGORTASI -99 -99 N/A 101 101 DOLU SİGORTA POLİÇESİ 102 102 SERA SİGORTA POLİÇESİ 103 103 HAYVAN HAYAT SİGORTA POLİÇESİ 104 104 BESİ SİGORTA POLİÇESİ 105 105 KEDİ KÖPEK KAZA SİGORTA POLİÇESİ 111 111 DEVLET DESTEKLİ BİTKİSEL ÜRÜN SİGORTALARI POLİÇESİ 112 112 SERA POLİÇESİ 113 113 ARICILIK(ARI KOVANI) 114 114 BÜYÜKBAŞ HAYVAN POLİÇESİ 115 115 KÜÇÜKBAŞ HAYVAN POLİÇESİ 116 116 KÜMES HAYVANLARI POLİÇESİ 118 118 SU ÜRÜNLERİ POLİÇESİ 210 210 MOTORLU ARACA BAGLI HUKUKSAL KORUMA POLİÇESİ 220 220 SÜRÜCÜ HUKUKSAL KORUMA POLİÇESİ 230 230 KİŞİ-AİLE HUKUKSAL KORUMA POLİÇESİ 240 240 TAŞINMAZA BAĞLI HUKUKSAL KORUMA POLİÇESİ 250 250 YURTİÇİ KREDİ SİGORTA POLİÇESİ 251 251 İHRACAT KREDİ SİGORTA POLİÇESİ 252 252 KOBİLER İÇİN DEVLET DESTEKLİ 253 253 FİNANSAL KAYIP SİGORTASI 255 255 PATIM GÜVENDE SIGORTASI 261 261 BİNA TAMAMLAMA SİGORTASI POLİÇESİ 310 310 EMTEA TAŞIMA SİGORTA POLİÇESİ 311 311 NAKLİYAT EMTEA PAKET POLİÇESİ 312 312 NAKLİYAT EMTEA BLOK SİGORTA POLİÇESİ 313 313 NAKLİYAT ARACISI / KOMİSYONCUSU YASAL SORUMLULUK SİGORTA POLİÇESİ 314 314 DEPOCU YASAL SORUMLULUK SİGORTA POLİÇESİ 315 315 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK BLOK POLİÇESİ 330 330 KIYMET TAŞIMA SİGORTA POLİÇESİ 340 340 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 341 341 YURTİÇİ NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 370 370 TEKNE SİGORTA POLİÇESİ 371 371 TEKNE HARP VE GREV SİGORTA POLİÇESİ 372 372 TEKNE İNŞAAT SİGORTA POLİÇESİ 373 373 TEKNE REHİNLİ ALACAKLI SİGORTA POLİÇESİ 374 374 TEKNE KAZANÇ/KİRA KAYBI SİGORTA POLİÇESİ 375 375 TEKNE ARTAN DEĞER SİGORTASI 380 380 GEZİNTİ TEKNELERİ SİGORTA POLİÇESİ 381 381 GEZİNTİ TEKNELERİ İNŞAAT POLİÇESİ 390 390 LİMAN VE TERMİNAL İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 391 391 GEMİ TAMİRCİLERİ SORUMLULUK SİGORTA POLİÇESİ 392 392 MARİNA İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 410 410 TRAFİK SİGORTA POLİÇESİ 411 411 MOTORLU ARAÇLARLA İLGİLİ MESLEKİ FAALİYET SİGORTA POLİÇESİ 414 414 ZORUNLU KARAYOLU TAŞIMACILIK MALİ SORUMLULUK SİGORTA POLİÇESİ 415 415 YEŞİLKART SİGORTA POLİÇESİ 416 416 YEŞİLKART SİGORTA POLİÇESİ (TRAMER) 420 420 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ 421 421 MOTORLU KARA TAŞIT ARAÇLARI KASKO SİGORTA POLİÇESİ 428 428 PATİM GÜVENDE SİGORTA POLİÇESİ 429 429 TAMAMLAYICI HEKİM SORUMLULUK SİGORTASI 430 430 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 431 431 ÜÇÜNCÜ KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 432 432 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 433 433 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MALİ SORUMLULUK SİGORTA POL. 434 434 ASANSÖR KAZALARINDA 3.KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 435 435 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 436 436 MESLEKİ SORUMLULUK SİGORTA POLİÇESİ 437 437 TÜPGAZ ZORUNLU SORUMLULUK SİGORTA POLİÇESİ 438 438 TEHLİKELİ MADDELER VE TEHLİKELİ ATIK ZORUNLU MALİ SORUMLULUK POLİÇESİ 439 439 TIBBİ KÖTÜ UYGULAMAYA İLİŞKİN ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 440 440 FERDİ KAZA SİGORTA POLİÇESİ 441 441 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 442 442 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 443 443 KREDİ KARTI FERDİ KAZA SİGORTA POLİÇESİ 444 444 VİZE SİGORTA POLİÇESİ 446 446 SERVİS ARAÇLARI KOLTUK FERDİ KAZA SİGORTA POLİÇESİ 447 447 KARAYOLU YOLCU TAŞIMACILIĞI ZORUNLU KOLTUK FERDİ KAZA SİG. 448 448 FERDİ KAZA SİGORTA POLİÇESİ 449 449 ÖZEL GÜVENLİK ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 450 450 İŞYERİ HIRSIZLIK SİGORTA POLİÇESİ 451 451 KASA HIRSIZLIK SİGORTA POLİÇESİ 452 452 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 453 453 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 454 454 KONUT HIRSIZLIK SİGORTA POLİÇESİ 455 455 KREDİ KARTI HIRSIZLIK SİGORTA POLİÇESİ 456 456 KART KORUMA SİGORTA POLİÇESİ 457 457 KART KORUMA SİGORTA POLİÇESİ 458 458 KART KORUMA SİGORTA POLİÇESİ 460 460 CAM KIRILMASI SİGORTA POLİÇESİ 463 463 TELEFONUM GÜVENDE SIGORTASI 475 475 DENİZ YOLU YOLCU TAŞIMACILIĞI ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 476 476 DENİZ ARAÇLARI ZORUNLU MALİ SORUMLULUK SİGORTASI POLİÇESİ 480 480 KAZA SİGORTA POLİÇESİ 481 481 MUHTELİF SORUMLULUK SİGORTALARI POLİÇESİ 482 482 TİCARİ SİBER RİSK POLİÇESİ 483 483 BİREYSEL SİBER GÜVENLİK POLİÇESİ 484 484 Ticari Siber Güvenlik Paket Poliçesi 485 485 KEFALET SİGORTASI POLİÇESİ 486 486 UÇUŞ GECİKME SİGORTASI 487 487 BILETIM GÜVENDE SIGORTASI 488 488 PARAMETRIK SALGIN HASTALIK SIGORTASI 490 490 KASKO SİGORTA POLİÇESİ 491 491 ÜÇÜNCÜ ŞAHIS SORUMLULUK SİGORTA POLİÇESİ 492 492 FERDİ KAZA SİGORTA POLİÇESİ 493 493 HIRSIZLIK SİGORTA POLİÇESİ 494 494 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 495 495 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 496 496 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 497 497 KASA HIRSIZLIK SİGORTA POLİÇESİ 498 498 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 499 499 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 501 501 YANGIN SİGORTA POLİÇESİ 502 502 YANGIN SİGORTA POLİÇESİ 503 503 YANGIN MALİ SORUMLULUK SİGORTA POLİÇESİ 504 504 KİRA KAYBI SİGORTA POLİÇESİ 505 505 KAR KAYBI SİGORTA POLİÇESİ 520 520 YANGIN ABONMAN SİGORTA POLİÇESİ 590 590 YANGIN MUHTELİF SİGORTA POLİÇESİ 610 610 İNŞAAT SİGORTA POLİÇESİ 620 620 MONTAJ SİGORTA POLİÇESİ 630 630 MAKİNA KIRILMASI SİGORTA POLİÇESİ 631 631 OTO ARIZA SİGORTA POLİÇESİ 632 632 İŞ VE İNŞAAT MAKİNALARI SİGORTA POLİÇESİ 633 633 MAKİNE KIRILMASI LEASİNG ALL RİSK SİGORTASI 634 634 İŞ VE İNŞAAT MAKİNELERİ LEASİNG ALL RİSK SİGORTASI 640 640 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 641 641 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 642 642 KONUT ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 643 643 ELEKTRONİK CİHAZ LEASİNG ALL RİSK SİGORTASI 644 644 ÖDEME KAYDEDİCİ CİHAZ SİGORTASI 645 645 CİHAZIM GÜVENDE SİGORTA POLİÇESİ 701 701 MOTORLU KARA TAŞITLARI BİRLEŞİK KASKO SİGORTA POLİÇESİ 702 702 MAKSİMUM TRAFİK SİGORTA POLİÇESİ 703 703 DOĞALGAZ SİGORTA POLİÇESİ 704 704 SEYAHAT SİGORTA POLİÇESİ 705 705 AİLE SİGORTA POLİÇESİ 706 706 UCAK 707 707 SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 708 708 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 709 709 DOĞALGAZ PAKET SİGORTA POLİÇESİ 710 710 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 711 711 MEHMETÇİK KASKO POLİÇESİ 712 712 MEHMETÇİK YAŞAM POLİÇESİ 713 713 BALIKÇI TEKNELERİ SİGORTA POLİÇESİ 714 714 KAMU KASKO SİGORTA POLİÇESİ 715 715 KAMU MAKSİMUM TRAFİK SİGORTA POLİÇESİ 716 716 PLAZA KASKO SİGORTA POLİÇESİ 717 717 KAMU SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 718 718 HESAPLI KASKO SİGORTA POLİÇESİ 720 720 İŞYERİ ABONMAN SİGORTA POLİÇESİ 721 721 İŞYERİ SİGORTA POLİÇESİ 722 722 KONUT SİGORTA POLİÇESİ 723 723 MARKET SİGORTA POLİÇESİ 724 724 TURİSTİK TESİS SİGORTA POLİÇESİ 725 725 KOBİ PAKET POLİÇESİ 726 726 İŞYERİ SİGORTA POLİÇESİ 727 727 KONUT SİGORTA POLİÇESİ 728 728 KOBİ PAKET POLİÇESİ 729 729 AKARYAKIT PAKET POLİÇESİ 730 730 HAREKETLİ İŞ MAKİNALARI POLİÇESİ 732 732 YENI NESIL KONUT PAKETLERI 733 733 TICARI YANGIN 734 734 ÇOKGEZEN YURTDIŞI SEYAHAT SAĞLIK SIGORTASI 735 735 YURTDIŞI EĞİTİM SİGORTA POLİÇESİ 736 736 BSMV İSTISNALI KONUT PAKET SIGORTASI 737 737 KIBRIS KONUT PAKET SIGORTASI 738 738 ESI KONUT PAKET SIGORTASI 739 739 SITE YÖNETIMI ORTAK ALAN PAKET SIGORTASI 740 740 TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM) 741 741 AUDİ KASKO SİGORTASI 742 742 SKODA KASKO SİGORTASI 743 743 DIJITAL TICARI YANGIN 744 744 FORD KASKO SİGORTASI 745 745 MOTOSİKLET KASKO SİGORTASI 746 746 İŞ BANK KASKO SİGORTASI 747 747 MOTIFKART KASKO 748 748 KOMPLIKASYON SIGORTASI 749 749 FIAT KASKO 750 750 VOLKSWAGEN KASKO 751 751 ALFA ROMEO KASKO 752 752 JEEP KASKO 753 753 SEAT KASKO 756 756 HONDA KASKO 757 757 DEV KASKO 758 758 MEHMETÇIK HESAPLI KASKO 759 759 SCANIA KASKO 760 760 ELEKTRIKLI ARAÇ KASKO 761 761 M KASKO 762 762 BAŞKA KASKO 765 765 HONDA MOTOSIKLET KASKO 770 770 BYD KASKO 777 777 ANADOLU 75 SİGORTA POLİÇESİ 778 778 TÜRKİYE SEYAHAT SİGORTA POLİÇESİ 780 780 ANADOLU PAKET SİGORTA POLİÇESİ 781 781 KASKO SİGORTASI 782 782 TRAFİK SİGORTASI 785 785 RENAULT KASKO 790 790 DACIA KASKO 791 791 İŞYERİ SİGORTA POLİÇESİ 792 792 KONUT SİGORTA POLİÇESİ 794 794 TURİSTİK TESİS SİGORTA POLİÇESİ 795 795 ALPINE KASKO 800 800 ZORUNLU DEPREM SİGORTA POLİÇESİ 850 850 HIRSIZLIK SİGORTA POLİÇESİ 860 860 CAM KIRILMASI SİGORTA POLİÇESİ 901 901 MOTORLU KARA TAŞIT ARAÇLARI BİRLEŞİK SİGORTA POLİÇESİ (GRUP) 902 902 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ (GRUP) 903 903 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ (GRUP) 904 904 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ (GRUP) 905 905 FERDİ KAZA SİGORTA POLİÇESİ (GRUP) 906 906 Maden Çalışanları Zorunlu Ferdi Kaza Poliçesi 910 910 YURTDIŞI GRUP SEYAHAT SİGORTA POLİÇESİ 930 930 FİLO SİGORTA POLİÇESİ 935 935 YURTDIŞI GRUP EĞİTİM SİGORTA POLİÇESİ 951 951 Bireysel Sağlık 952 952 Kurumsal Sağlık 953 953 BIREYSEL NEFES 954 954 SAĞLIK SİGORTA POLİÇESİ (GRUP) 955 955 YABANCI UYRUKLULAR SAĞLIK SIGORTASI 956 956 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (BIREYSEL) 957 957 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (KURUMSAL) 958 958 ASO 959 959 KURUMSAL NEFES 960 960 MEHMETÇIK TAMAMLAYICI SAĞLIK SIGORTASI 961 961 YABANCI UYRUKLULAR SAĞLIK SİGORTASI (Uzun Dönem) 962 962 ANADOLU RİSKLİ HASTALIKLAR SİGORTASI 963 963 CANIM KENDIM 965 965 KOBI TSS 966 966 AILEM GÜVENDE TAMAMLAYICI SAĞLIK SIGORTASI 971 971 SAĞLIK SİGORTA POLİÇESİ (FERDİ) 972 972 SAĞLIK SİGORTA POLİÇESİ (KURUMSAL) 990 990 YANGIN SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 KAZA SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 NAKLİYAT SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 TARIM SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 MÜHENDİSLİK SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 991 991 ABONMAN SİGORTA SÖZLEŞMESİ 992 992 CMR-KARAYOLU ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA SÖZLEŞMESİ 41001 410* TRAFIK (YENI) 41002 410** EKSTRA TRAFIK STANDART 41003 410*** SUPER TRAFIK 41004 410**** SINIRSIZ TRAFIK 41005 410***** TAM BAKIM PAKETI 41006 410****** TRAFIK YOL YARDIM 41007 410******* EKSTRA TRAFIK MINI 41008 410******** EKSTRA TRAFIK PLUS 41009 410********* HUKUKSAL KORUMA 42000 420* PERT KASKO %60 42001 420* PERT PLUS KASKO %50 42002 420* PERT PLUS KASKO %40 44001 440-1 GUVENLI GELECEK PLUS 44002 440-2 GUVENLI GELECEK MAXI PLUS 44003 440-3 GUVENLI GELECEK 44004 440-4 GUVENLI GELECEK MAXI 44005 440-5 GUVENLI GELECEK GOLD 44006 440-6 GUVENLI GELECEK GOLD PLUS 44007 440-7 GUVENLI GELECEK GOLD MAXI 44008 440-8 GUVENLI GELECEK GOLD MAXI PLUS 44009 440-9 GULUMSETEN PAKET 44010 440-10 SMS FERDI KAZA 44011 440-11 GUVENLI BIZ MAXI BTSO 44012 440-12 GUVENLI BIZ GOLD PLUS BTSO 44013 440-13 ISYERIMDE GUVENDEYIM PAKET-1 44014 440-14 ISYERIMDE GUVENDEYIM PAKET-2 44015 440-15 ISYERIMDE GUVENDEYIM PAKET-3 44016 440-16 ISYERIMDE GUVENDEYIM PAKET-4 44017 440-17 1.SINIF FAALIYETLER 44018 440-18 2.SINIF FAALIYETLER 44019 440-19 3.SINIF FAALIYETLER 44020 440-20 IS TE TICARI KORUMA 44021 440-21 IS TE CIFTCI KORUMA 44022 440-22 KARMA/IS TE KORUMA 44023 440-23 IS TE ÖZEL KORUMA 44024 440-24 IS TE MAXIMUM KORUMA 44025 440-25 PROFESYONEL FUTBOLCU 1.TEMINAT GRUBU 44026 440-26 PROFESYONEL FUTBOLCU 2.TEMINAT GRUBU 44027 440-27 PROFESYONEL FUTBOLCU 3.TEMINAT GRUBU 44028 440-28 PAKET 1 44029 440-29 PAKET 2 44030 440-30 PAKET 3 44031 440-31 PAKET 4 44032 440-32 PROFESYONEL SPORCU 44033 440-33 BASIDAV-1 44034 440-34 BASIDAV-2 44035 440-35 BASIDAV-3 44036 440-36 BASIDAV-4 44037 440-37 BASIDAV-5 44038 440* ELİT PAKET 64501 645* Ekstra Garanti Sigortası 64502 645* Dört Dörtlük Cihaz Koruma ve Kazaen Kırılma Sigortası 64503 645* Ekstra Garanti ve Kazaen Kırılma Sigortası 64504 645* Dört Dörtlük Cihaz Koruma Sigortası 70101 701-1 DEV KASKO 71601 716* VOLKSWAGEN KASKO SIGORTA POLIÇESI 71602 716** AUDİ KASKO SİGORTASI 71603 716*** SKODA KASKO SİGORTASI 71604 716**** SCANIA KASKO SİGORTA POLİÇESİ 71605 716***** HONDA KASKO SİGORTA POLİÇESİ 71801 718* HESAPLI STANDART 71802 718** HESAPLI PLUS 71803 718*** HESAPLI MİNİ 73201 732* YENI NESIL HESAPLI KONUT PAKET 73202 732** YENI NESIL STANDART KONUT PAKET 73203 732*** YENI NESIL ELIT KONUT PAKET 74001 740* TÜRKIYE' YE SEYAHAT SIGORTASI 74002 732** TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Açıklama",
+            "Poliçe Kodu Açıklama",
+            "Poliçe Adı",
+            "Ürün Adı",
+            "Poliçe Kodu Detay"
+          ]
+        },
+        {
+          "name": "TKZ_ADI",
+          "type": "VARCHAR2",
+          "description": "TKZ Kodu Açıklaması TKZ Kodu Açıklaması, sigorta sistemlerinde kullanılan TKZ kodunun neyi ifade ettiğini açıklayan metinsel bilgidir. TKZ kodu açıklaması = TKZ kodunun hangi tarife, kapsam veya ürün tanımına karşılık geldiğini açıklayan bilgi Kolon icerigi: TKZ_ID TKZ_KODU TKZ_ADI KAYNAK_SISTEM_ID -99 -99 N/A -99 1 702 KAR KAYBI 1 2 0 1 3 701 YANGIN 1 4 704 MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA 1 5 711 KIYMET 1 6 703 ZORUNLU DEPREM 1 7 715 KTK ZMSS (Trafik)(Yeşil Kart Dahil) 1 8 710 EMTEA 1 9 717 KASKO 1 10 712 TEKNE 1 11 719 İŞVEREN MALİ SORUMLULUK 1 12 714 ZORUNLU KARAYOLU TASIMACILIK MALİ SORUMLULUK 1 13 720 ÜÇÜNCÜ ŞAHISLARA KARŞI MS 1 14 716 İHTİYARİ MALİ SORUMLULUK 1 15 724 HIRSIZLIK 1 16 718 KARAYOLU YOLCU TAŞIMACILIĞI ZORUNLU KOLTUK FERDİ KAZA 1 17 726 TEHLİKE MADDELER ZORUNLU SORUMLULUK 1 18 721 ASANSÖR KAZA 3. ŞAHIS MS 1 19 728 UÇAK MALİ MESULİYET 1 20 723 CAM KIRILMASI 1 21 731 ÖZEL GÜVENLİK MSS 1 22 725 TÜPGAZ ZORUNLU SORUMLULUK 1 23 733 MESLEKİ SORUMLULUK 1 24 727 UÇAK TEKNE 1 25 755 KREDİ 1 26 729 UÇAK YOLCU KAZA 1 27 760 HUKUKSAL KORUMA 1 28 730 TIBBI KÖTÜ UYGULAMAYA İLİŞKİN ZMSS 1 29 766 MONTAJ 1 30 734 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MS 1 31 768 ELEKTRONİK CİHAZ 1 32 750 FERDİ KAZA 1 33 773 GENEL ZARARLAR 1 34 756 İHRACAT KREDİ 1 35 775 DOLU SERA 1 36 765 MAKİNE KIRILMASI 1 37 777 DEVLET DESTEKLİ BİTKİSEL ÜRÜN 1 38 767 İNŞAAT 1 39 779 DEVLET DESTEKLİ HAYVAN HAYAT 1 40 770 DENİZ YOLU YOLCU TAŞIMACILIĞI ZMS 1 41 780 HAYVAN HAYAT 1 42 776 DEVLET DESTEKLİ SERA 1 43 782 DEVLET DESTEKLİ KÜMES HAYVAN HAYAT 1 44 778 DEVLET DESTEKLİ SU ÜRÜNLERİ 1 45 786 SEYAHAT SAĞLIK 1 46 783 DEVLET DESTEKLİ KÜÇÜKBAŞ HAYVAN HAYAT 1 47 785 SAĞLIK 1 48 759 DİĞER FİNANSAL KAYIPLAR 1 49 736 DOĞRUDAN KEFALET 1 50 706 DOLAYLI KEFALET 1 51 722 ÇEVRE KİRLİLİĞİ MALİ SORUMLULUK 1 146 707 DEVLET DESTEKLİ TİCARİ ALACAK SİGORTASI 1 147 771 ÜRÜN SORUMLULUK SİGORTASI 1 148 784 HASTALIK 1 149 705 DOĞRUDAN KEFALET 1 150 708 BİNA TAMAMLAMA 1 226 713 RAYLI ARAÇLAR 1 227 740 İHTİYARİ DEPREM 1 228 732 ZORUNLU SERTİFİKA MS 1 229 741 SEL 1 230 735 TEKNE SORUMLULUK 1 231 742 DEPREM VE SEL DIŞINDAKİ DOĞAL AFETLER 1 232 737 MOTORLU KARA TAŞITLARI DIŞINDAKİ KARA TAŞITLARI 1 233 743 NÜKLEER ENERJİ 1 234 738 NEHİR ARAÇLARI 1 235 744 TOPRAK KAYMASI 1 236 739 GÖL ARAÇLARI 1 237 745 TASİTLİ KREDİ 1 238 752 HAVA ŞARTLARI 1 239 746 UZUN VADELİ KONUT KREDİSİ 1 240 753 GENEL GİDERLER 1 241 747 TARIM KREDİSİ 1 242 754 BEKLENMEYEN TİCARİ GİDERLER 1 243 748 İSTİHDAM 1 244 757 PİYASA DEĞERİNDEKİ KAYIP 1 245 749 GELİR YETERSİZLİĞİ 1 246 758 KİRA VE GELİR KAYBI 1 247 761 PATLAMA 1 248 774 SU ÜRÜNLERİ 1 249 769 YAPI DENETİMİ ZORUNLU MS 1 250 781 KÜMES HAYVAN. HAYAT 1 251 751 UZUN SÜRELİ FERDİ KAZA 15 252 789 SEYAHAT ARAÇ DESTEK 15 253 798 DESTEK GENEL 15 Tablo baglami: TKZ Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "TKZ Tanımı",
+            "Tarife Kodu Açıklaması",
+            "TKZ Kodu Açıklaması"
+          ]
+        },
+        {
+          "name": "TKZ_KODU",
+          "type": "VARCHAR2",
+          "description": "TKZ Kodu TKZ Kodu, sigortacılıkta bir poliçenin veya işlemin tarife, kapsam veya özel ürün sınıflandırmasını belirlemek için kullanılan tanımlayıcı koddur. TKZ Kodu = Poliçenin hangi tarife veya kapsam grubuna ait olduğunu gösteren kod. Kolon icerigi: TKZ_ID TKZ_KODU TKZ_ADI KAYNAK_SISTEM_ID -99 -99 N/A -99 1 702 KAR KAYBI 1 2 0 1 3 701 YANGIN 1 4 704 MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA 1 5 711 KIYMET 1 6 703 ZORUNLU DEPREM 1 7 715 KTK ZMSS (Trafik)(Yeşil Kart Dahil) 1 8 710 EMTEA 1 9 717 KASKO 1 10 712 TEKNE 1 11 719 İŞVEREN MALİ SORUMLULUK 1 12 714 ZORUNLU KARAYOLU TASIMACILIK MALİ SORUMLULUK 1 13 720 ÜÇÜNCÜ ŞAHISLARA KARŞI MS 1 14 716 İHTİYARİ MALİ SORUMLULUK 1 15 724 HIRSIZLIK 1 16 718 KARAYOLU YOLCU TAŞIMACILIĞI ZORUNLU KOLTUK FERDİ KAZA 1 17 726 TEHLİKE MADDELER ZORUNLU SORUMLULUK 1 18 721 ASANSÖR KAZA 3. ŞAHIS MS 1 19 728 UÇAK MALİ MESULİYET 1 20 723 CAM KIRILMASI 1 21 731 ÖZEL GÜVENLİK MSS 1 22 725 TÜPGAZ ZORUNLU SORUMLULUK 1 23 733 MESLEKİ SORUMLULUK 1 24 727 UÇAK TEKNE 1 25 755 KREDİ 1 26 729 UÇAK YOLCU KAZA 1 27 760 HUKUKSAL KORUMA 1 28 730 TIBBI KÖTÜ UYGULAMAYA İLİŞKİN ZMSS 1 29 766 MONTAJ 1 30 734 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MS 1 31 768 ELEKTRONİK CİHAZ 1 32 750 FERDİ KAZA 1 33 773 GENEL ZARARLAR 1 34 756 İHRACAT KREDİ 1 35 775 DOLU SERA 1 36 765 MAKİNE KIRILMASI 1 37 777 DEVLET DESTEKLİ BİTKİSEL ÜRÜN 1 38 767 İNŞAAT 1 39 779 DEVLET DESTEKLİ HAYVAN HAYAT 1 40 770 DENİZ YOLU YOLCU TAŞIMACILIĞI ZMS 1 41 780 HAYVAN HAYAT 1 42 776 DEVLET DESTEKLİ SERA 1 43 782 DEVLET DESTEKLİ KÜMES HAYVAN HAYAT 1 44 778 DEVLET DESTEKLİ SU ÜRÜNLERİ 1 45 786 SEYAHAT SAĞLIK 1 46 783 DEVLET DESTEKLİ KÜÇÜKBAŞ HAYVAN HAYAT 1 47 785 SAĞLIK 1 48 759 DİĞER FİNANSAL KAYIPLAR 1 49 736 DOĞRUDAN KEFALET 1 50 706 DOLAYLI KEFALET 1 51 722 ÇEVRE KİRLİLİĞİ MALİ SORUMLULUK 1 146 707 DEVLET DESTEKLİ TİCARİ ALACAK SİGORTASI 1 147 771 ÜRÜN SORUMLULUK SİGORTASI 1 148 784 HASTALIK 1 149 705 DOĞRUDAN KEFALET 1 150 708 BİNA TAMAMLAMA 1 226 713 RAYLI ARAÇLAR 1 227 740 İHTİYARİ DEPREM 1 228 732 ZORUNLU SERTİFİKA MS 1 229 741 SEL 1 230 735 TEKNE SORUMLULUK 1 231 742 DEPREM VE SEL DIŞINDAKİ DOĞAL AFETLER 1 232 737 MOTORLU KARA TAŞITLARI DIŞINDAKİ KARA TAŞITLARI 1 233 743 NÜKLEER ENERJİ 1 234 738 NEHİR ARAÇLARI 1 235 744 TOPRAK KAYMASI 1 236 739 GÖL ARAÇLARI 1 237 745 TASİTLİ KREDİ 1 238 752 HAVA ŞARTLARI 1 239 746 UZUN VADELİ KONUT KREDİSİ 1 240 753 GENEL GİDERLER 1 241 747 TARIM KREDİSİ 1 242 754 BEKLENMEYEN TİCARİ GİDERLER 1 243 748 İSTİHDAM 1 244 757 PİYASA DEĞERİNDEKİ KAYIP 1 245 749 GELİR YETERSİZLİĞİ 1 246 758 KİRA VE GELİR KAYBI 1 247 761 PATLAMA 1 248 774 SU ÜRÜNLERİ 1 249 769 YAPI DENETİMİ ZORUNLU MS 1 250 781 KÜMES HAYVAN. HAYAT 1 251 751 UZUN SÜRELİ FERDİ KAZA 15 252 789 SEYAHAT ARAÇ DESTEK 15 253 798 DESTEK GENEL 15 Tablo baglami: TKZ Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Tarife Kodu",
+            "Teminat Kodu",
+            "Ürün Tarife Kodu",
+            "Tarife Tanımlama Kodu",
+            "TKZ Kodu"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID"
+      ],
+      "indexes": [
+        "AS_DWH.POL_POLICE_REF_TANIM(REF_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe Adı",
+        "Üretim",
+        "AS_DWH.POL_POLICE_REF_TANIM",
+        "Poliçe Açıklama",
+        "Poliçe Kodu Açıklama",
+        "Ürün Adı",
+        "Poliçe Kodu Detay",
+        "Poliçe Adı Detay",
+        "Branş",
+        "Sigorta Branşı",
+        "Sigorta Türü",
+        "Poliçe Branşı",
+        "Branş Açıklama",
+        "Hayır",
+        "TKZ Kodu",
+        "Tarife Kodu",
+        "Teminat Kodu",
+        "Ürün Tarife Kodu",
+        "Tarife Tanımlama Kodu",
+        "TKZ Kodu Açıklaması"
+      ]
+    },
+    {
+      "score": 0.0023,
+      "table": "AS_DWH.POL_BRANS",
+      "description": "Branş Tanımlarını İçeren Look Up Tablo TKZ Tanımlarını İçeren Look Up Tablo",
+      "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+      "columns": [
+        {
+          "name": "BRANS_ADI",
+          "type": "VARCHAR2",
+          "description": "Branş Açıklama Üretim branş açıklaması bilgisidir. Branş Açıklama, sigortacılıkta bir poliçenin ait olduğu sigorta branşının adını veya tanımını açıklayıcı şekilde gösteren bilgidir. Branş açıklama = Sigorta branşının adının veya detaylı tanımının yazıldığı alan Kolon icerigi: BRANS_ID BRANS_KODU BRANS_ADI KAYNAK_SISTEM_ID -99 -99 N/A -99 2 101 DOLU 1 3 102 SERA 1 4 103 HAYVAN HAYAT 1 5 104 BESİ 1 6 111 BİTKİSEL ÜRÜN 1 7 112 SERA POLİÇESİ 1 8 113 ARICILIK 1 9 114 HAYVAN HAYAT 1 10 115 KÜÇÜKBAŞ HAYVAN HAYAT 1 11 116 KÜMES HAYVANLARI 1 12 210 HUKUKSAL KORUMA 1 13 118 SU ÜRÜNLERİ POLİÇESİ 1 14 330 KIYMET TAŞIMA 1 15 220 HUKUKSAL KORUMA 1 16 340 NAKLİYECİ SORUMLULUK 1 19 240 HUKUKSAL KORUMA TAŞINMAZ 1 20 410 TRAFİK 1 21 250 KREDİ SİGORTALARI 1 22 414 ZORUNLU TAŞIMACI SORUMLULUK 1 25 310 EMTEA TAŞIMA 1 26 431 ÜÇÜNCÜ KİŞİ SORUMLULUK 1 27 370 TEKNE 1 28 433 KIYI TESİSLERİ 1 29 411 MESLEKİ FAALİYET 1 30 435 ÜRÜN SORUMLULUK 1 31 415 YEŞİL KART (TRAMER) 1 32 437 TÜPGAZ ZORUNLU SORUMLULUK 1 33 419 ANADOLU HİZMET 1 34 439 ZORUNLU HEKİM SORUMLULUK 1 35 420 KASKO 1 36 441 KOLTUK FERDİ KAZA 1 37 430 ARTAN MALİ SORUMLULUK 1 38 460 CAM KIRILMASI 1 39 432 İŞVEREN SORUMLULUK 1 40 470 UÇAK KASKO 1 41 434 ASANSÖR SORUMLULUK 1 42 472 UÇAK KOLTUK FERDİ 1 43 436 MESLEKİ SORUMLULUK 1 44 474 UÇAK KASKO MUAFİYET 1 45 438 TEHLİKELİ MADDELER 1 46 490 MUHTELİF RİSKLER 1 47 440 FERDİ KAZA 1 49 442 KOLTUK FERDİ KAZA 1 50 610 İNŞAAT 1 51 444 VİZE 1 52 800 ZORUNLU DEPREM 1 53 450 HIRSIZLIK 1 54 471 UÇAK SORUMLULUK 1 55 473 UÇAK MUHTELİF RİSKLER 1 56 475 DENİZ YOLU YOLCU TAŞIMACILIĞI 1 57 500 YANGIN 1 58 620 DOĞALGAZ 1 59 630 MAKİNA KIRILMASI 1 60 640 ELEKTRONİK CİHAZ 1 61 704 FERDİ KAZA 1 62 900 SAĞLIK 1 63 0 SAĞLIK 1 64 120 1 65 100 1 66 400 1 67 230 1 68 600 1 69 300 1 70 200 HUKUKSAL KORUMA 1 71 421 1 72 482 BİREYSEL SİBER GÜVENLİK 1 73 706 DOLAYLI KEFALET 1 74 951 SAĞLIK 1 75 484 TİCARİ SİBER GÜVENLİK 1 76 722 KONUT 1 77 736 DOĞRUDAN KEFALET 1 78 486 UÇUŞ GECİKME 1 364 476 YÖNETİCİ SORUMLULUK 1 365 252 DEVLET DESTEKLI KOBI 1 366 443 ÜÇÜNCÜ KİŞİ ÜRÜN SORUMLULUK 1 367 416 YEŞIL KART 1 368 710 YURTDIŞI SEYAHAT 1 369 488 PARAMETRIK SALGIN HASTALIK SIGORTASI 1 370 447 ZORUNLU KOLTUK FERDI KAZA 1 371 255 PATIM GÜVENDE SIGORTASI 1 372 487 BILETIM GÜVENDE SIGORTASI 1 373 478 HAVA ARACI YEDEK PARÇA 1 374 477 HAVA ARACI GÖVDE SAVAŞ 1 375 632 MAKİNA KIRILMASI 1 376 428 PATİM GÜVENDE 1 377 505 TICARI YANGIN 1 378 760 KASKO 1 379 261 BİNA TAMAMLAMA 15 380 251 İHRACAT KREDİ 15 381 491 DOLAYLI KEFALET 15 382 811 TARSİM BİTKİSEL - DON DIŞINDAKİ RİSKLER 15 383 253 FİNANSAL KAYIP 15 384 81100 TARSİM BİTKİSEL - DON DIŞINDAKİ RİSKLER(DD) 15 385 810 TARSİM BİTKİSEL DON 15 386 840 ARICILIK 15 387 81000 TARSİM BİTKİSEL DON(DD) 15 388 850 BÜYÜK BAŞ HAYVANLAR 15 389 84000 ARICILIK(DD) 15 390 85000 BÜYÜK BAŞ HAYVANLAR(DD) 15 391 851 BÜYÜK BAŞ HAYVAN HAYAT - DAR 15 392 852 KÜÇÜK BAŞ HAYVAN HAYAT 15 393 85100 BÜYÜK BAŞ HAYVAN HAYAT - DAR(DD) 15 394 85200 KÜÇÜK BAŞ HAYVAN HAYAT(DD) 15 395 860 KÜÇÜK BAŞ HAYVAN HAYAT - DAR 15 396 86000 KÜÇÜK BAŞ HAYVAN HAYAT - DAR(DD) 15 397 870 KÜMES HAYVANLARI 15 398 871 KÜMES HAYVAN HAYAT - DAR 15 399 87000 KÜMES HAYVANLARI(DD) 15 400 87100 KÜMES HAYVAN HAYAT - DAR(DD) 15 401 890 SERA 15 402 895 TARSİM BİTKİSEL DON 15 403 89000 SERA(DD) 15 404 784 TARSİM BİTKİSEL - GÜNEŞ YANIKLIĞI 15 405 78400 TARSİM BİTKİSEL - GÜNEŞ YANIKLIĞI (DD) 15 406 786 TARSİM BİTKİSEL - TEMEL PAKET 15 407 78600 TARSİM BİTKİSEL - TEMEL PAKET (DD) 15 408 906 MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA 15 409 785 TARSİM BİTKİSE - KIŞ DONU 15 410 78500 TARSİM BİTKİSE - KIŞ DONU (DD) 15 411 560 HUKUKSAL KORUMA 15 Tablo baglami: Branş Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Hayır",
+            "Branş Açıklama"
+          ]
+        },
+        {
+          "name": "BRANS_KODU",
+          "type": "VARCHAR2",
+          "description": "Branş Üretim branşı bilgisidir. Branş, sigortacılıkta bir poliçenin ait olduğu sigorta türünü veya faaliyet alanını ifade eder. Branş = Poliçenin hangi sigorta alanına ait olduğunu gösteren sınıflandırma Kolon icerigi: BRANS_ID BRANS_KODU BRANS_ADI KAYNAK_SISTEM_ID -99 -99 N/A -99 2 101 DOLU 1 3 102 SERA 1 4 103 HAYVAN HAYAT 1 5 104 BESİ 1 6 111 BİTKİSEL ÜRÜN 1 7 112 SERA POLİÇESİ 1 8 113 ARICILIK 1 9 114 HAYVAN HAYAT 1 10 115 KÜÇÜKBAŞ HAYVAN HAYAT 1 11 116 KÜMES HAYVANLARI 1 12 210 HUKUKSAL KORUMA 1 13 118 SU ÜRÜNLERİ POLİÇESİ 1 14 330 KIYMET TAŞIMA 1 15 220 HUKUKSAL KORUMA 1 16 340 NAKLİYECİ SORUMLULUK 1 19 240 HUKUKSAL KORUMA TAŞINMAZ 1 20 410 TRAFİK 1 21 250 KREDİ SİGORTALARI 1 22 414 ZORUNLU TAŞIMACI SORUMLULUK 1 25 310 EMTEA TAŞIMA 1 26 431 ÜÇÜNCÜ KİŞİ SORUMLULUK 1 27 370 TEKNE 1 28 433 KIYI TESİSLERİ 1 29 411 MESLEKİ FAALİYET 1 30 435 ÜRÜN SORUMLULUK 1 31 415 YEŞİL KART (TRAMER) 1 32 437 TÜPGAZ ZORUNLU SORUMLULUK 1 33 419 ANADOLU HİZMET 1 34 439 ZORUNLU HEKİM SORUMLULUK 1 35 420 KASKO 1 36 441 KOLTUK FERDİ KAZA 1 37 430 ARTAN MALİ SORUMLULUK 1 38 460 CAM KIRILMASI 1 39 432 İŞVEREN SORUMLULUK 1 40 470 UÇAK KASKO 1 41 434 ASANSÖR SORUMLULUK 1 42 472 UÇAK KOLTUK FERDİ 1 43 436 MESLEKİ SORUMLULUK 1 44 474 UÇAK KASKO MUAFİYET 1 45 438 TEHLİKELİ MADDELER 1 46 490 MUHTELİF RİSKLER 1 47 440 FERDİ KAZA 1 49 442 KOLTUK FERDİ KAZA 1 50 610 İNŞAAT 1 51 444 VİZE 1 52 800 ZORUNLU DEPREM 1 53 450 HIRSIZLIK 1 54 471 UÇAK SORUMLULUK 1 55 473 UÇAK MUHTELİF RİSKLER 1 56 475 DENİZ YOLU YOLCU TAŞIMACILIĞI 1 57 500 YANGIN 1 58 620 DOĞALGAZ 1 59 630 MAKİNA KIRILMASI 1 60 640 ELEKTRONİK CİHAZ 1 61 704 FERDİ KAZA 1 62 900 SAĞLIK 1 63 0 SAĞLIK 1 64 120 1 65 100 1 66 400 1 67 230 1 68 600 1 69 300 1 70 200 HUKUKSAL KORUMA 1 71 421 1 72 482 BİREYSEL SİBER GÜVENLİK 1 73 706 DOLAYLI KEFALET 1 74 951 SAĞLIK 1 75 484 TİCARİ SİBER GÜVENLİK 1 76 722 KONUT 1 77 736 DOĞRUDAN KEFALET 1 78 486 UÇUŞ GECİKME 1 364 476 YÖNETİCİ SORUMLULUK 1 365 252 DEVLET DESTEKLI KOBI 1 366 443 ÜÇÜNCÜ KİŞİ ÜRÜN SORUMLULUK 1 367 416 YEŞIL KART 1 368 710 YURTDIŞI SEYAHAT 1 369 488 PARAMETRIK SALGIN HASTALIK SIGORTASI 1 370 447 ZORUNLU KOLTUK FERDI KAZA 1 371 255 PATIM GÜVENDE SIGORTASI 1 372 487 BILETIM GÜVENDE SIGORTASI 1 373 478 HAVA ARACI YEDEK PARÇA 1 374 477 HAVA ARACI GÖVDE SAVAŞ 1 375 632 MAKİNA KIRILMASI 1 376 428 PATİM GÜVENDE 1 377 505 TICARI YANGIN 1 378 760 KASKO 1 379 261 BİNA TAMAMLAMA 15 380 251 İHRACAT KREDİ 15 381 491 DOLAYLI KEFALET 15 382 811 TARSİM BİTKİSEL - DON DIŞINDAKİ RİSKLER 15 383 253 FİNANSAL KAYIP 15 384 81100 TARSİM BİTKİSEL - DON DIŞINDAKİ RİSKLER(DD) 15 385 810 TARSİM BİTKİSEL DON 15 386 840 ARICILIK 15 387 81000 TARSİM BİTKİSEL DON(DD) 15 388 850 BÜYÜK BAŞ HAYVANLAR 15 389 84000 ARICILIK(DD) 15 390 85000 BÜYÜK BAŞ HAYVANLAR(DD) 15 391 851 BÜYÜK BAŞ HAYVAN HAYAT - DAR 15 392 852 KÜÇÜK BAŞ HAYVAN HAYAT 15 393 85100 BÜYÜK BAŞ HAYVAN HAYAT - DAR(DD) 15 394 85200 KÜÇÜK BAŞ HAYVAN HAYAT(DD) 15 395 860 KÜÇÜK BAŞ HAYVAN HAYAT - DAR 15 396 86000 KÜÇÜK BAŞ HAYVAN HAYAT - DAR(DD) 15 397 870 KÜMES HAYVANLARI 15 398 871 KÜMES HAYVAN HAYAT - DAR 15 399 87000 KÜMES HAYVANLARI(DD) 15 400 87100 KÜMES HAYVAN HAYAT - DAR(DD) 15 401 890 SERA 15 402 895 TARSİM BİTKİSEL DON 15 403 89000 SERA(DD) 15 404 784 TARSİM BİTKİSEL - GÜNEŞ YANIKLIĞI 15 405 78400 TARSİM BİTKİSEL - GÜNEŞ YANIKLIĞI (DD) 15 406 786 TARSİM BİTKİSEL - TEMEL PAKET 15 407 78600 TARSİM BİTKİSEL - TEMEL PAKET (DD) 15 408 906 MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA 15 409 785 TARSİM BİTKİSE - KIŞ DONU 15 410 78500 TARSİM BİTKİSE - KIŞ DONU (DD) 15 411 560 HUKUKSAL KORUMA 15 Tablo baglami: Branş Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigorta Branşı",
+            "Sigorta Türü",
+            "Poliçe Branşı",
+            "Branş"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID",
+        "AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID"
+      ],
+      "indexes": [
+        "AS_DWH.POL_BRANS(BRANS_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Branş",
+        "Üretim",
+        "AS_DWH.POL_BRANS",
+        "Sigorta Branşı",
+        "Sigorta Türü",
+        "Poliçe Branşı",
+        "Branş Açıklama",
+        "Hayır",
+        "TKZ Kodu",
+        "Tarife Kodu",
+        "Teminat Kodu",
+        "Ürün Tarife Kodu",
+        "Tarife Tanımlama Kodu"
+      ]
+    },
+    {
+      "score": 0.0016,
+      "table": "AS_DWH.POL_URUN",
+      "description": "Poliçe Bilgilerini Tutan Tablo Ürünlere ait bilgileri tutan tablo",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası",
+      "columns": [
+        {
+          "name": "URUN_ADI",
+          "type": "VARCHAR2",
+          "description": "Ürün Adı Ürün Adı, sigorta şirketinin müşterilere sunduğu sigorta ürününün veya teminat paketinin adını ifade eder. Ürün adı = Satılan sigorta ürününün ismi Kolon icerigi: URUN_KODU URUN_ADI KAYNAK_SISTEM_ID 140 YANGIN / YANGIN SİGORTASI 15 141 YANGIN / TİCARİ YANGIN SİGORTASI 15 143 YANGIN / KİRA KAYBI SİGORTASI 15 144 YANGIN / KAR KAYBI SİGORTASI 15 145 YANGIN / HIRSIZLIK SİGORTASI 15 146 YANGIN / ABONMAN SİGORTASI 15 147 YANGIN / YANGIN MALİ SORUMLULUK SİGORTASI 15 148 YANGIN / TAŞINAN PARA-EMNİYETİ SUİSTİMAL SİGORTASI 15 156 YANGIN / KREDİ KARTI HIRSIZLIK SİGORTASI 15 157 YANGIN / KASA HIRSIZLIK SİGORTASI 15 160 SORUMLULUK / BİREYSEL SİBER GÜVENLİK SİGORTASI 15 161 SORUMLULUK / TİCARİ SİBER RİSK SİGORTASI 15 162 SORUMLULUK / KREDİ SİGORTASI 15 163 SORUMLULUK / FİNANSAL KAYIP SİGORTASI 15 164 SORUMLULUK / TİCARİ SİBER GÜVENLİK PAKET SİGORTASI 15 166 SORUMLULUK / HAVACILIK SİGORTASI 15 167 YANGIN / ANADOLU PAKET SİGORTASI 15 168 YANGIN / CAM KIRILMASI SİGORTASI 15 169 SORUMLULUK / BİNA TAMAMLAMA SİGORTASI 15 265 OTO / BİREYSEL FERDİ KAZA SİGORTASI 15 266 OTO / GRUP FERDİ KAZA SİGORTASI 15 267 OTO / MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA SİGORTASI 15 270 SORUMLULUK / İŞVEREN SORUMLULUK SİGORTASI 15 273 SORUMLULUK / ÜÇÜNCÜ ŞAHISLARA KARŞI SORUMLULUK SİGORTASI 15 275 SORUMLULUK / DOKTOR SİGORTASI 15 288 SORUMLULUK / MESLEKİ SORUMLULUK SİGORTASI 15 290 SORUMLULUK / ÜRÜN SORUMLULUK SİGORTASI 15 293 SORUMLULUK / ZORUNLU SORUMLULUK SİGORTASI 15 299 SORUMLULUK / KEFALET SİGORTASI 15 300 OTO / MESLEKİ FAALİYET SİGORTASI 15 352 OTO / İHTİYARİ MALİ MESULİYET SİGORTASI 15 400 NAKLİYAT / DENİZE BAĞLI SORUMLULUK SİGORTASI 15 401 NAKLİYAT / EMTİA SORUMLULUK SİGORTASI 15 402 NAKLİYAT / EMTİA & KIYMET TAŞIMA SİGORTASI 15 403 NAKLİYAT / TEKNE SİGORTASI 15 404 NAKLİYAT / TEKNE İNŞAAT SİGORTASI 15 511 MÜHENDİSLİK / MAKİNE KIRILMASI SİGORTASI 15 512 MÜHENDİSLİK / ELEKTRONİK CİHAZ SİGORTASI 15 513 MÜHENDİSLİK / İNŞAAT-MONTAJ SİGORTASI 15 700 YANGIN / TARSİM TARIM SİGORTALARI 15 1000004 İsteğe Bağlı Araç Poliçeleri 2 1000019 İsteğe Bağlı Araç Poliçeleri 2 1000020 Ticari Yangın 2 1000028 Maden Çalışanları Zorunlu Ferdi Kaza 2 1000031 Trafik 2 1000032 Kasko 2 2000005 Araç Dışı Zorunlu Örünler 2 2000026 Ferdi Kaza 2 2000027 Yurtdışı Seyahat 2 2000028 Nakliyat Branşına Bağlı Sorumluluk Sigortaları 2 2000029 Tekne İnşaat & Garanti Sigortası 2 2000030 Proje 2 2000031 Havacılık Sigorta Poliçesi 2 2000032 Kirilma 2 2000033 Finansal Risk 2 2000034 Bireysel Yangın 2 2000035 Genel Sorumluluk 2 2000036 Bireysel Sağlık 2 2000037 Zorunlu Sorumluluk 2 2000038 Hayvan Hayat 2 2000039 Bitkisel Ürün 2 2000043 Emtia Taşıma Sigortası 2 2000044 Test Ürünü 2 2000053 Grup Sağlık 2 2000056 Mehmetçik Yaşam Sigortası 2 2000057 Tekne ve Makine Sigortaları 2 2000058 Accounting test 2 2000059 TARSİM 2 2000060 Nakliyeci Sorumluluk Sigortası 2 2000062 Zorunlu Deprem 2 2000063 AS400 Ürünü 2 2000065 Türkiye'ye Seyahat Sigortası 2 2000067 Uçuşum Güvende Sigortası 2 2000069 Ticari Alacak Sigortası 2 9000001 Yeşil Kart 2 17000000 Ticari Yangın 2 17000001 Dijital Ticari Yangın 2 20000001 Telefonum Güvende Sigortası 2 20000002 Parametrik Salgın Hastalık Sigortası 2 20000003 Yurtdışı Eğitim 2 20000004 Zorunlu Koltuk Ferdi Kaza 2 20000005 Bireysel Ferdi Kaza 2 20000006 Koltuk Ferdi Kaza 2 20000008 Patim Güvende Sigortası 2 20000009 Biletim Güvende Sigortası 2 20000010 Canım Kendim 2 20000011 Gezinti Teknesi 2 61348462 Ticari Siber Güvenlik Paket Poliçesi 2 61348466 Emtia Taşıma Sigortası 2 Tablo baglami: Ürünlere ait bilgileri tutan tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigorta Ürün Adı",
+            "Poliçe Ürün Adı",
+            "Ürün Tanımı",
+            "Sigorta Ürün İsmi",
+            "Ürün Tanımlaması",
+            "Ürün Adı"
+          ]
+        },
+        {
+          "name": "URUN_KODU",
+          "type": "VARCHAR2",
+          "description": "Ürün Kodu Ürün Kodu, sigorta şirketinin sunduğu her sigorta ürününü sistem içinde benzersiz şekilde tanımlamak için kullanılan koddur. Ürün kodu = Sigorta ürününü sistemde tanımlayan özel kod Kolon icerigi: URUN_KODU URUN_ADI KAYNAK_SISTEM_ID 140 YANGIN / YANGIN SİGORTASI 15 141 YANGIN / TİCARİ YANGIN SİGORTASI 15 143 YANGIN / KİRA KAYBI SİGORTASI 15 144 YANGIN / KAR KAYBI SİGORTASI 15 145 YANGIN / HIRSIZLIK SİGORTASI 15 146 YANGIN / ABONMAN SİGORTASI 15 147 YANGIN / YANGIN MALİ SORUMLULUK SİGORTASI 15 148 YANGIN / TAŞINAN PARA-EMNİYETİ SUİSTİMAL SİGORTASI 15 156 YANGIN / KREDİ KARTI HIRSIZLIK SİGORTASI 15 157 YANGIN / KASA HIRSIZLIK SİGORTASI 15 160 SORUMLULUK / BİREYSEL SİBER GÜVENLİK SİGORTASI 15 161 SORUMLULUK / TİCARİ SİBER RİSK SİGORTASI 15 162 SORUMLULUK / KREDİ SİGORTASI 15 163 SORUMLULUK / FİNANSAL KAYIP SİGORTASI 15 164 SORUMLULUK / TİCARİ SİBER GÜVENLİK PAKET SİGORTASI 15 166 SORUMLULUK / HAVACILIK SİGORTASI 15 167 YANGIN / ANADOLU PAKET SİGORTASI 15 168 YANGIN / CAM KIRILMASI SİGORTASI 15 169 SORUMLULUK / BİNA TAMAMLAMA SİGORTASI 15 265 OTO / BİREYSEL FERDİ KAZA SİGORTASI 15 266 OTO / GRUP FERDİ KAZA SİGORTASI 15 267 OTO / MADEN ÇALIŞANLARI ZORUNLU FERDİ KAZA SİGORTASI 15 270 SORUMLULUK / İŞVEREN SORUMLULUK SİGORTASI 15 273 SORUMLULUK / ÜÇÜNCÜ ŞAHISLARA KARŞI SORUMLULUK SİGORTASI 15 275 SORUMLULUK / DOKTOR SİGORTASI 15 288 SORUMLULUK / MESLEKİ SORUMLULUK SİGORTASI 15 290 SORUMLULUK / ÜRÜN SORUMLULUK SİGORTASI 15 293 SORUMLULUK / ZORUNLU SORUMLULUK SİGORTASI 15 299 SORUMLULUK / KEFALET SİGORTASI 15 300 OTO / MESLEKİ FAALİYET SİGORTASI 15 352 OTO / İHTİYARİ MALİ MESULİYET SİGORTASI 15 400 NAKLİYAT / DENİZE BAĞLI SORUMLULUK SİGORTASI 15 401 NAKLİYAT / EMTİA SORUMLULUK SİGORTASI 15 402 NAKLİYAT / EMTİA & KIYMET TAŞIMA SİGORTASI 15 403 NAKLİYAT / TEKNE SİGORTASI 15 404 NAKLİYAT / TEKNE İNŞAAT SİGORTASI 15 511 MÜHENDİSLİK / MAKİNE KIRILMASI SİGORTASI 15 512 MÜHENDİSLİK / ELEKTRONİK CİHAZ SİGORTASI 15 513 MÜHENDİSLİK / İNŞAAT-MONTAJ SİGORTASI 15 700 YANGIN / TARSİM TARIM SİGORTALARI 15 1000004 İsteğe Bağlı Araç Poliçeleri 2 1000019 İsteğe Bağlı Araç Poliçeleri 2 1000020 Ticari Yangın 2 1000028 Maden Çalışanları Zorunlu Ferdi Kaza 2 1000031 Trafik 2 1000032 Kasko 2 2000005 Araç Dışı Zorunlu Örünler 2 2000026 Ferdi Kaza 2 2000027 Yurtdışı Seyahat 2 2000028 Nakliyat Branşına Bağlı Sorumluluk Sigortaları 2 2000029 Tekne İnşaat & Garanti Sigortası 2 2000030 Proje 2 2000031 Havacılık Sigorta Poliçesi 2 2000032 Kirilma 2 2000033 Finansal Risk 2 2000034 Bireysel Yangın 2 2000035 Genel Sorumluluk 2 2000036 Bireysel Sağlık 2 2000037 Zorunlu Sorumluluk 2 2000038 Hayvan Hayat 2 2000039 Bitkisel Ürün 2 2000043 Emtia Taşıma Sigortası 2 2000044 Test Ürünü 2 2000053 Grup Sağlık 2 2000056 Mehmetçik Yaşam Sigortası 2 2000057 Tekne ve Makine Sigortaları 2 2000058 Accounting test 2 2000059 TARSİM 2 2000060 Nakliyeci Sorumluluk Sigortası 2 2000062 Zorunlu Deprem 2 2000063 AS400 Ürünü 2 2000065 Türkiye'ye Seyahat Sigortası 2 2000067 Uçuşum Güvende Sigortası 2 2000069 Ticari Alacak Sigortası 2 9000001 Yeşil Kart 2 17000000 Ticari Yangın 2 17000001 Dijital Ticari Yangın 2 20000001 Telefonum Güvende Sigortası 2 20000002 Parametrik Salgın Hastalık Sigortası 2 20000003 Yurtdışı Eğitim 2 20000004 Zorunlu Koltuk Ferdi Kaza 2 20000005 Bireysel Ferdi Kaza 2 20000006 Koltuk Ferdi Kaza 2 20000008 Patim Güvende Sigortası 2 20000009 Biletim Güvende Sigortası 2 20000010 Canım Kendim 2 20000011 Gezinti Teknesi 2 61348462 Ticari Siber Güvenlik Paket Poliçesi 2 61348466 Emtia Taşıma Sigortası 2 Tablo baglami: Ürünlere ait bilgileri tutan tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigorta Ürün Kodu",
+            "Ürün Tanımlama Kodu",
+            "Ürün Kodu"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.URUN_KODU = AS_DWH.POL_URUN.URUN_KODU",
+        "AS_DWH.POL_POLICE_OZET.URUN_KODU = AS_DWH.POL_URUN.URUN_KODU"
+      ],
+      "indexes": [
+        "AS_DWH.POL_URUN(URUN_KODU)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe No",
+        "Üretim",
+        "AS_DWH.POL_URUN",
+        "Poliçe Numarası",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası",
+        "Yenileme No",
+        "Poliçe Yenileme Numarası",
+        "Poliçe Yenileme Sayısı",
+        "Tecdit No",
+        "Tecdit Numarası",
+        "Ek No",
+        "Zeyil Numarası",
+        "Poliçe Ek Numarası",
+        "Zeyil Sıra Numarası",
+        "Ek İşlem Numarası",
+        "Ek Numarası",
+        "Poliçe Ek No",
+        "Poliçe Döviz Cinsi"
+      ]
+    },
+    {
+      "score": 0.0005,
+      "table": "AS_DWH.POL_POLICE_KOD",
+      "description": "Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe",
+      "columns": [
+        {
+          "name": "POLICE_KOD_ADI",
+          "type": "VARCHAR2",
+          "description": "Poliçe Adı Poliçe kodunun açıklamasını içerir. Ürünün Adını verin Kolon icerigi: POLICE_KOD_ID KAYNAK_SISTEM_ID POLICE_KOD_ADI -99 1 N/A 1 1 KASKO VE ÜÇÜNCÜ ŞAHIS YÜKÜMLÜLÜK SİGORTASI 2 1 SERA SİGORTA POLİÇESİ 3 1 DOLU SİGORTA POLİÇESİ 4 1 BESİ SİGORTA POLİÇESİ 5 1 HAYVAN HAYAT SİGORTA POLİÇESİ 6 1 DEVLET DESTEKLİ BİTKİSEL ÜRÜN SİGORTALARI POLİÇESİ 7 1 KEDİ KÖPEK KAZA SİGORTA POLİÇESİ 8 1 ARICILIK(ARI KOVANI) 9 1 SERA POLİÇESİ 10 1 KÜÇÜKBAŞ HAYVAN POLİÇESİ 11 1 BÜYÜKBAŞ HAYVAN POLİÇESİ 12 1 KÜMES HAYVANLARI POLİÇESİ 13 1 MOTORLU ARACA BAGLI HUKUKSAL KORUMA POLİÇESİ 14 1 SU ÜRÜNLERİ POLİÇESİ 15 1 KİŞİ-AİLE HUKUKSAL KORUMA POLİÇESİ 16 1 SÜRÜCÜ HUKUKSAL KORUMA POLİÇESİ 17 1 YURTİÇİ KREDİ SİGORTA POLİÇESİ 18 1 TAŞINMAZA BAĞLI HUKUKSAL KORUMA POLİÇESİ 19 1 NAKLİYAT EMTEA PAKET POLİÇESİ 20 1 İHRACAT KREDİ SİGORTA POLİÇESİ 21 1 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 22 1 EMTEA TAŞIMA SİGORTA POLİÇESİ 23 1 TEKNE HARP VE GREV SİGORTA POLİÇESİ 24 1 NAKLİYAT EMTEA BLOK SİGORTA POLİÇESİ 25 1 TEKNE REHİNLİ ALACAKLI SİGORTA POLİÇESİ 26 1 KIYMET TAŞIMA SİGORTA POLİÇESİ 27 2 Gezinti Teknesi 28 1 YURTİÇİ NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 29 1 GEMİ TAMİRCİLERİ SORUMLULUK SİGORTA POLİÇESİ 30 1 TEKNE SİGORTA POLİÇESİ 31 1 MOTORLU ARAÇLARLA İLGİLİ MESLEKİ FAALİYET SİGORTA POLİÇESİ 32 1 TEKNE İNŞAAT SİGORTA POLİÇESİ 33 1 YEŞİLKART SİGORTA POLİÇESİ 34 1 TEKNE KAZANÇ/KİRA KAYBI SİGORTA POLİÇESİ 35 2 Kasko 36 1 GEZİNTİ TEKNELERİ İNŞAAT POLİÇESİ 37 1 ÜÇÜNCÜ KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 38 1 LİMAN VE TERMİNAL İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 39 1 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MALİ SORUMLULUK SİGORTA POL. 40 1 MARİNA İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 41 1 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 42 2 Trafik Sigortası 43 1 TÜPGAZ ZORUNLU SORUMLULUK SİGORTA POLİÇESİ 44 1 ZORUNLU KARAYOLU TAŞIMACILIK MALİ SORUMLULUK SİGORTA POLİÇESİ 45 1 TIBBİ KÖTÜ UYGULAMAYA İLİŞKİN ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 46 2 Yeşil Kart 47 2 Bireysel Ferdi Kaza Sigortası 48 2 Pert Kasko 49 1 VİZE SİGORTA POLİÇESİ 50 1 TAMAMLAYICI HEKİM SORUMLULUK SİGORTASI 51 2 Servis Araçları Koltuk Ferdi Kaza 52 1 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 53 1 FERDİ KAZA SİGORTA POLİÇESİ 54 1 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 55 1 KASA HIRSIZLIK SİGORTA POLİÇESİ 56 1 ASANSÖR KAZALARINDA 3.KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 57 1 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 58 1 MESLEKİ SORUMLULUK SİGORTA POLİÇESİ 59 1 KREDİ KARTI HIRSIZLIK SİGORTA POLİÇESİ 60 1 TEHLİKELİ MADDELER VE TEHLİKELİ ATIK ZORUNLU MALİ SORUMLULUK POLİÇESİ 61 1 KART KORUMA SİGORTA POLİÇESİ 62 2 Koltuk Ferdi Kaza 63 1 CAM KIRILMASI SİGORTA POLİÇESİ 64 1 KREDİ KARTI FERDİ KAZA SİGORTA POLİÇESİ 65 1 DENİZ YOLU YOLCU TAŞIMACILIĞI ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 66 2 Zorunlu Koltuk Ferdi Kaza 67 1 KAZA SİGORTA POLİÇESİ 68 1 ÖZEL GÜVENLİK ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 69 1 ÜÇÜNCÜ ŞAHIS SORUMLULUK SİGORTA POLİÇESİ 70 1 İŞYERİ HIRSIZLIK SİGORTA POLİÇESİ 71 1 HIRSIZLIK SİGORTA POLİÇESİ 72 1 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 73 1 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 74 1 KONUT HIRSIZLIK SİGORTA POLİÇESİ 75 1 KASA HIRSIZLIK SİGORTA POLİÇESİ 76 1 KART KORUMA SİGORTA POLİÇESİ 77 1 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 78 1 KART KORUMA SİGORTA POLİÇESİ 79 1 YANGIN SİGORTA POLİÇESİ 80 1 DENİZ ARAÇLARI ZORUNLU MALİ SORUMLULUK SİGORTASI POLİÇESİ 81 1 YANGIN MALİ SORUMLULUK SİGORTA POLİÇESİ 82 1 MUHTELİF SORUMLULUK SİGORTALARI POLİÇESİ 83 1 KAR KAYBI SİGORTA POLİÇESİ 84 1 KASKO SİGORTA POLİÇESİ 85 1 YANGIN MUHTELİF SİGORTA POLİÇESİ 86 1 FERDİ KAZA SİGORTA POLİÇESİ 87 1 MONTAJ SİGORTA POLİÇESİ 88 1 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 89 1 OTO ARIZA SİGORTA POLİÇESİ 90 1 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 91 1 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 92 1 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 93 1 KONUT ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 94 1 YANGIN SİGORTA POLİÇESİ 95 2 Birleşik Kasko 96 1 KİRA KAYBI SİGORTA POLİÇESİ 97 1 DOĞALGAZ SİGORTA POLİÇESİ 98 1 YANGIN ABONMAN SİGORTA POLİÇESİ 99 1 AİLE SİGORTA POLİÇESİ 100 1 İNŞAAT SİGORTA POLİÇESİ 101 1 SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 102 1 MAKİNA KIRILMASI SİGORTA POLİÇESİ 103 1 DOĞALGAZ PAKET SİGORTA POLİÇESİ 104 1 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 105 2 Bireysel Yurtdışı Seyahat Sigortası 106 1 MAKSİMUM TRAFİK SİGORTA POLİÇESİ 107 2 Mehmetçik Yaşam Poliçesi 108 1 SEYAHAT SİGORTA POLİÇESİ 109 1 KAMU KASKO SİGORTA POLİÇESİ 110 1 HAVA ARACI YEDEK PARÇA SİGORTA POLİÇESİ 111 2 Plaza Kasko 112 1 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 113 2 Hesaplı Kasko 114 2 Mehmetçik Kasko 115 1 İŞYERİ SİGORTA POLİÇESİ 116 1 BALIKÇI TEKNELERİ SİGORTA POLİÇESİ 117 1 MARKET SİGORTA POLİÇESİ 118 1 KAMU MAKSİMUM TRAFİK SİGORTA POLİÇESİ 119 1 KOBİ PAKET POLİÇESİ 120 1 KAMU SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 121 1 KONUT SİGORTA POLİÇESİ 122 1 İŞYERİ ABONMAN SİGORTA POLİÇESİ 123 1 AKARYAKIT PAKET POLİÇESİ 124 2 Modüler Konut Paket Sigortası 125 1 HAREKETLİ İŞ MAKİNALARI POLİÇESİ 126 1 TURİSTİK TESİS SİGORTA POLİÇESİ 127 1 KASKO SİGORTASI 128 1 İŞYERİ SİGORTA POLİÇESİ 129 1 KONUT SİGORTA POLİÇESİ 130 1 KOBİ PAKET POLİÇESİ 131 1 TURİSTİK TESİS SİGORTA POLİÇESİ 132 2 Bireysel Yurtdışı Eğitim Sigortası 133 1 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ (GRUP) 134 1 ANADOLU 75 SİGORTA POLİÇESİ 135 1 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ (GRUP) 136 1 ANADOLU PAKET SİGORTA POLİÇESİ 137 2 Maden Çalışanları Zorunlu Ferdi Kaza 138 1 TRAFİK SİGORTASI 139 1 YURTDIŞI GRUP EĞİTİM SİGORTA POLİÇESİ 140 1 İŞYERİ SİGORTA POLİÇESİ 141 2 Bireysel Sağlık 142 2 Zorunlu Deprem Sigorta Poliçesi 143 2 Bireysel Nefes 144 1 MOTORLU KARA TAŞIT ARAÇLARI BİRLEŞİK SİGORTA POLİÇESİ (GRUP) 145 2 Yabancı Uyruklular Sağlık Sigortası 146 1 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ (GRUP) 147 2 Anadolu Tamamlayıcı Sağlık Sigortası (Kurumsal) 148 1 FERDİ KAZA SİGORTA POLİÇESİ (GRUP) 149 2 Kurumsal Nefes 150 1 YURTDIŞI GRUP SEYAHAT SİGORTA POLİÇESİ 151 1 ABONMAN SİGORTA SÖZLEŞMESİ 152 1 FİLO SİGORTA POLİÇESİ 153 2 Kurumsal Sağlık 154 2 SAĞLIK SİGORTA POLİÇESİ (GRUP) 155 2 Anadolu Tamamlayıcı Sağlık Sigortası (Bireysel) 156 2 ASO 157 1 MÜHENDİSLİK SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 158 1 CMR-KARAYOLU ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA SÖZLEŞMESİ 159 1 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 160 2 Mehmetçik Tamamlayıcı Sağlık Sigortası 161 1 NAKLİYAT ARACISI / KOMİSYONCUSU YASAL SORUMLULUK SİGORTA POLİÇESİ 162 1 DEPOCU YASAL SORUMLULUK SİGORTA POLİÇESİ 163 1 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK BLOK POLİÇESİ 164 2 Yabancı Uyruklular Sağlık Sigortası(Uzun Dönem) 165 2 BSMV İstisnalı Konut Paket Sigortası 166 2 Site Yönetimi Ortak Alan Paket Sigortası 167 2 ESI Konut Paket Sigortası 168 1 BİREYSEL SİBER GÜVENLİK POLİÇESİ 169 1 TİCARİ SİBER RİSK POLİÇESİ 170 1 KEFALET SİGORTASI POLİÇESİ 171 2 Kıbrıs Konut Paket Sigortası 172 2 Ticari Siber Güvenlik Paket Poliçesi 173 2 Uçuşum Güvende Sigortası 174 1 BİNA TAMAMLAMA SİGORTASI POLİÇESİ 501 2 Yeni Nesil Konut Paketleri 502 2 Devlet Destekli Alacak Sigortasi 503 2 Audi Kasko 504 2 Dijital Ticari Yangın 505 2 Motosiklet Kasko 506 2 Motifkart Kasko 507 2 Skoda Kasko 508 1 FORD KASKO SİGORTASI 509 2 Aile İşi Kasko 510 2 Türkiye' ye Seyahat Sigortası (Uzun Dönem) 511 2 DEV Kasko 512 2 Volkswagen Kasko 513 2 Anadolu Riskli Hastalıklar Sigortası 514 2 Mehmetçik Hesaplı Kasko 515 2 Honda Kasko 516 2 Scania Kasko 517 2 Seat Kasko 518 1 TÜRKİYE SEYAHAT SİGORTA POLİÇESİ 519 2 Telefonum Güvende Sigortası 520 2 Parametrik Salgın Hastalık Sigortası 521 2 Elektrikli Araç Kasko 522 2 Patim Güvende Sigortası 523 2 M Kasko 524 2 Biletim Güvende Sigortası 525 2 Canım Kendim 526 1 İŞ VE İNŞAAT MAKİNALARI SİGORTA POLİÇESİ 527 2 Ticari Yangın 528 1 PATİM GÜVENDE SİGORTA POLİÇESİ 529 2 Başka Kasko 530 1 SAĞLIK SİGORTA POLİÇESİ (FERDİ) 531 1 SAĞLIK SİGORTA POLİÇESİ (KURUMSAL) 532 2 Çokgezen Yurtdışı Seyahat Sağlık Sigortası 533 2 FIAT Kasko 534 2 Alfa Romeo Kasko 535 2 Jeep Kasko 536 1 CİHAZIM GÜVENDE SİGORTA POLİÇESİ 537 1 CAM KIRILMASI SİGORTA POLİÇESİ 538 1 HIRSIZLIK SİGORTA POLİÇESİ 539 2 Honda Motosiklet Kasko 540 2 Kobi TSS 542 2 BYD Kasko 543 2 Ailem Güvende Tamamlayıcı Sağlık Sigortası 544 15 ÖDEME KAYDEDİCİ CİHAZ SİGORTASI 545 15 İŞ VE İNŞAAT MAKİNELERİ LEASİNG ALL RİSK SİGORTASI 546 15 ELEKTRONİK CİHAZ LEASİNG ALL RİSK SİGORTASI 547 15 MAKİNE KIRILMASI LEASİNG ALL RİSK SİGORTASI 548 15 TEKNE ARTAN DEĞER SİGORTASI 549 2 Komplikasyon Sigortası 550 15 FİNANSAL KAYIP SİGORTASI 551 2 Alpine Kasko 552 2 Renault Kasko 553 2 Dacia Kasko Tablo baglami: Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Açıklama",
+            "Poliçe Kodu Açıklama",
+            "Poliçe Adı",
+            "Ürün Adı"
+          ]
+        },
+        {
+          "name": "POLICE_KOD_KODU",
+          "type": "VARCHAR2",
+          "description": "Poliçe Kodu Poliçe Kodu, bir sigorta poliçesini sistem içinde tanımlamak, sınıflandırmak veya ayırt etmek için kullanılan özel koddur. Poliçe kodu = Poliçeyi sistemde tanımlayan veya hangi ürün/poliçe tipine ait olduğunu gösteren kod Kolon icerigi: POLICE_KOD_ID KAYNAK_SISTEM_ID POLICE_KOD_ADI -99 1 N/A 1 1 KASKO VE ÜÇÜNCÜ ŞAHIS YÜKÜMLÜLÜK SİGORTASI 2 1 SERA SİGORTA POLİÇESİ 3 1 DOLU SİGORTA POLİÇESİ 4 1 BESİ SİGORTA POLİÇESİ 5 1 HAYVAN HAYAT SİGORTA POLİÇESİ 6 1 DEVLET DESTEKLİ BİTKİSEL ÜRÜN SİGORTALARI POLİÇESİ 7 1 KEDİ KÖPEK KAZA SİGORTA POLİÇESİ 8 1 ARICILIK(ARI KOVANI) 9 1 SERA POLİÇESİ 10 1 KÜÇÜKBAŞ HAYVAN POLİÇESİ 11 1 BÜYÜKBAŞ HAYVAN POLİÇESİ 12 1 KÜMES HAYVANLARI POLİÇESİ 13 1 MOTORLU ARACA BAGLI HUKUKSAL KORUMA POLİÇESİ 14 1 SU ÜRÜNLERİ POLİÇESİ 15 1 KİŞİ-AİLE HUKUKSAL KORUMA POLİÇESİ 16 1 SÜRÜCÜ HUKUKSAL KORUMA POLİÇESİ 17 1 YURTİÇİ KREDİ SİGORTA POLİÇESİ 18 1 TAŞINMAZA BAĞLI HUKUKSAL KORUMA POLİÇESİ 19 1 NAKLİYAT EMTEA PAKET POLİÇESİ 20 1 İHRACAT KREDİ SİGORTA POLİÇESİ 21 1 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 22 1 EMTEA TAŞIMA SİGORTA POLİÇESİ 23 1 TEKNE HARP VE GREV SİGORTA POLİÇESİ 24 1 NAKLİYAT EMTEA BLOK SİGORTA POLİÇESİ 25 1 TEKNE REHİNLİ ALACAKLI SİGORTA POLİÇESİ 26 1 KIYMET TAŞIMA SİGORTA POLİÇESİ 27 2 Gezinti Teknesi 28 1 YURTİÇİ NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 29 1 GEMİ TAMİRCİLERİ SORUMLULUK SİGORTA POLİÇESİ 30 1 TEKNE SİGORTA POLİÇESİ 31 1 MOTORLU ARAÇLARLA İLGİLİ MESLEKİ FAALİYET SİGORTA POLİÇESİ 32 1 TEKNE İNŞAAT SİGORTA POLİÇESİ 33 1 YEŞİLKART SİGORTA POLİÇESİ 34 1 TEKNE KAZANÇ/KİRA KAYBI SİGORTA POLİÇESİ 35 2 Kasko 36 1 GEZİNTİ TEKNELERİ İNŞAAT POLİÇESİ 37 1 ÜÇÜNCÜ KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 38 1 LİMAN VE TERMİNAL İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 39 1 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MALİ SORUMLULUK SİGORTA POL. 40 1 MARİNA İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 41 1 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 42 2 Trafik Sigortası 43 1 TÜPGAZ ZORUNLU SORUMLULUK SİGORTA POLİÇESİ 44 1 ZORUNLU KARAYOLU TAŞIMACILIK MALİ SORUMLULUK SİGORTA POLİÇESİ 45 1 TIBBİ KÖTÜ UYGULAMAYA İLİŞKİN ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 46 2 Yeşil Kart 47 2 Bireysel Ferdi Kaza Sigortası 48 2 Pert Kasko 49 1 VİZE SİGORTA POLİÇESİ 50 1 TAMAMLAYICI HEKİM SORUMLULUK SİGORTASI 51 2 Servis Araçları Koltuk Ferdi Kaza 52 1 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 53 1 FERDİ KAZA SİGORTA POLİÇESİ 54 1 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 55 1 KASA HIRSIZLIK SİGORTA POLİÇESİ 56 1 ASANSÖR KAZALARINDA 3.KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 57 1 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 58 1 MESLEKİ SORUMLULUK SİGORTA POLİÇESİ 59 1 KREDİ KARTI HIRSIZLIK SİGORTA POLİÇESİ 60 1 TEHLİKELİ MADDELER VE TEHLİKELİ ATIK ZORUNLU MALİ SORUMLULUK POLİÇESİ 61 1 KART KORUMA SİGORTA POLİÇESİ 62 2 Koltuk Ferdi Kaza 63 1 CAM KIRILMASI SİGORTA POLİÇESİ 64 1 KREDİ KARTI FERDİ KAZA SİGORTA POLİÇESİ 65 1 DENİZ YOLU YOLCU TAŞIMACILIĞI ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 66 2 Zorunlu Koltuk Ferdi Kaza 67 1 KAZA SİGORTA POLİÇESİ 68 1 ÖZEL GÜVENLİK ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 69 1 ÜÇÜNCÜ ŞAHIS SORUMLULUK SİGORTA POLİÇESİ 70 1 İŞYERİ HIRSIZLIK SİGORTA POLİÇESİ 71 1 HIRSIZLIK SİGORTA POLİÇESİ 72 1 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 73 1 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 74 1 KONUT HIRSIZLIK SİGORTA POLİÇESİ 75 1 KASA HIRSIZLIK SİGORTA POLİÇESİ 76 1 KART KORUMA SİGORTA POLİÇESİ 77 1 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 78 1 KART KORUMA SİGORTA POLİÇESİ 79 1 YANGIN SİGORTA POLİÇESİ 80 1 DENİZ ARAÇLARI ZORUNLU MALİ SORUMLULUK SİGORTASI POLİÇESİ 81 1 YANGIN MALİ SORUMLULUK SİGORTA POLİÇESİ 82 1 MUHTELİF SORUMLULUK SİGORTALARI POLİÇESİ 83 1 KAR KAYBI SİGORTA POLİÇESİ 84 1 KASKO SİGORTA POLİÇESİ 85 1 YANGIN MUHTELİF SİGORTA POLİÇESİ 86 1 FERDİ KAZA SİGORTA POLİÇESİ 87 1 MONTAJ SİGORTA POLİÇESİ 88 1 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 89 1 OTO ARIZA SİGORTA POLİÇESİ 90 1 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 91 1 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 92 1 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 93 1 KONUT ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 94 1 YANGIN SİGORTA POLİÇESİ 95 2 Birleşik Kasko 96 1 KİRA KAYBI SİGORTA POLİÇESİ 97 1 DOĞALGAZ SİGORTA POLİÇESİ 98 1 YANGIN ABONMAN SİGORTA POLİÇESİ 99 1 AİLE SİGORTA POLİÇESİ 100 1 İNŞAAT SİGORTA POLİÇESİ 101 1 SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 102 1 MAKİNA KIRILMASI SİGORTA POLİÇESİ 103 1 DOĞALGAZ PAKET SİGORTA POLİÇESİ 104 1 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 105 2 Bireysel Yurtdışı Seyahat Sigortası 106 1 MAKSİMUM TRAFİK SİGORTA POLİÇESİ 107 2 Mehmetçik Yaşam Poliçesi 108 1 SEYAHAT SİGORTA POLİÇESİ 109 1 KAMU KASKO SİGORTA POLİÇESİ 110 1 HAVA ARACI YEDEK PARÇA SİGORTA POLİÇESİ 111 2 Plaza Kasko 112 1 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 113 2 Hesaplı Kasko 114 2 Mehmetçik Kasko 115 1 İŞYERİ SİGORTA POLİÇESİ 116 1 BALIKÇI TEKNELERİ SİGORTA POLİÇESİ 117 1 MARKET SİGORTA POLİÇESİ 118 1 KAMU MAKSİMUM TRAFİK SİGORTA POLİÇESİ 119 1 KOBİ PAKET POLİÇESİ 120 1 KAMU SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 121 1 KONUT SİGORTA POLİÇESİ 122 1 İŞYERİ ABONMAN SİGORTA POLİÇESİ 123 1 AKARYAKIT PAKET POLİÇESİ 124 2 Modüler Konut Paket Sigortası 125 1 HAREKETLİ İŞ MAKİNALARI POLİÇESİ 126 1 TURİSTİK TESİS SİGORTA POLİÇESİ 127 1 KASKO SİGORTASI 128 1 İŞYERİ SİGORTA POLİÇESİ 129 1 KONUT SİGORTA POLİÇESİ 130 1 KOBİ PAKET POLİÇESİ 131 1 TURİSTİK TESİS SİGORTA POLİÇESİ 132 2 Bireysel Yurtdışı Eğitim Sigortası 133 1 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ (GRUP) 134 1 ANADOLU 75 SİGORTA POLİÇESİ 135 1 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ (GRUP) 136 1 ANADOLU PAKET SİGORTA POLİÇESİ 137 2 Maden Çalışanları Zorunlu Ferdi Kaza 138 1 TRAFİK SİGORTASI 139 1 YURTDIŞI GRUP EĞİTİM SİGORTA POLİÇESİ 140 1 İŞYERİ SİGORTA POLİÇESİ 141 2 Bireysel Sağlık 142 2 Zorunlu Deprem Sigorta Poliçesi 143 2 Bireysel Nefes 144 1 MOTORLU KARA TAŞIT ARAÇLARI BİRLEŞİK SİGORTA POLİÇESİ (GRUP) 145 2 Yabancı Uyruklular Sağlık Sigortası 146 1 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ (GRUP) 147 2 Anadolu Tamamlayıcı Sağlık Sigortası (Kurumsal) 148 1 FERDİ KAZA SİGORTA POLİÇESİ (GRUP) 149 2 Kurumsal Nefes 150 1 YURTDIŞI GRUP SEYAHAT SİGORTA POLİÇESİ 151 1 ABONMAN SİGORTA SÖZLEŞMESİ 152 1 FİLO SİGORTA POLİÇESİ 153 2 Kurumsal Sağlık 154 2 SAĞLIK SİGORTA POLİÇESİ (GRUP) 155 2 Anadolu Tamamlayıcı Sağlık Sigortası (Bireysel) 156 2 ASO 157 1 MÜHENDİSLİK SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 158 1 CMR-KARAYOLU ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA SÖZLEŞMESİ 159 1 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 160 2 Mehmetçik Tamamlayıcı Sağlık Sigortası 161 1 NAKLİYAT ARACISI / KOMİSYONCUSU YASAL SORUMLULUK SİGORTA POLİÇESİ 162 1 DEPOCU YASAL SORUMLULUK SİGORTA POLİÇESİ 163 1 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK BLOK POLİÇESİ 164 2 Yabancı Uyruklular Sağlık Sigortası(Uzun Dönem) 165 2 BSMV İstisnalı Konut Paket Sigortası 166 2 Site Yönetimi Ortak Alan Paket Sigortası 167 2 ESI Konut Paket Sigortası 168 1 BİREYSEL SİBER GÜVENLİK POLİÇESİ 169 1 TİCARİ SİBER RİSK POLİÇESİ 170 1 KEFALET SİGORTASI POLİÇESİ 171 2 Kıbrıs Konut Paket Sigortası 172 2 Ticari Siber Güvenlik Paket Poliçesi 173 2 Uçuşum Güvende Sigortası 174 1 BİNA TAMAMLAMA SİGORTASI POLİÇESİ 501 2 Yeni Nesil Konut Paketleri 502 2 Devlet Destekli Alacak Sigortasi 503 2 Audi Kasko 504 2 Dijital Ticari Yangın 505 2 Motosiklet Kasko 506 2 Motifkart Kasko 507 2 Skoda Kasko 508 1 FORD KASKO SİGORTASI 509 2 Aile İşi Kasko 510 2 Türkiye' ye Seyahat Sigortası (Uzun Dönem) 511 2 DEV Kasko 512 2 Volkswagen Kasko 513 2 Anadolu Riskli Hastalıklar Sigortası 514 2 Mehmetçik Hesaplı Kasko 515 2 Honda Kasko 516 2 Scania Kasko 517 2 Seat Kasko 518 1 TÜRKİYE SEYAHAT SİGORTA POLİÇESİ 519 2 Telefonum Güvende Sigortası 520 2 Parametrik Salgın Hastalık Sigortası 521 2 Elektrikli Araç Kasko 522 2 Patim Güvende Sigortası 523 2 M Kasko 524 2 Biletim Güvende Sigortası 525 2 Canım Kendim 526 1 İŞ VE İNŞAAT MAKİNALARI SİGORTA POLİÇESİ 527 2 Ticari Yangın 528 1 PATİM GÜVENDE SİGORTA POLİÇESİ 529 2 Başka Kasko 530 1 SAĞLIK SİGORTA POLİÇESİ (FERDİ) 531 1 SAĞLIK SİGORTA POLİÇESİ (KURUMSAL) 532 2 Çokgezen Yurtdışı Seyahat Sağlık Sigortası 533 2 FIAT Kasko 534 2 Alfa Romeo Kasko 535 2 Jeep Kasko 536 1 CİHAZIM GÜVENDE SİGORTA POLİÇESİ 537 1 CAM KIRILMASI SİGORTA POLİÇESİ 538 1 HIRSIZLIK SİGORTA POLİÇESİ 539 2 Honda Motosiklet Kasko 540 2 Kobi TSS 542 2 BYD Kasko 543 2 Ailem Güvende Tamamlayıcı Sağlık Sigortası 544 15 ÖDEME KAYDEDİCİ CİHAZ SİGORTASI 545 15 İŞ VE İNŞAAT MAKİNELERİ LEASİNG ALL RİSK SİGORTASI 546 15 ELEKTRONİK CİHAZ LEASİNG ALL RİSK SİGORTASI 547 15 MAKİNE KIRILMASI LEASİNG ALL RİSK SİGORTASI 548 15 TEKNE ARTAN DEĞER SİGORTASI 549 2 Komplikasyon Sigortası 550 15 FİNANSAL KAYIP SİGORTASI 551 2 Alpine Kasko 552 2 Renault Kasko 553 2 Dacia Kasko Tablo baglami: Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Kodu",
+            "Pol Kod"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID"
+      ],
+      "indexes": [
+        "AS_DWH.POL_POLICE_KOD(POLICE_KOD_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe Kodu",
+        "Üretim",
+        "AS_DWH.POL_POLICE_KOD",
+        "Pol Kod",
+        "Poliçe Adı",
+        "Poliçe Açıklama",
+        "Poliçe Kodu Açıklama",
+        "Ürün Adı"
+      ]
+    },
+    {
+      "score": 0.0004,
+      "table": "AGGR.AS400_YENI_URUN",
+      "description": "Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe",
+      "columns": [
+        {
+          "name": "NEW_FPOLK",
+          "type": "VARCHAR2",
+          "description": "Poliçe Kodu Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisinin kodu (410*,420-1 vb.) içerir. Kolon icerigi: POLICE_KODU(NEW_FPOLK) YENI_FPOLK POLICE_KOD_ADI (YENI_FPOLAC) -781 -781 KASKO VE ÜÇÜNCÜ ŞAHIS YÜKÜMLÜLÜK SİGORTASI -99 -99 N/A 101 101 DOLU SİGORTA POLİÇESİ 102 102 SERA SİGORTA POLİÇESİ 103 103 HAYVAN HAYAT SİGORTA POLİÇESİ 104 104 BESİ SİGORTA POLİÇESİ 105 105 KEDİ KÖPEK KAZA SİGORTA POLİÇESİ 111 111 DEVLET DESTEKLİ BİTKİSEL ÜRÜN SİGORTALARI POLİÇESİ 112 112 SERA POLİÇESİ 113 113 ARICILIK(ARI KOVANI) 114 114 BÜYÜKBAŞ HAYVAN POLİÇESİ 115 115 KÜÇÜKBAŞ HAYVAN POLİÇESİ 116 116 KÜMES HAYVANLARI POLİÇESİ 118 118 SU ÜRÜNLERİ POLİÇESİ 210 210 MOTORLU ARACA BAGLI HUKUKSAL KORUMA POLİÇESİ 220 220 SÜRÜCÜ HUKUKSAL KORUMA POLİÇESİ 230 230 KİŞİ-AİLE HUKUKSAL KORUMA POLİÇESİ 240 240 TAŞINMAZA BAĞLI HUKUKSAL KORUMA POLİÇESİ 250 250 YURTİÇİ KREDİ SİGORTA POLİÇESİ 251 251 İHRACAT KREDİ SİGORTA POLİÇESİ 252 252 KOBİLER İÇİN DEVLET DESTEKLİ 253 253 FİNANSAL KAYIP SİGORTASI 255 255 PATIM GÜVENDE SIGORTASI 261 261 BİNA TAMAMLAMA SİGORTASI POLİÇESİ 310 310 EMTEA TAŞIMA SİGORTA POLİÇESİ 311 311 NAKLİYAT EMTEA PAKET POLİÇESİ 312 312 NAKLİYAT EMTEA BLOK SİGORTA POLİÇESİ 313 313 NAKLİYAT ARACISI / KOMİSYONCUSU YASAL SORUMLULUK SİGORTA POLİÇESİ 314 314 DEPOCU YASAL SORUMLULUK SİGORTA POLİÇESİ 315 315 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK BLOK POLİÇESİ 330 330 KIYMET TAŞIMA SİGORTA POLİÇESİ 340 340 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 341 341 YURTİÇİ NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 370 370 TEKNE SİGORTA POLİÇESİ 371 371 TEKNE HARP VE GREV SİGORTA POLİÇESİ 372 372 TEKNE İNŞAAT SİGORTA POLİÇESİ 373 373 TEKNE REHİNLİ ALACAKLI SİGORTA POLİÇESİ 374 374 TEKNE KAZANÇ/KİRA KAYBI SİGORTA POLİÇESİ 375 375 TEKNE ARTAN DEĞER SİGORTASI 380 380 GEZİNTİ TEKNELERİ SİGORTA POLİÇESİ 381 381 GEZİNTİ TEKNELERİ İNŞAAT POLİÇESİ 390 390 LİMAN VE TERMİNAL İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 391 391 GEMİ TAMİRCİLERİ SORUMLULUK SİGORTA POLİÇESİ 392 392 MARİNA İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 410 410 TRAFİK SİGORTA POLİÇESİ 411 411 MOTORLU ARAÇLARLA İLGİLİ MESLEKİ FAALİYET SİGORTA POLİÇESİ 414 414 ZORUNLU KARAYOLU TAŞIMACILIK MALİ SORUMLULUK SİGORTA POLİÇESİ 415 415 YEŞİLKART SİGORTA POLİÇESİ 416 416 YEŞİLKART SİGORTA POLİÇESİ (TRAMER) 420 420 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ 421 421 MOTORLU KARA TAŞIT ARAÇLARI KASKO SİGORTA POLİÇESİ 428 428 PATİM GÜVENDE SİGORTA POLİÇESİ 429 429 TAMAMLAYICI HEKİM SORUMLULUK SİGORTASI 430 430 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 431 431 ÜÇÜNCÜ KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 432 432 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 433 433 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MALİ SORUMLULUK SİGORTA POL. 434 434 ASANSÖR KAZALARINDA 3.KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 435 435 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 436 436 MESLEKİ SORUMLULUK SİGORTA POLİÇESİ 437 437 TÜPGAZ ZORUNLU SORUMLULUK SİGORTA POLİÇESİ 438 438 TEHLİKELİ MADDELER VE TEHLİKELİ ATIK ZORUNLU MALİ SORUMLULUK POLİÇESİ 439 439 TIBBİ KÖTÜ UYGULAMAYA İLİŞKİN ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 440 440 FERDİ KAZA SİGORTA POLİÇESİ 441 441 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 442 442 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 443 443 KREDİ KARTI FERDİ KAZA SİGORTA POLİÇESİ 444 444 VİZE SİGORTA POLİÇESİ 446 446 SERVİS ARAÇLARI KOLTUK FERDİ KAZA SİGORTA POLİÇESİ 447 447 KARAYOLU YOLCU TAŞIMACILIĞI ZORUNLU KOLTUK FERDİ KAZA SİG. 448 448 FERDİ KAZA SİGORTA POLİÇESİ 449 449 ÖZEL GÜVENLİK ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 450 450 İŞYERİ HIRSIZLIK SİGORTA POLİÇESİ 451 451 KASA HIRSIZLIK SİGORTA POLİÇESİ 452 452 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 453 453 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 454 454 KONUT HIRSIZLIK SİGORTA POLİÇESİ 455 455 KREDİ KARTI HIRSIZLIK SİGORTA POLİÇESİ 456 456 KART KORUMA SİGORTA POLİÇESİ 457 457 KART KORUMA SİGORTA POLİÇESİ 458 458 KART KORUMA SİGORTA POLİÇESİ 460 460 CAM KIRILMASI SİGORTA POLİÇESİ 463 463 TELEFONUM GÜVENDE SIGORTASI 475 475 DENİZ YOLU YOLCU TAŞIMACILIĞI ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 476 476 DENİZ ARAÇLARI ZORUNLU MALİ SORUMLULUK SİGORTASI POLİÇESİ 480 480 KAZA SİGORTA POLİÇESİ 481 481 MUHTELİF SORUMLULUK SİGORTALARI POLİÇESİ 482 482 TİCARİ SİBER RİSK POLİÇESİ 483 483 BİREYSEL SİBER GÜVENLİK POLİÇESİ 484 484 Ticari Siber Güvenlik Paket Poliçesi 485 485 KEFALET SİGORTASI POLİÇESİ 486 486 UÇUŞ GECİKME SİGORTASI 487 487 BILETIM GÜVENDE SIGORTASI 488 488 PARAMETRIK SALGIN HASTALIK SIGORTASI 490 490 KASKO SİGORTA POLİÇESİ 491 491 ÜÇÜNCÜ ŞAHIS SORUMLULUK SİGORTA POLİÇESİ 492 492 FERDİ KAZA SİGORTA POLİÇESİ 493 493 HIRSIZLIK SİGORTA POLİÇESİ 494 494 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 495 495 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 496 496 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 497 497 KASA HIRSIZLIK SİGORTA POLİÇESİ 498 498 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 499 499 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 501 501 YANGIN SİGORTA POLİÇESİ 502 502 YANGIN SİGORTA POLİÇESİ 503 503 YANGIN MALİ SORUMLULUK SİGORTA POLİÇESİ 504 504 KİRA KAYBI SİGORTA POLİÇESİ 505 505 KAR KAYBI SİGORTA POLİÇESİ 520 520 YANGIN ABONMAN SİGORTA POLİÇESİ 590 590 YANGIN MUHTELİF SİGORTA POLİÇESİ 610 610 İNŞAAT SİGORTA POLİÇESİ 620 620 MONTAJ SİGORTA POLİÇESİ 630 630 MAKİNA KIRILMASI SİGORTA POLİÇESİ 631 631 OTO ARIZA SİGORTA POLİÇESİ 632 632 İŞ VE İNŞAAT MAKİNALARI SİGORTA POLİÇESİ 633 633 MAKİNE KIRILMASI LEASİNG ALL RİSK SİGORTASI 634 634 İŞ VE İNŞAAT MAKİNELERİ LEASİNG ALL RİSK SİGORTASI 640 640 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 641 641 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 642 642 KONUT ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 643 643 ELEKTRONİK CİHAZ LEASİNG ALL RİSK SİGORTASI 644 644 ÖDEME KAYDEDİCİ CİHAZ SİGORTASI 645 645 CİHAZIM GÜVENDE SİGORTA POLİÇESİ 701 701 MOTORLU KARA TAŞITLARI BİRLEŞİK KASKO SİGORTA POLİÇESİ 702 702 MAKSİMUM TRAFİK SİGORTA POLİÇESİ 703 703 DOĞALGAZ SİGORTA POLİÇESİ 704 704 SEYAHAT SİGORTA POLİÇESİ 705 705 AİLE SİGORTA POLİÇESİ 706 706 UCAK 707 707 SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 708 708 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 709 709 DOĞALGAZ PAKET SİGORTA POLİÇESİ 710 710 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 711 711 MEHMETÇİK KASKO POLİÇESİ 712 712 MEHMETÇİK YAŞAM POLİÇESİ 713 713 BALIKÇI TEKNELERİ SİGORTA POLİÇESİ 714 714 KAMU KASKO SİGORTA POLİÇESİ 715 715 KAMU MAKSİMUM TRAFİK SİGORTA POLİÇESİ 716 716 PLAZA KASKO SİGORTA POLİÇESİ 717 717 KAMU SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 718 718 HESAPLI KASKO SİGORTA POLİÇESİ 720 720 İŞYERİ ABONMAN SİGORTA POLİÇESİ 721 721 İŞYERİ SİGORTA POLİÇESİ 722 722 KONUT SİGORTA POLİÇESİ 723 723 MARKET SİGORTA POLİÇESİ 724 724 TURİSTİK TESİS SİGORTA POLİÇESİ 725 725 KOBİ PAKET POLİÇESİ 726 726 İŞYERİ SİGORTA POLİÇESİ 727 727 KONUT SİGORTA POLİÇESİ 728 728 KOBİ PAKET POLİÇESİ 729 729 AKARYAKIT PAKET POLİÇESİ 730 730 HAREKETLİ İŞ MAKİNALARI POLİÇESİ 732 732 YENI NESIL KONUT PAKETLERI 733 733 TICARI YANGIN 734 734 ÇOKGEZEN YURTDIŞI SEYAHAT SAĞLIK SIGORTASI 735 735 YURTDIŞI EĞİTİM SİGORTA POLİÇESİ 736 736 BSMV İSTISNALI KONUT PAKET SIGORTASI 737 737 KIBRIS KONUT PAKET SIGORTASI 738 738 ESI KONUT PAKET SIGORTASI 739 739 SITE YÖNETIMI ORTAK ALAN PAKET SIGORTASI 740 740 TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM) 741 741 AUDİ KASKO SİGORTASI 742 742 SKODA KASKO SİGORTASI 743 743 DIJITAL TICARI YANGIN 744 744 FORD KASKO SİGORTASI 745 745 MOTOSİKLET KASKO SİGORTASI 746 746 İŞ BANK KASKO SİGORTASI 747 747 MOTIFKART KASKO 748 748 KOMPLIKASYON SIGORTASI 749 749 FIAT KASKO 750 750 VOLKSWAGEN KASKO 751 751 ALFA ROMEO KASKO 752 752 JEEP KASKO 753 753 SEAT KASKO 756 756 HONDA KASKO 757 757 DEV KASKO 758 758 MEHMETÇIK HESAPLI KASKO 759 759 SCANIA KASKO 760 760 ELEKTRIKLI ARAÇ KASKO 761 761 M KASKO 762 762 BAŞKA KASKO 765 765 HONDA MOTOSIKLET KASKO 770 770 BYD KASKO 777 777 ANADOLU 75 SİGORTA POLİÇESİ 778 778 TÜRKİYE SEYAHAT SİGORTA POLİÇESİ 780 780 ANADOLU PAKET SİGORTA POLİÇESİ 781 781 KASKO SİGORTASI 782 782 TRAFİK SİGORTASI 785 785 RENAULT KASKO 790 790 DACIA KASKO 791 791 İŞYERİ SİGORTA POLİÇESİ 792 792 KONUT SİGORTA POLİÇESİ 794 794 TURİSTİK TESİS SİGORTA POLİÇESİ 795 795 ALPINE KASKO 800 800 ZORUNLU DEPREM SİGORTA POLİÇESİ 850 850 HIRSIZLIK SİGORTA POLİÇESİ 860 860 CAM KIRILMASI SİGORTA POLİÇESİ 901 901 MOTORLU KARA TAŞIT ARAÇLARI BİRLEŞİK SİGORTA POLİÇESİ (GRUP) 902 902 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ (GRUP) 903 903 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ (GRUP) 904 904 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ (GRUP) 905 905 FERDİ KAZA SİGORTA POLİÇESİ (GRUP) 906 906 Maden Çalışanları Zorunlu Ferdi Kaza Poliçesi 910 910 YURTDIŞI GRUP SEYAHAT SİGORTA POLİÇESİ 930 930 FİLO SİGORTA POLİÇESİ 935 935 YURTDIŞI GRUP EĞİTİM SİGORTA POLİÇESİ 951 951 Bireysel Sağlık 952 952 Kurumsal Sağlık 953 953 BIREYSEL NEFES 954 954 SAĞLIK SİGORTA POLİÇESİ (GRUP) 955 955 YABANCI UYRUKLULAR SAĞLIK SIGORTASI 956 956 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (BIREYSEL) 957 957 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (KURUMSAL) 958 958 ASO 959 959 KURUMSAL NEFES 960 960 MEHMETÇIK TAMAMLAYICI SAĞLIK SIGORTASI 961 961 YABANCI UYRUKLULAR SAĞLIK SİGORTASI (Uzun Dönem) 962 962 ANADOLU RİSKLİ HASTALIKLAR SİGORTASI 963 963 CANIM KENDIM 965 965 KOBI TSS 966 966 AILEM GÜVENDE TAMAMLAYICI SAĞLIK SIGORTASI 971 971 SAĞLIK SİGORTA POLİÇESİ (FERDİ) 972 972 SAĞLIK SİGORTA POLİÇESİ (KURUMSAL) 990 990 YANGIN SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 KAZA SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 NAKLİYAT SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 TARIM SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 MÜHENDİSLİK SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 991 991 ABONMAN SİGORTA SÖZLEŞMESİ 992 992 CMR-KARAYOLU ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA SÖZLEŞMESİ 41001 410* TRAFIK (YENI) 41002 410** EKSTRA TRAFIK STANDART 41003 410*** SUPER TRAFIK 41004 410**** SINIRSIZ TRAFIK 41005 410***** TAM BAKIM PAKETI 41006 410****** TRAFIK YOL YARDIM 41007 410******* EKSTRA TRAFIK MINI 41008 410******** EKSTRA TRAFIK PLUS 41009 410********* HUKUKSAL KORUMA 42000 420* PERT KASKO %60 42001 420* PERT PLUS KASKO %50 42002 420* PERT PLUS KASKO %40 44001 440-1 GUVENLI GELECEK PLUS 44002 440-2 GUVENLI GELECEK MAXI PLUS 44003 440-3 GUVENLI GELECEK 44004 440-4 GUVENLI GELECEK MAXI 44005 440-5 GUVENLI GELECEK GOLD 44006 440-6 GUVENLI GELECEK GOLD PLUS 44007 440-7 GUVENLI GELECEK GOLD MAXI 44008 440-8 GUVENLI GELECEK GOLD MAXI PLUS 44009 440-9 GULUMSETEN PAKET 44010 440-10 SMS FERDI KAZA 44011 440-11 GUVENLI BIZ MAXI BTSO 44012 440-12 GUVENLI BIZ GOLD PLUS BTSO 44013 440-13 ISYERIMDE GUVENDEYIM PAKET-1 44014 440-14 ISYERIMDE GUVENDEYIM PAKET-2 44015 440-15 ISYERIMDE GUVENDEYIM PAKET-3 44016 440-16 ISYERIMDE GUVENDEYIM PAKET-4 44017 440-17 1.SINIF FAALIYETLER 44018 440-18 2.SINIF FAALIYETLER 44019 440-19 3.SINIF FAALIYETLER 44020 440-20 IS TE TICARI KORUMA 44021 440-21 IS TE CIFTCI KORUMA 44022 440-22 KARMA/IS TE KORUMA 44023 440-23 IS TE ÖZEL KORUMA 44024 440-24 IS TE MAXIMUM KORUMA 44025 440-25 PROFESYONEL FUTBOLCU 1.TEMINAT GRUBU 44026 440-26 PROFESYONEL FUTBOLCU 2.TEMINAT GRUBU 44027 440-27 PROFESYONEL FUTBOLCU 3.TEMINAT GRUBU 44028 440-28 PAKET 1 44029 440-29 PAKET 2 44030 440-30 PAKET 3 44031 440-31 PAKET 4 44032 440-32 PROFESYONEL SPORCU 44033 440-33 BASIDAV-1 44034 440-34 BASIDAV-2 44035 440-35 BASIDAV-3 44036 440-36 BASIDAV-4 44037 440-37 BASIDAV-5 44038 440* ELİT PAKET 64501 645* Ekstra Garanti Sigortası 64502 645* Dört Dörtlük Cihaz Koruma ve Kazaen Kırılma Sigortası 64503 645* Ekstra Garanti ve Kazaen Kırılma Sigortası 64504 645* Dört Dörtlük Cihaz Koruma Sigortası 70101 701-1 DEV KASKO 71601 716* VOLKSWAGEN KASKO SIGORTA POLIÇESI 71602 716** AUDİ KASKO SİGORTASI 71603 716*** SKODA KASKO SİGORTASI 71604 716**** SCANIA KASKO SİGORTA POLİÇESİ 71605 716***** HONDA KASKO SİGORTA POLİÇESİ 71801 718* HESAPLI STANDART 71802 718** HESAPLI PLUS 71803 718*** HESAPLI MİNİ 73201 732* YENI NESIL HESAPLI KONUT PAKET 73202 732** YENI NESIL STANDART KONUT PAKET 73203 732*** YENI NESIL ELIT KONUT PAKET 74001 740* TÜRKIYE' YE SEYAHAT SIGORTASI 74002 732** TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM) Tablo baglami: Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Kodu Detay"
+          ]
+        },
+        {
+          "name": "YENI_FPOLAC",
+          "type": "VARCHAR2",
+          "description": "Poliçe Adı Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisini (Güvenli Gelecek, Sınırsız Trafik, VW Kasko vb.) içerir. Kolon icerigi: POLICE_KODU(NEW_FPOLK) YENI_FPOLK POLICE_KOD_ADI (YENI_FPOLAC) -781 -781 KASKO VE ÜÇÜNCÜ ŞAHIS YÜKÜMLÜLÜK SİGORTASI -99 -99 N/A 101 101 DOLU SİGORTA POLİÇESİ 102 102 SERA SİGORTA POLİÇESİ 103 103 HAYVAN HAYAT SİGORTA POLİÇESİ 104 104 BESİ SİGORTA POLİÇESİ 105 105 KEDİ KÖPEK KAZA SİGORTA POLİÇESİ 111 111 DEVLET DESTEKLİ BİTKİSEL ÜRÜN SİGORTALARI POLİÇESİ 112 112 SERA POLİÇESİ 113 113 ARICILIK(ARI KOVANI) 114 114 BÜYÜKBAŞ HAYVAN POLİÇESİ 115 115 KÜÇÜKBAŞ HAYVAN POLİÇESİ 116 116 KÜMES HAYVANLARI POLİÇESİ 118 118 SU ÜRÜNLERİ POLİÇESİ 210 210 MOTORLU ARACA BAGLI HUKUKSAL KORUMA POLİÇESİ 220 220 SÜRÜCÜ HUKUKSAL KORUMA POLİÇESİ 230 230 KİŞİ-AİLE HUKUKSAL KORUMA POLİÇESİ 240 240 TAŞINMAZA BAĞLI HUKUKSAL KORUMA POLİÇESİ 250 250 YURTİÇİ KREDİ SİGORTA POLİÇESİ 251 251 İHRACAT KREDİ SİGORTA POLİÇESİ 252 252 KOBİLER İÇİN DEVLET DESTEKLİ 253 253 FİNANSAL KAYIP SİGORTASI 255 255 PATIM GÜVENDE SIGORTASI 261 261 BİNA TAMAMLAMA SİGORTASI POLİÇESİ 310 310 EMTEA TAŞIMA SİGORTA POLİÇESİ 311 311 NAKLİYAT EMTEA PAKET POLİÇESİ 312 312 NAKLİYAT EMTEA BLOK SİGORTA POLİÇESİ 313 313 NAKLİYAT ARACISI / KOMİSYONCUSU YASAL SORUMLULUK SİGORTA POLİÇESİ 314 314 DEPOCU YASAL SORUMLULUK SİGORTA POLİÇESİ 315 315 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK BLOK POLİÇESİ 330 330 KIYMET TAŞIMA SİGORTA POLİÇESİ 340 340 CMR-ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 341 341 YURTİÇİ NAKLİYECİ SORUMLULUK SİGORTA POLİÇESİ 370 370 TEKNE SİGORTA POLİÇESİ 371 371 TEKNE HARP VE GREV SİGORTA POLİÇESİ 372 372 TEKNE İNŞAAT SİGORTA POLİÇESİ 373 373 TEKNE REHİNLİ ALACAKLI SİGORTA POLİÇESİ 374 374 TEKNE KAZANÇ/KİRA KAYBI SİGORTA POLİÇESİ 375 375 TEKNE ARTAN DEĞER SİGORTASI 380 380 GEZİNTİ TEKNELERİ SİGORTA POLİÇESİ 381 381 GEZİNTİ TEKNELERİ İNŞAAT POLİÇESİ 390 390 LİMAN VE TERMİNAL İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 391 391 GEMİ TAMİRCİLERİ SORUMLULUK SİGORTA POLİÇESİ 392 392 MARİNA İŞLETENLERİ SORUMLULUK SİGORTA POLİÇESİ 410 410 TRAFİK SİGORTA POLİÇESİ 411 411 MOTORLU ARAÇLARLA İLGİLİ MESLEKİ FAALİYET SİGORTA POLİÇESİ 414 414 ZORUNLU KARAYOLU TAŞIMACILIK MALİ SORUMLULUK SİGORTA POLİÇESİ 415 415 YEŞİLKART SİGORTA POLİÇESİ 416 416 YEŞİLKART SİGORTA POLİÇESİ (TRAMER) 420 420 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ 421 421 MOTORLU KARA TAŞIT ARAÇLARI KASKO SİGORTA POLİÇESİ 428 428 PATİM GÜVENDE SİGORTA POLİÇESİ 429 429 TAMAMLAYICI HEKİM SORUMLULUK SİGORTASI 430 430 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 431 431 ÜÇÜNCÜ KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 432 432 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 433 433 KIYI TESİSLERİ DENİZ KİRLİLİĞİ ZORUNLU MALİ SORUMLULUK SİGORTA POL. 434 434 ASANSÖR KAZALARINDA 3.KİŞİLERE KARŞI SORUMLULUK SİGORTA POLİÇESİ 435 435 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 436 436 MESLEKİ SORUMLULUK SİGORTA POLİÇESİ 437 437 TÜPGAZ ZORUNLU SORUMLULUK SİGORTA POLİÇESİ 438 438 TEHLİKELİ MADDELER VE TEHLİKELİ ATIK ZORUNLU MALİ SORUMLULUK POLİÇESİ 439 439 TIBBİ KÖTÜ UYGULAMAYA İLİŞKİN ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 440 440 FERDİ KAZA SİGORTA POLİÇESİ 441 441 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 442 442 ÜRÜN SORUMLULUK SİGORTA POLİÇESİ 443 443 KREDİ KARTI FERDİ KAZA SİGORTA POLİÇESİ 444 444 VİZE SİGORTA POLİÇESİ 446 446 SERVİS ARAÇLARI KOLTUK FERDİ KAZA SİGORTA POLİÇESİ 447 447 KARAYOLU YOLCU TAŞIMACILIĞI ZORUNLU KOLTUK FERDİ KAZA SİG. 448 448 FERDİ KAZA SİGORTA POLİÇESİ 449 449 ÖZEL GÜVENLİK ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 450 450 İŞYERİ HIRSIZLIK SİGORTA POLİÇESİ 451 451 KASA HIRSIZLIK SİGORTA POLİÇESİ 452 452 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 453 453 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 454 454 KONUT HIRSIZLIK SİGORTA POLİÇESİ 455 455 KREDİ KARTI HIRSIZLIK SİGORTA POLİÇESİ 456 456 KART KORUMA SİGORTA POLİÇESİ 457 457 KART KORUMA SİGORTA POLİÇESİ 458 458 KART KORUMA SİGORTA POLİÇESİ 460 460 CAM KIRILMASI SİGORTA POLİÇESİ 463 463 TELEFONUM GÜVENDE SIGORTASI 475 475 DENİZ YOLU YOLCU TAŞIMACILIĞI ZORUNLU MALİ SORUMLULUK SİGORTA POLİÇESİ 476 476 DENİZ ARAÇLARI ZORUNLU MALİ SORUMLULUK SİGORTASI POLİÇESİ 480 480 KAZA SİGORTA POLİÇESİ 481 481 MUHTELİF SORUMLULUK SİGORTALARI POLİÇESİ 482 482 TİCARİ SİBER RİSK POLİÇESİ 483 483 BİREYSEL SİBER GÜVENLİK POLİÇESİ 484 484 Ticari Siber Güvenlik Paket Poliçesi 485 485 KEFALET SİGORTASI POLİÇESİ 486 486 UÇUŞ GECİKME SİGORTASI 487 487 BILETIM GÜVENDE SIGORTASI 488 488 PARAMETRIK SALGIN HASTALIK SIGORTASI 490 490 KASKO SİGORTA POLİÇESİ 491 491 ÜÇÜNCÜ ŞAHIS SORUMLULUK SİGORTA POLİÇESİ 492 492 FERDİ KAZA SİGORTA POLİÇESİ 493 493 HIRSIZLIK SİGORTA POLİÇESİ 494 494 İŞVEREN SORUMLULUK SİGORTA POLİÇESİ 495 495 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ 496 496 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ 497 497 KASA HIRSIZLIK SİGORTA POLİÇESİ 498 498 TAŞINAN PARA VE KIYMET SİGORTA POLİÇESİ 499 499 EMNİYETİ SUİİSTİMAL SİGORTA POLİÇESİ 501 501 YANGIN SİGORTA POLİÇESİ 502 502 YANGIN SİGORTA POLİÇESİ 503 503 YANGIN MALİ SORUMLULUK SİGORTA POLİÇESİ 504 504 KİRA KAYBI SİGORTA POLİÇESİ 505 505 KAR KAYBI SİGORTA POLİÇESİ 520 520 YANGIN ABONMAN SİGORTA POLİÇESİ 590 590 YANGIN MUHTELİF SİGORTA POLİÇESİ 610 610 İNŞAAT SİGORTA POLİÇESİ 620 620 MONTAJ SİGORTA POLİÇESİ 630 630 MAKİNA KIRILMASI SİGORTA POLİÇESİ 631 631 OTO ARIZA SİGORTA POLİÇESİ 632 632 İŞ VE İNŞAAT MAKİNALARI SİGORTA POLİÇESİ 633 633 MAKİNE KIRILMASI LEASİNG ALL RİSK SİGORTASI 634 634 İŞ VE İNŞAAT MAKİNELERİ LEASİNG ALL RİSK SİGORTASI 640 640 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 641 641 ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 642 642 KONUT ELEKTRONİK CİHAZ SİGORTA POLİÇESİ 643 643 ELEKTRONİK CİHAZ LEASİNG ALL RİSK SİGORTASI 644 644 ÖDEME KAYDEDİCİ CİHAZ SİGORTASI 645 645 CİHAZIM GÜVENDE SİGORTA POLİÇESİ 701 701 MOTORLU KARA TAŞITLARI BİRLEŞİK KASKO SİGORTA POLİÇESİ 702 702 MAKSİMUM TRAFİK SİGORTA POLİÇESİ 703 703 DOĞALGAZ SİGORTA POLİÇESİ 704 704 SEYAHAT SİGORTA POLİÇESİ 705 705 AİLE SİGORTA POLİÇESİ 706 706 UCAK 707 707 SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 708 708 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 709 709 DOĞALGAZ PAKET SİGORTA POLİÇESİ 710 710 YURTDIŞI SEYAHAT SİGORTA POLİÇESİ 711 711 MEHMETÇİK KASKO POLİÇESİ 712 712 MEHMETÇİK YAŞAM POLİÇESİ 713 713 BALIKÇI TEKNELERİ SİGORTA POLİÇESİ 714 714 KAMU KASKO SİGORTA POLİÇESİ 715 715 KAMU MAKSİMUM TRAFİK SİGORTA POLİÇESİ 716 716 PLAZA KASKO SİGORTA POLİÇESİ 717 717 KAMU SAĞLIK UZMANLARI BİREYSEL RİSKLER SİGORTA POLİÇESİ 718 718 HESAPLI KASKO SİGORTA POLİÇESİ 720 720 İŞYERİ ABONMAN SİGORTA POLİÇESİ 721 721 İŞYERİ SİGORTA POLİÇESİ 722 722 KONUT SİGORTA POLİÇESİ 723 723 MARKET SİGORTA POLİÇESİ 724 724 TURİSTİK TESİS SİGORTA POLİÇESİ 725 725 KOBİ PAKET POLİÇESİ 726 726 İŞYERİ SİGORTA POLİÇESİ 727 727 KONUT SİGORTA POLİÇESİ 728 728 KOBİ PAKET POLİÇESİ 729 729 AKARYAKIT PAKET POLİÇESİ 730 730 HAREKETLİ İŞ MAKİNALARI POLİÇESİ 732 732 YENI NESIL KONUT PAKETLERI 733 733 TICARI YANGIN 734 734 ÇOKGEZEN YURTDIŞI SEYAHAT SAĞLIK SIGORTASI 735 735 YURTDIŞI EĞİTİM SİGORTA POLİÇESİ 736 736 BSMV İSTISNALI KONUT PAKET SIGORTASI 737 737 KIBRIS KONUT PAKET SIGORTASI 738 738 ESI KONUT PAKET SIGORTASI 739 739 SITE YÖNETIMI ORTAK ALAN PAKET SIGORTASI 740 740 TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM) 741 741 AUDİ KASKO SİGORTASI 742 742 SKODA KASKO SİGORTASI 743 743 DIJITAL TICARI YANGIN 744 744 FORD KASKO SİGORTASI 745 745 MOTOSİKLET KASKO SİGORTASI 746 746 İŞ BANK KASKO SİGORTASI 747 747 MOTIFKART KASKO 748 748 KOMPLIKASYON SIGORTASI 749 749 FIAT KASKO 750 750 VOLKSWAGEN KASKO 751 751 ALFA ROMEO KASKO 752 752 JEEP KASKO 753 753 SEAT KASKO 756 756 HONDA KASKO 757 757 DEV KASKO 758 758 MEHMETÇIK HESAPLI KASKO 759 759 SCANIA KASKO 760 760 ELEKTRIKLI ARAÇ KASKO 761 761 M KASKO 762 762 BAŞKA KASKO 765 765 HONDA MOTOSIKLET KASKO 770 770 BYD KASKO 777 777 ANADOLU 75 SİGORTA POLİÇESİ 778 778 TÜRKİYE SEYAHAT SİGORTA POLİÇESİ 780 780 ANADOLU PAKET SİGORTA POLİÇESİ 781 781 KASKO SİGORTASI 782 782 TRAFİK SİGORTASI 785 785 RENAULT KASKO 790 790 DACIA KASKO 791 791 İŞYERİ SİGORTA POLİÇESİ 792 792 KONUT SİGORTA POLİÇESİ 794 794 TURİSTİK TESİS SİGORTA POLİÇESİ 795 795 ALPINE KASKO 800 800 ZORUNLU DEPREM SİGORTA POLİÇESİ 850 850 HIRSIZLIK SİGORTA POLİÇESİ 860 860 CAM KIRILMASI SİGORTA POLİÇESİ 901 901 MOTORLU KARA TAŞIT ARAÇLARI BİRLEŞİK SİGORTA POLİÇESİ (GRUP) 902 902 MOTORLU KARA TAŞITLARI KASKO SİGORTA POLİÇESİ (GRUP) 903 903 ARTAN MALİ SORUMLULUK SİGORTA POLİÇESİ (GRUP) 904 904 FERDİ KAZA KOLTUK SİGORTA POLİÇESİ (GRUP) 905 905 FERDİ KAZA SİGORTA POLİÇESİ (GRUP) 906 906 Maden Çalışanları Zorunlu Ferdi Kaza Poliçesi 910 910 YURTDIŞI GRUP SEYAHAT SİGORTA POLİÇESİ 930 930 FİLO SİGORTA POLİÇESİ 935 935 YURTDIŞI GRUP EĞİTİM SİGORTA POLİÇESİ 951 951 Bireysel Sağlık 952 952 Kurumsal Sağlık 953 953 BIREYSEL NEFES 954 954 SAĞLIK SİGORTA POLİÇESİ (GRUP) 955 955 YABANCI UYRUKLULAR SAĞLIK SIGORTASI 956 956 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (BIREYSEL) 957 957 ANADOLU TAMAMLAYICI SAĞLIK SIGORTASI (KURUMSAL) 958 958 ASO 959 959 KURUMSAL NEFES 960 960 MEHMETÇIK TAMAMLAYICI SAĞLIK SIGORTASI 961 961 YABANCI UYRUKLULAR SAĞLIK SİGORTASI (Uzun Dönem) 962 962 ANADOLU RİSKLİ HASTALIKLAR SİGORTASI 963 963 CANIM KENDIM 965 965 KOBI TSS 966 966 AILEM GÜVENDE TAMAMLAYICI SAĞLIK SIGORTASI 971 971 SAĞLIK SİGORTA POLİÇESİ (FERDİ) 972 972 SAĞLIK SİGORTA POLİÇESİ (KURUMSAL) 990 990 YANGIN SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 KAZA SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 NAKLİYAT SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 TARIM SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 990 990 MÜHENDİSLİK SİGORTALARI MUHTELİF SİGORTA POLİÇESİ 991 991 ABONMAN SİGORTA SÖZLEŞMESİ 992 992 CMR-KARAYOLU ULUSLARARASI NAKLİYECİ SORUMLULUK SİGORTA SÖZLEŞMESİ 41001 410* TRAFIK (YENI) 41002 410** EKSTRA TRAFIK STANDART 41003 410*** SUPER TRAFIK 41004 410**** SINIRSIZ TRAFIK 41005 410***** TAM BAKIM PAKETI 41006 410****** TRAFIK YOL YARDIM 41007 410******* EKSTRA TRAFIK MINI 41008 410******** EKSTRA TRAFIK PLUS 41009 410********* HUKUKSAL KORUMA 42000 420* PERT KASKO %60 42001 420* PERT PLUS KASKO %50 42002 420* PERT PLUS KASKO %40 44001 440-1 GUVENLI GELECEK PLUS 44002 440-2 GUVENLI GELECEK MAXI PLUS 44003 440-3 GUVENLI GELECEK 44004 440-4 GUVENLI GELECEK MAXI 44005 440-5 GUVENLI GELECEK GOLD 44006 440-6 GUVENLI GELECEK GOLD PLUS 44007 440-7 GUVENLI GELECEK GOLD MAXI 44008 440-8 GUVENLI GELECEK GOLD MAXI PLUS 44009 440-9 GULUMSETEN PAKET 44010 440-10 SMS FERDI KAZA 44011 440-11 GUVENLI BIZ MAXI BTSO 44012 440-12 GUVENLI BIZ GOLD PLUS BTSO 44013 440-13 ISYERIMDE GUVENDEYIM PAKET-1 44014 440-14 ISYERIMDE GUVENDEYIM PAKET-2 44015 440-15 ISYERIMDE GUVENDEYIM PAKET-3 44016 440-16 ISYERIMDE GUVENDEYIM PAKET-4 44017 440-17 1.SINIF FAALIYETLER 44018 440-18 2.SINIF FAALIYETLER 44019 440-19 3.SINIF FAALIYETLER 44020 440-20 IS TE TICARI KORUMA 44021 440-21 IS TE CIFTCI KORUMA 44022 440-22 KARMA/IS TE KORUMA 44023 440-23 IS TE ÖZEL KORUMA 44024 440-24 IS TE MAXIMUM KORUMA 44025 440-25 PROFESYONEL FUTBOLCU 1.TEMINAT GRUBU 44026 440-26 PROFESYONEL FUTBOLCU 2.TEMINAT GRUBU 44027 440-27 PROFESYONEL FUTBOLCU 3.TEMINAT GRUBU 44028 440-28 PAKET 1 44029 440-29 PAKET 2 44030 440-30 PAKET 3 44031 440-31 PAKET 4 44032 440-32 PROFESYONEL SPORCU 44033 440-33 BASIDAV-1 44034 440-34 BASIDAV-2 44035 440-35 BASIDAV-3 44036 440-36 BASIDAV-4 44037 440-37 BASIDAV-5 44038 440* ELİT PAKET 64501 645* Ekstra Garanti Sigortası 64502 645* Dört Dörtlük Cihaz Koruma ve Kazaen Kırılma Sigortası 64503 645* Ekstra Garanti ve Kazaen Kırılma Sigortası 64504 645* Dört Dörtlük Cihaz Koruma Sigortası 70101 701-1 DEV KASKO 71601 716* VOLKSWAGEN KASKO SIGORTA POLIÇESI 71602 716** AUDİ KASKO SİGORTASI 71603 716*** SKODA KASKO SİGORTASI 71604 716**** SCANIA KASKO SİGORTA POLİÇESİ 71605 716***** HONDA KASKO SİGORTA POLİÇESİ 71801 718* HESAPLI STANDART 71802 718** HESAPLI PLUS 71803 718*** HESAPLI MİNİ 73201 732* YENI NESIL HESAPLI KONUT PAKET 73202 732** YENI NESIL STANDART KONUT PAKET 73203 732*** YENI NESIL ELIT KONUT PAKET 74001 740* TÜRKIYE' YE SEYAHAT SIGORTASI 74002 732** TÜRKIYE' YE SEYAHAT SIGORTASI (UZUN DÖNEM) Tablo baglami: Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Adı Detay"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.NEW_FPOLK = AGGR.AS400_YENI_URUN.NEW_FPOLK",
+        "AS_DWH.POL_POLICE_OZET.NEW_FPOLK = AGGR.AS400_YENI_URUN.NEW_FPOLK"
+      ],
+      "indexes": [
+        "AGGR.AS400_YENI_URUN(NEW_FPOLK)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe Kodu Detay",
+        "Üretim",
+        "AGGR.AS400_YENI_URUN",
+        "Poliçe Adı Detay"
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.ACE_ACENTE_ADRES",
+      "description": "Acentelere ait adres bilgilerini tutar. AS_DWH.ACE_ACENTE tablosuna ACENTE_ID ile bağlanır Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir.",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; veri_seviyesi=Acente Kodu; degisim_seviyesi=Acente Kodu",
+      "columns": [
+        {
+          "name": "IL_ADI",
+          "type": "VARCHAR2",
+          "description": "Acente İl Adı Kanalın faaliyet adresine ilişkin il adıdır. Acente İl Adı, sigorta acentesinin faaliyet gösterdiği veya kayıtlı olduğu ilin adını ifade eder. Acente İl Adı = Sigorta acentesinin bulunduğu şehrin adı Tablo baglami: Acentelere ait adres bilgilerini tutar. AS_DWH.ACE_ACENTE tablosuna ACENTE_ID ile bağlanır",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Şehri",
+            "Acente İl Bilgisi",
+            "Acente Konum İli",
+            "Acente İl Adı"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.ACE_ACENTE_ADRES.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+        "AS_DWH.ACE_ACENTE_ADRES.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID"
+      ],
+      "indexes": [
+        "AS_DWH.ACE_ACENTE_ADRES(ACENTE_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Acente İl Adı",
+        "Kanal",
+        "AS_DWH.ACE_ACENTE_ADRES",
+        "Acente Şehri",
+        "Acente İl Bilgisi",
+        "Acente Konum İli",
+        "Acente Kodu",
+        "Acenta Tanımlama Kodu",
+        "Acenta Referans Kodu",
+        "Acenta Numarası",
+        "Satış Acentesi Kodu",
+        "Acente Unvanı",
+        "Acente Adı",
+        "Satış Müdürlüğü",
+        "Satış Bölge Müdürlüğü",
+        "Bölge Satış Birimi",
+        "Acente Tipi",
+        "Acente Türü",
+        "Acente Sınıfı",
+        "Acente Sınıflandırması"
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.ACE_SATIS_MUDURLUGU",
+      "description": "Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir. Acente bölgelerine ait bilgileri tutan tablo. SATIS_MUDURLUGU_ID üzerinden bağlanarak bilgilere erişilir.",
+      "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; veri_seviyesi=Acente Kodu; degisim_seviyesi=Acente Kodu",
+      "columns": [
+        {
+          "name": "SATIS_MUDURLUGU_ADI",
+          "type": "VARCHAR2",
+          "description": "Acente Bölge Adı Acente Bölge Adı = Acentenin bağlı olduğu bölgenin ismi Kolon icerigi: SATIS_MUDURLUGU_ID KAYNAK_SISTEM_ID SATIS_MUDURLUGU_KODU SATIS_MUDURLUGU_ADI -99 1 -99 2 1 11 İSTANBUL BÖLGE MÜDÜRLÜĞÜ 6 1 2 GÜNEY ANADOLU BÖLGE MÜDÜRLÜĞÜ 7 1 1 GENEL MÜDÜRLÜK 8 1 4 MARMARA BÖLGE MÜDÜRLÜĞÜ 9 1 12 KADIKÖY BÖLGE MÜDÜRLÜĞÜ 10 1 6 ORTA KARADENIZ BÖLGE MÜDÜRLÜĞÜ 11 1 3 BATI ANADOLU BÖLGE MÜDÜRLÜĞÜ 12 1 8 AKDENIZ BÖLGE MÜDÜRLÜĞÜ 13 1 5 İÇ ANADOLU BÖLGE MÜDÜRLÜĞÜ 14 1 50 KIBRIS ŞUBE 15 1 7 KARADENIZ BÖLGE MÜDÜRLÜĞÜ 115 1 14 ORTA ANADOLU BÖLGE MÜDÜRLÜĞÜ Tablo baglami: Acente bölgelerine ait bilgileri tutan tablo. SATIS_MUDURLUGU_ID üzerinden bağlanarak bilgilere erişilir.",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Bölge İsmi",
+            "Acentenin Bağlı Olduğu Bölge",
+            "Satış Bölgesi Adı",
+            "Acente Bölge Bilgisi",
+            "Acente Bölge Adı"
+          ]
+        },
+        {
+          "name": "SATIS_MUDURLUGU_KODU",
+          "type": "VARCHAR2",
+          "description": "Acente Bölge Kodu Acente Bölge Kodu = Acentenin hangi bölgeye bağlı olduğunu gösteren kod Kolon icerigi: SATIS_MUDURLUGU_ID KAYNAK_SISTEM_ID SATIS_MUDURLUGU_KODU SATIS_MUDURLUGU_ADI -99 1 -99 2 1 11 İSTANBUL BÖLGE MÜDÜRLÜĞÜ 6 1 2 GÜNEY ANADOLU BÖLGE MÜDÜRLÜĞÜ 7 1 1 GENEL MÜDÜRLÜK 8 1 4 MARMARA BÖLGE MÜDÜRLÜĞÜ 9 1 12 KADIKÖY BÖLGE MÜDÜRLÜĞÜ 10 1 6 ORTA KARADENIZ BÖLGE MÜDÜRLÜĞÜ 11 1 3 BATI ANADOLU BÖLGE MÜDÜRLÜĞÜ 12 1 8 AKDENIZ BÖLGE MÜDÜRLÜĞÜ 13 1 5 İÇ ANADOLU BÖLGE MÜDÜRLÜĞÜ 14 1 50 KIBRIS ŞUBE 15 1 7 KARADENIZ BÖLGE MÜDÜRLÜĞÜ 115 1 14 ORTA ANADOLU BÖLGE MÜDÜRLÜĞÜ Tablo baglami: Acente bölgelerine ait bilgileri tutan tablo. SATIS_MUDURLUGU_ID üzerinden bağlanarak bilgilere erişilir.",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Bölge Kodu"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID",
+        "AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID"
+      ],
+      "indexes": [
+        "AS_DWH.ACE_SATIS_MUDURLUGU(SATIS_MUDURLUGU_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Acente Kodu",
+        "Kanal",
+        "AS_DWH.ACE_SATIS_MUDURLUGU",
+        "Acenta Tanımlama Kodu",
+        "Acenta Referans Kodu",
+        "Acenta Numarası",
+        "Satış Acentesi Kodu",
+        "Acente Unvanı",
+        "Acente Adı",
+        "Acente Bölge Kodu",
+        "Satış Müdürlüğü",
+        "Satış Bölge Müdürlüğü",
+        "Bölge Satış Birimi",
+        "Acente Bölge Adı",
+        "Acente Bölge İsmi",
+        "Acentenin Bağlı Olduğu Bölge",
+        "Satış Bölgesi Adı",
+        "Acente Bölge Bilgisi",
+        "Acente Tipi",
+        "Acente Türü"
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.MUS_MUSTERI_CINSIYET",
+      "description": "Müşteri Bilgilerini İçeren Tablo",
+      "grain": "veri_seviyesi=Müşteri; degisim_seviyesi=Müşteri",
+      "columns": [
+        {
+          "name": "MUSTERI_CINSIYET_ADI",
+          "type": "VARCHAR2",
+          "description": "Müşteri Cinsiyet Müşteri Cinsiyet, sigorta müşterisinin biyolojik veya resmi kayıtlarına göre belirtilen cinsiyet bilgisini ifade eder. Müşteri cinsiyet = Müşterinin kadın mı erkek mi olduğunu gösteren bilgi Kolon icerigi: MUSTERI_CINSIYET_ID MUSTERI_CINSIYET_KODU MUSTERI_CINSIYET_ADI 16 E ERKEK 18 N/A 17 K KADIN -99 -99 N/A Tablo baglami: Müşteri Bilgilerini İçeren Tablo",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Cinsiyet",
+            "Müşteri Cinsiyet Bilgisi",
+            "Sigortalı Cinsiyeti",
+            "Müşteri Cinsiyet"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID",
+        "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID"
+      ],
+      "indexes": [
+        "AS_DWH.MUS_MUSTERI_CINSIYET(MUSTERI_CINSIYET_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Müşteri Cinsiyet",
+        "Müşteri",
+        "AS_DWH.MUS_MUSTERI_CINSIYET",
+        "Cinsiyet",
+        "Müşteri Cinsiyet Bilgisi",
+        "Sigortalı Cinsiyeti"
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POLICE_SAYISI",
+      "description": "Poliçe Sayısı Bilgisini Tutar",
+      "grain": "veri_seviyesi=Police ID",
+      "columns": [
+        {
+          "name": "POLICE_SAYISI",
+          "type": "NUMBER",
+          "description": "Poliçe Sayısı Poliçe Sayısı Bilgisini Verir. Poliçe Sayısı, belirli bir kapsam içinde bulunan toplam sigorta poliçesi adedini ifade eder. Poliçe Sayısı = Belirli bir dönemde veya grupta bulunan toplam poliçe adedi Tablo baglami: Poliçe Sayısı Bilgisini Tutar",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Toplam Poliçe Adedi",
+            "Poliçe Adedi",
+            "Poliçe Toplamı",
+            "Poliçe Miktarı",
+            "Policy Count",
+            "Poliçe Sayısı"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID"
+      ],
+      "indexes": [
+        "AS_DWH.POLICE_SAYISI(POLICE_ID)"
+      ],
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ],
+      "security": {
+        "restricted": false,
+        "pii_columns": [],
+        "note": "No direct PII markers inferred from Excel metadata."
+      },
+      "keywords": [
+        "Poliçe Sayısı",
+        "Üretim",
+        "AS_DWH.POLICE_SAYISI",
+        "Toplam Poliçe Adedi",
+        "Poliçe Adedi",
+        "Poliçe Toplamı",
+        "Poliçe Miktarı",
+        "Policy Count"
+      ]
+    }
+  ],
+  "guardrails": [
+    "Apply selective date filters for production reporting queries.",
+    "Prefer key-based joins observed in workbook join definitions.",
+    "No direct PII markers inferred from Excel metadata.",
+    "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+    "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+    "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır.",
+    "Contains customer-identifying fields; apply least-privilege and masking in broad extracts.",
+    "PII columns restricted: MUSTERI_ADI, MUSTERI_NUMARASI, MUSTERI_SOYADI"
+  ],
+  "mandatory_rules": [
+    "REPORT_PERIOD = :report_period"
+  ],
+  "retrieval_debug": {
+    "selected_count": 20,
+    "total_documents": 20,
+    "effective_top_k": 200,
+    "min_score_threshold": 0.005,
+    "metadata_source": "C:\\Users\\ky4642\\talk-to-your-data-v0\\metadata\\agents\\metadata_vectored_uretim.json"
+  }
+}

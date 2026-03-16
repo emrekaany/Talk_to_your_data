@@ -1,0 +1,23 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT REPORT_PERIOD, PRIM_TL, REPORT_PERIOD, PRIM_TL FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Direct listing based on extracted dimensions/measures.",
+    "risk_notes": "May return row-level data if aggregation is expected.",
+    "description": "Question answered: What are the report periods and PRIM_TL values for the specified report period, limited to 200 rows?  \nTables used: AS_IFRS.IFRS_PRIM_VERISI  \nFilters: REPORT_PERIOD = :report_period  \nGrouping/measures: None  \nExpected output columns: REPORT_PERIOD, PRIM_TL  \nAssumptions: The report_period parameter is provided and valid; the table contains data for the specified period."
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT REPORT_PERIOD, SUM(REPORT_PERIOD) AS TOTAL_REPORT_PERIOD FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period GROUP BY REPORT_PERIOD ORDER BY TOTAL_REPORT_PERIOD DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Aggregated interpretation using primary measure.",
+    "risk_notes": "Aggregation logic should be validated with business owner.",
+    "description": "Question answered: What is the total report period value for a specific report period?  \nTables used: AS_IFRS.IFRS_PRIM_VERISI  \nFilters: REPORT_PERIOD = :report_period  \nGrouping/measures: Grouped by REPORT_PERIOD, summing REPORT_PERIOD values  \nExpected output columns: REPORT_PERIOD, TOTAL_REPORT_PERIOD  \nAssumptions: REPORT_PERIOD is numeric and can be summed, and the filter :report_period is provided to avoid unrestricted queries."
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT REPORT_PERIOD, COUNT(*) AS ROW_COUNT FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period GROUP BY REPORT_PERIOD ORDER BY ROW_COUNT DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Distribution-focused alternative by key dimension.",
+    "risk_notes": "Counts may not match metric totals.",
+    "description": "Question answered: Alternative SQL interpretation of the user request.\nTables used: AS_IFRS.IFRS_PRIM_VERISI\nFilters: REPORT_PERIOD = :report_period\nGrouping/measures: GROUP BY REPORT_PERIOD\nExpected output columns: REPORT_PERIOD, COUNT(*) AS ROW_COUNT\nAssumptions: A report period value must be provided at runtime. Mandatory metadata guardrails were applied."
+  }
+]

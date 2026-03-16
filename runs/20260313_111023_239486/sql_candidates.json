@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT \n  ppo.POLICE_NO,\n  pb.BRANS_KODU,\n  fpp.BRUT_PRIM_TL AS PRIM_TL\nFROM \n  AS_DWH.POL_POLICE_OZET ppo\nJOIN AS_DWH.FACT_POL_POLICE_EK fpp ON ppo.POLICE_ID = fpp.POLICE_ID\nJOIN AS_DWH.POL_POLICE_KIRILIM ppk ON ppo.POLICE_ID = ppk.POLICE_ID\nJOIN AS_DWH.POL_BRANS pb ON ppk.BRANS_ID = pb.BRANS_ID\nWHERE \n  TO_CHAR(ppo.TANZIM_TARIH_ID) BETWEEN '20250101' AND '20251231'\n  AND ppo.REPORT_PERIOD = :report_period\nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What are the police numbers, branch codes, and gross premium amounts (in Turkish Lira) for policies issued between January 1, 2025, and December 31, 2025, filtered by a specific report period?\n\nTables used: \n- AS_DWH.POL_POLICE_OZET (policy summary)\n- AS_DWH.FACT_POL_POLICE_EK (policy premium facts)\n- AS_DWH.POL_POLICE_KIRILIM (policy breakdown)\n- AS_DWH.POL_BRANS (branch codes)\n\nFilters: \n- Policies with a formulation date between January 1, 2025, and December 31, 2025.\n- A specific report period (`:report_period`) is applied.\n\nGrouping/measures: \n- No grouping or aggregation is performed. The query simply retrieves individual policy records.\n\nExpected output columns: \n- POLICE_NO (policy number)\n- BRANS_KODU (branch code)\n- PRIM_TL (gross premium in Turkish Lira)\n\nAssumptions: \n- The `:report_period` parameter is provided externally.\n- The date filter (`TO_CHAR(ppo.TANZIM_TARIH_ID)`) refers to the formulation date of the policy.\n- The query is likely used to extract a sample of policy data for reporting or analysis purposes.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT \n  ppo.POLICE_NO,\n  pb.BRANS_KODU,\n  fppa.VOP_TL AS PRIM_TL\nFROM \n  AS_DWH.POL_POLICE_OZET ppo\nJOIN AS_DWH.FACT_POL_POLICE_TEM_ASSET fppa ON ppo.POLICE_ID = fppa.POLICE_ID\nJOIN AS_DWH.POL_POLICE_KIRILIM ppk ON ppo.POLICE_ID = ppk.POLICE_ID\nJOIN AS_DWH.POL_BRANS pb ON ppk.BRANS_ID = pb.BRANS_ID\nWHERE \n  TO_CHAR(ppo.TANZIM_TARIH_ID) BETWEEN '20250101' AND '20251231'\n  AND ppo.REPORT_PERIOD = :report_period\nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What are the police numbers, branch codes, and premium amounts (in TL) for policies issued between January 1, 2025, and December 31, 2025, filtered by a specific report period?\n\nTables used: \n- AS_DWH.POL_POLICE_OZET (policy summary)\n- AS_DWH.FACT_POL_POLICE_TEM_ASSET (policy asset facts)\n- AS_DWH.POL_POLICE_KIRILIM (policy breakdown)\n- AS_DWH.POL_BRANS (branch codes)\n\nFilters: \n- Policies with a formulation date between January 1, 2025, and December 31, 2025.\n- A specific report period (`REPORT_PERIOD = :report_period`).\n\nGrouping/measures: \n- No grouping or aggregation is applied. The query simply retrieves individual policy records.\n\nExpected output columns: \n- POLICE_NO (policy number)\n- BRANS_KODU (branch code)\n- PRIM_TL (premium amount in Turkish Lira)\n\nAssumptions: \n- The `REPORT_PERIOD` is a parameter used to filter data according to a specific reporting timeframe.\n- The `VOP_TL` column represents the premium amount in Turkish Lira.\n- The query is likely used to extract a sample of policy records for analysis or reporting purposes.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT \n  ppo.POLICE_NO,\n  pb.BRANS_KODU,\n  fpp.BRUT_PRIM_TL AS PRIM_TL\nFROM \n  AS_DWH.POL_POLICE_OZET ppo\nJOIN AS_DWH.FACT_POL_POLICE_EK fpp ON ppo.POLICE_ID = fpp.POLICE_ID\nJOIN AS_DWH.POL_POLICE_KIRILIM ppk ON ppo.POLICE_ID = ppk.POLICE_ID\nJOIN AS_DWH.POL_BRANS pb ON ppk.BRANS_ID = pb.BRANS_ID\nWHERE \n  TO_CHAR(ppo.TANZIM_TARIH_ID) BETWEEN '20250101' AND '20251231'\n  AND ppo.REPORT_PERIOD = :report_period\nGROUP BY \n  ppo.POLICE_NO,\n  pb.BRANS_KODU,\n  fpp.BRUT_PRIM_TL\nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What are the police numbers, branch codes, and gross premium amounts (in Turkish Lira) for policies issued in 2025, filtered by a specific report period, limited to the first 200 rows?\n\nTables used: \n- AS_DWH.POL_POLICE_OZET (policy summary)\n- AS_DWH.FACT_POL_POLICE_EK (policy additional facts)\n- AS_DWH.POL_POLICE_KIRILIM (policy breakdown)\n- AS_DWH.POL_BRANS (branch codes)\n\nFilters: \n- Policies with a formulation date between January 1, 2025, and December 31, 2025.\n- A specific report period (`:report_period`) is selected.\n\nGrouping/measures: \n- Grouped by police number, branch code, and gross premium amount.\n\nExpected output columns: \n- Police number (`POLICE_NO`)\n- Branch code (`BRANS_KODU`)\n- Gross premium in Turkish Lira (`PRIM_TL`)\n\nAssumptions: \n- The `:report_period` parameter is provided externally.\n- The query is intended to retrieve a limited sample (200 rows) for analysis or reporting purposes.\n- The joins are based on shared policy IDs and branch relationships as defined in the metadata.",
+    "recommended": false
+  }
+]

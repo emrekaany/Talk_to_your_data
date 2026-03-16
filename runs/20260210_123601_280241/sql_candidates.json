@@ -1,0 +1,23 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT PRIM_TL FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What are the first 200 values of `PRIM_TL` for a specific reporting period?  \nTables used: AS_IFRS.IFRS_PRIM_VERISI  \nFilters: REPORT_PERIOD = :report_period  \nGrouping/measures: None  \nExpected output columns: PRIM_TL  \nAssumptions: The `REPORT_PERIOD` is provided as a parameter, and the table contains valid data for that period."
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(PRIM_TL) FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total value of `PRIM_TL` for a specific reporting period?  \nTables used: AS_IFRS.IFRS_PRIM_VERISI  \nFilters: REPORT_PERIOD = :report_period  \nGrouping/measures: SUM(PRIM_TL)  \nExpected output columns: One column with the total sum of PRIM_TL  \nAssumptions: The `REPORT_PERIOD` is provided as a parameter, and the table contains valid numeric values in the `PRIM_TL` column."
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT COUNT(*) FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: How many records exist in the IFRS_PRIM_VERISI table for a specific reporting period?  \nTables used: AS_IFRS.IFRS_PRIM_VERISI  \nFilters: REPORT_PERIOD = :report_period  \nGrouping/measures: COUNT(*)  \nExpected output columns: One column with the total count of records matching the report period  \nAssumptions: The REPORT_PERIOD filter is provided and valid; the table contains data for the specified period."
+  }
+]

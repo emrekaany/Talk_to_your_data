@@ -1,0 +1,45 @@
+{
+  "recommended_candidate_id": "option_1",
+  "recommended_canonical_id": "option_1",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM judge failed: LLM HTTP error 429: {\"error\":{\"message\":\"Rate limit exceeded for api_key: cb6f2657c4a7eb4b37ea9b7c47a068eee04fa815864cb3038c648661831aab4a. Limit type: requests. Current limit: 5, Remaining: 0. Limit resets at: 2026-03-13 13:44:46 UTC\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}",
+  "llm_raw_output": "",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Unsupported column 'fpp.KAYNAK_SISTEM_ID' for metadata table 'as_dwh.fact_pol_police_ek'.",
+        "Unsupported column 'ppo.KAYNAK_SISTEM_ID' for metadata table 'as_dwh.pol_police_ozet'.",
+        "Unsupported column 'fpp.POLICE_ID' for metadata table 'as_dwh.fact_pol_police_ek'.",
+        "Unsupported column 'ppo.POLICE_ID' for metadata table 'as_dwh.pol_police_ozet'."
+      ],
+      "fallback_score": 8.0
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Unsupported column 'fpp.KAYNAK_SISTEM_ID' for metadata table 'as_dwh.fact_pol_police_ek'.",
+        "Unsupported column 'ppo.KAYNAK_SISTEM_ID' for metadata table 'as_dwh.pol_police_ozet'.",
+        "Unsupported column 'fpp.POLICE_ID' for metadata table 'as_dwh.fact_pol_police_ek'.",
+        "Unsupported column 'ppo.POLICE_ID' for metadata table 'as_dwh.pol_police_ozet'."
+      ],
+      "fallback_score": 8.0
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Unsupported column 'fpp.KAYNAK_SISTEM_ID' for metadata table 'as_dwh.fact_pol_police_ek'.",
+        "Unsupported column 'ppo.KAYNAK_SISTEM_ID' for metadata table 'as_dwh.pol_police_ozet'.",
+        "Unsupported column 'fpp.POLICE_ID' for metadata table 'as_dwh.fact_pol_police_ek'.",
+        "Unsupported column 'ppo.POLICE_ID' for metadata table 'as_dwh.pol_police_ozet'."
+      ],
+      "fallback_score": 8.0
+    }
+  ]
+}

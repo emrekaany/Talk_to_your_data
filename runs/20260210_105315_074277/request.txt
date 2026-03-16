@@ -1,0 +1,1 @@
+202501 donemi icin BRANS_KODU bazinda toplam PRIM_TL getir.

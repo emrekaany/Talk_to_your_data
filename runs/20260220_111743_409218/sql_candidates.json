@@ -1,0 +1,23 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT PRIM_TL FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What are the first 200 premium amounts (`PRIM_TL`) recorded in the specified reporting period?  \nTables used: `AS_IFRS.IFRS_PRIM_VERISI`  \nFilters: Only records where `REPORT_PERIOD` matches the provided input (`:report_period`)  \nGrouping/measures: No grouping or aggregation is applied  \nExpected output columns: `PRIM_TL`  \nAssumptions: The `REPORT_PERIOD` filter is provided and valid; the query retrieves up to 200 rows to limit data volume."
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(PRIM_TL) FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What is the total primary premium (`PRIM_TL`) for the specified reporting period?  \nTables used: AS_IFRS.IFRS_PRIM_VERISI  \nFilters: REPORT_PERIOD = :report_period  \nGrouping/measures: SUM(PRIM_TL)  \nExpected output columns: Total PRIM_TL (summed)  \nAssumptions: The `REPORT_PERIOD` parameter is provided, and the query is restricted to 200 rows as a safety measure."
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT PRIM_TL, SGK_PRIM_TL, ACENTE_KOMISYON_TL FROM AS_IFRS.IFRS_PRIM_VERISI WHERE REPORT_PERIOD = :report_period FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative interpretation.",
+    "risk_notes": "Verify business definitions before execution.",
+    "description": "Question answered: What are the premium amounts, social security premiums, and agent commissions for the specified reporting period?  \nTables used: AS_IFRS.IFRS_PRIM_VERISI  \nFilters: REPORT_PERIOD = :report_period  \nGrouping/measures: No grouping; returns raw values  \nExpected output columns: PRIM_TL, SGK_PRIM_TL, ACENTE_KOMISYON_TL  \nAssumptions: The REPORT_PERIOD filter is provided and valid; the query is limited to 200 rows."
+  }
+]

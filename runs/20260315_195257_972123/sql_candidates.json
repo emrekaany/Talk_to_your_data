@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "WITH filtered_data AS (\n  SELECT fpe.BRUT_PRIM_TL\n  FROM AS_DWH.FACT_POL_POLICE_EK fpe\n  JOIN AS_DWH.POL_POLICE_OZET ppo ON fpe.POLICE_ID = ppo.POLICE_ID\n  JOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID\n  WHERE gt.TARIH_ID = :report_period\n)\nSELECT SUM(BRUT_PRIM_TL) AS PRIM_TL\nFROM filtered_data\nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Replaced hardcoded period filter with :report_period bind variable using TANZIM_TARIH_ID context.",
+    "risk_notes": "Ensure :report_period is correctly bound to a valid TARIH_ID from EK TANZIM date basis.",
+    "description": "Question answered: Alternative SQL interpretation of the user request.\nTables used: AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.FACT_POL_POLICE_EK\nFilters: gt.TARIH_ID = :report_period ) SELECT SUM(BRUT_PRIM_TL) AS PRIM_TL FROM filtered_data\nGrouping/measures: No GROUP BY clause (row-level or pre-aggregated output).\nExpected output columns: fpe.BRUT_PRIM_TL\nAssumptions: A report period value must be provided at runtime.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(fpe.BRUT_PRIM_TL) AS PRIM_TL\nFROM AS_DWH.FACT_POL_POLICE_EK fpe\nJOIN AS_DWH.POL_POLICE_OZET ppo ON fpe.POLICE_ID = ppo.POLICE_ID\nJOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID\nWHERE gt.TARIH_ID = :report_period\nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Adjusted to use :report_period bind variable with TANZIM_TARIH_ID context.",
+    "risk_notes": "Ensure :report_period is correctly set to a valid TARIH_ID from EK TANZIM date basis.",
+    "description": "Question answered: Alternative SQL interpretation of the user request.\nTables used: AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.FACT_POL_POLICE_EK\nFilters: gt.TARIH_ID = :report_period\nGrouping/measures: No GROUP BY clause (row-level or pre-aggregated output).\nExpected output columns: SUM(fpe.BRUT_PRIM_TL) AS PRIM_TL\nAssumptions: A report period value must be provided at runtime.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "WITH filtered_data AS (\n  SELECT fpe.BRUT_PRIM_TL\n  FROM AS_DWH.FACT_POL_POLICE_EK fpe\n  JOIN AS_DWH.POL_POLICE_OZET ppo ON fpe.POLICE_ID = ppo.POLICE_ID\n  JOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID\n  WHERE gt.TARIH = :report_period\n)\nSELECT SUM(BRUT_PRIM_TL) AS PRIM_TL\nFROM filtered_data\nFETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Replaced hardcoded period filter with :report_period bind variable using TANZIM_TARIH_ID context.",
+    "risk_notes": "Ensure :report_period is correctly formatted and corresponds to valid TARIH_ID values.",
+    "description": "Question answered: Alternative SQL interpretation of the user request.\nTables used: AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.FACT_POL_POLICE_EK\nFilters: gt.TARIH = :report_period ) SELECT SUM(BRUT_PRIM_TL) AS PRIM_TL FROM filtered_data\nGrouping/measures: No GROUP BY clause (row-level or pre-aggregated output).\nExpected output columns: fpe.BRUT_PRIM_TL\nAssumptions: A report period value must be provided at runtime.",
+    "recommended": false
+  }
+]

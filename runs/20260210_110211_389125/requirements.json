@@ -1,0 +1,24 @@
+{
+  "intent": "listing",
+  "required_filters": [
+    "REPORT_PERIOD = :report_period"
+  ],
+  "measures": [
+    "BRANS_KODU",
+    "PRIM_TL"
+  ],
+  "dimensions": [],
+  "grain": [],
+  "join_needs": [],
+  "security_constraints": [
+    "PII_DISALLOWED"
+  ],
+  "invalid_request": false,
+  "notes": "LLM unavailable, heuristic extraction used: LLM connection error: [WinError 10061] Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı",
+  "row_limit": 200,
+  "report_period": "202501",
+  "time_range": {
+    "start": "None",
+    "end": "None"
+  }
+}
