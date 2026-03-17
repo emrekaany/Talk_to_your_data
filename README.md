@@ -65,7 +65,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Heuristic fallback when LLM is unavailable.
 - `talk_to_data/metadata_retriever.py`
   - Loads selected agent metadata JSON.
-  - Fails fast on metadata quality errors when join definitions reference missing table columns.
+  - Validates JSON/document structure and normalizes metadata payload for retrieval.
   - High-recall retrieval using Unicode-aware token cosine similarity.
   - Returns broader relevant payload (more tables/columns) and mandatory rules.
   - Initializes `runtime_mandatory_rules` container for generation-time obligations without mutating static metadata obligations.
@@ -162,7 +162,6 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `SELECT *` is blocked.
 - Row limit is always enforced with `FETCH FIRST 200 ROWS ONLY`.
 - Mandatory metadata filters are propagated and enforced.
-- Metadata loading blocks invalid join-key mappings before generation starts.
 - Granular time filters can be enforced via `TO_CHAR` predicates with binds (`:year_value`, `:report_period`, `:date_value`) when DATE/TIMESTAMP targets are available.
 - Controlled date-like NUMBER columns can be used for granular time filters only with strong metadata signals.
 - Granularity bind policy is strict (`year -> :year_value`, `month -> :report_period`, `day -> :date_value`).

@@ -2,10 +2,11 @@
 
 This document is the canonical architecture reference for this repository.
 All agents must read and understand this file before making code changes.
+When coding with Codex, this file is the primary source of architecture truth.
 
 ## System Purpose
 
-The system converts a natural-language analytics request into safe Oracle SQL options, lets the user choose one option, executes it, and returns:
+The system converts a natural-language analytics request into safe Oracle SQL options, auto-selects the best option (with manual override support), executes it, and returns:
 
 - preview table
 - human-readable summary
@@ -22,22 +23,24 @@ The system converts a natural-language analytics request into safe Oracle SQL op
    - generate exactly 3 SQL candidates
    - explain each candidate
    - persist generation artifacts under `runs/<timestamp>/`
-3. UI renders 3 options and a selector.
-4. User selects one option and clicks run.
-5. `TalkToDataService.execute_selected_candidate()`:
+3. UI renders 3 options and marks the recommended option selected by SQL judge (`LLM + fallback`).
+4. `generate_sql_options()` auto-runs the recommended candidate via `TalkToDataService.execute_selected_candidate()`.
+5. User can optionally override selection and rerun using `Run Selected SQL`.
+6. `TalkToDataService.execute_selected_candidate()`:
    - validates SQL guardrails before execution
    - executes SQL on Oracle using bind params
    - summarizes result with `summary_mode` visibility (`llm` or `heuristic`)
    - validates chart plan payload against result dataframe
    - keeps chart rendering deactivated unless explicitly enabled
    - saves execution artifacts (`result.xlsx`, `result_preview.csv`)
-6. UI shows run status, preview dataframe, summary text, chart plan text (deactivated), and downloadable Excel.
+7. UI shows run status, preview dataframe, summary text, chart plan text (deactivated), and downloadable Excel.
 
 ## Component Responsibilities
 
 - `app.py`
   - Gradio UI and callbacks (`generate_sql_options`, `run_selected_sql`).
   - Holds generation context in UI state.
+  - Auto-executes recommended SQL after generation; manual rerun remains available.
 - `talk_to_data/pipeline.py`
   - Main orchestrator (`TalkToDataService`).
   - Coordinates extract -> retrieve -> generate -> explain -> execute.
@@ -58,7 +61,8 @@ The system converts a natural-language analytics request into safe Oracle SQL op
   - Uses LLM path with retry/fix-json and heuristic fallback.
 - `talk_to_data/metadata_retriever.py`
   - Loads metadata JSON documents.
-  - Fails fast when metadata join definitions reference table columns that are absent in metadata.
+  - Enforces JSON and document-shape validity at metadata load time.
+  - Join-key column quality gate is currently disabled at load time (documented in change log).
   - Performs high-recall token/cosine retrieval (up to top 200).
   - Produces compact relevant metadata + static `mandatory_rules` + runtime `runtime_mandatory_rules` container + guardrails.
 - `talk_to_data/sql_generator.py`
@@ -121,7 +125,7 @@ The system converts a natural-language analytics request into safe Oracle SQL op
 - `SELECT *` is blocked.
 - SQL comments are blocked.
 - Mandatory filters from requirements/metadata are enforced.
-- Metadata load fails fast on invalid join-key references before SQL generation.
+- Metadata load enforces JSON/document-shape validity before SQL generation.
 - Granular time obligations are enforced with explicit bind+mask-aware pattern checks, not only token presence.
 - Granularity bind usage is strict (`year -> :year_value`, `month -> :report_period`, `day -> :date_value`).
 - Missing mandatory filters are corrected through candidate repair/revalidation, not by SQL text injection.
@@ -183,7 +187,7 @@ Secrets must remain env-driven and must not be hardcoded.
 
 ## Invariants (Do Not Break)
 
-1. End-to-end flow stays: request -> extraction -> metadata retrieval -> 3 SQL options -> selection -> Oracle execution -> preview/summary/excel.
+1. End-to-end flow stays: request -> extraction -> metadata retrieval -> 3 SQL options -> best-option selection (LLM judge + fallback) -> Oracle execution -> preview/summary/excel.
 2. Candidate generation must return exactly 3 SQL options.
 3. SQL safety/guardrail checks must remain active before execution.
 4. Run artifacts must persist under `runs/<timestamp>/`.
@@ -206,3 +210,5 @@ Entries:
 - 2026-03-15 - Codex: Strengthened shared SQL validation with quoted identifier parsing, schema ambiguity blocking, and full-catalog execution checks; removed duplicate unknown-column reason path from judge | Close guardrail bypass/false-positive risks and keep judge disqualify reasons singular | `talk_to_data/sql_validation.py`, `talk_to_data/sql_guardrails.py`, `talk_to_data/sql_judge.py`, `talk_to_data/pipeline.py`, `architecture.md`
 - 2026-03-16 - Codex: Reworked mandatory-filter handling to validation+repair (no SQL text injection), added controlled date-like NUMBER targeting for granular time filters, introduced `runtime_mandatory_rules`, expanded guardrail granular pattern validation, and added extractor hard-fail for invalid calendar date tokens | Close SQL breakage/false-negative risks while preserving 3-candidate flow and strict temporal safety | `talk_to_data/requirements_extractor.py`, `talk_to_data/sql_generator.py`, `talk_to_data/sql_guardrails.py`, `talk_to_data/sql_judge.py`, `talk_to_data/metadata_retriever.py`, `README.md`, `architecture.md`
 - 2026-03-16 - Codex: Added metadata join-key quality gate, judge retry metadata contract, and one-shot generate+judge retry orchestration with fail-fast on second all-disqualified attempt; added retry artifacts and retry-aware SQL prompting | Improve auto-selection robustness under judge failures/disqualifications while keeping strict safety guarantees | `talk_to_data/metadata_retriever.py`, `talk_to_data/sql_judge.py`, `talk_to_data/sql_generator.py`, `talk_to_data/pipeline.py`, `talk_to_data/runs.py`, `README.md`, `architecture.md`
+- 2026-03-17 - Codex: Disabled metadata join-key fail-fast at load time by removing runtime gate invocation so metadata files with partial join-key column coverage still load | Remove user-blocking metadata-load error while preserving rest of flow | `talk_to_data/metadata_retriever.py`, `README.md`, `architecture.md`
+- 2026-03-17 - Codex: Synced architecture document to runtime behavior by documenting auto-run-on-generate UI flow, manual override path, and current metadata-load validation scope | Keep `architecture.md` accurate/canonical for all future Codex sessions | `architecture.md`

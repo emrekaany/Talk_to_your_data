@@ -78,7 +78,6 @@ def load_metadata_documents(metadata_path: Path) -> list[dict[str, Any]]:
             f"Metadata file '{metadata_path}' has no usable documents. "
             f"See '{stub_path}' for expected schema."
         )
-    _validate_join_key_columns(documents, metadata_path=metadata_path)
     return documents
 
 
