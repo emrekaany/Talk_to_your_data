@@ -49,7 +49,9 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Auto-loads root `.env` with `python-dotenv` when available and built-in fallback parser otherwise.
 - `talk_to_data/agent_registry.py`
   - Loads `metadata/agents/agents.json`.
-  - Resolves selected/default agent and metadata path.
+  - Resolves selected/default agent, metadata path, and SQL rules path.
+- `talk_to_data/agent_rules.py`
+  - Loads and validates per-agent SQL prompt rule JSON files.
 - `talk_to_data/llm_client.py`
   - OpenAI-compatible chat completion wrapper.
   - Centralized LLM error handling.
@@ -68,31 +70,25 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - High-recall retrieval using Unicode-aware token cosine similarity.
   - Returns broader relevant payload (more tables/columns) and mandatory rules.
   - Initializes `runtime_mandatory_rules` container for generation-time obligations without mutating static metadata obligations.
-<<<<<<< ours
   - Builds compact metadata overview for extractor prompts (`tables`, `mandatory_filters`, `performance_rules`, source path).
   - Does not auto-add partitioning-derived `REPORT_PERIOD` obligations.
-  - Supports high-recall retrieval up to top 2000 metadata documents per request.
-=======
-  - Builds metadata overview hints (`has_report_period_column`, `time_filter_policy`) for extractor prompts.
   - Supports high-recall retrieval up to top 500 metadata documents per request.
->>>>>>> theirs
 - `talk_to_data/sql_generator.py`
   - Implements `generate_sql_candidates(...) -> list[dict]`.
   - Produces exactly 3 candidates.
   - Uses `talk_to_data/llm_client.py` for LLM calls.
+  - Accepts agent-specific prompt rules (`agent_rules`) and injects them into SQL generation prompt.
   - Accepts optional retry context (`retry_context`) so second-attempt prompts can avoid first-attempt disqualify patterns.
   - Builds LLM prompt with explicit `Metadata`, `Request`, and `Sql Rule` sections.
-  - Moves `YYYY` / `YYYYMM` / `YYYYMMDD` handling to SQL-generation prompt engineering stage.
+  - Uses prompt-only policy for time-expression behavior; agent-specific time guidance is supplied via rule JSON.
   - Includes column-level context in prompt (`type`, `description`, `semantic_type`, `keywords`, selected properties when available).
   - Carries metadata source trace (`retrieval_debug.metadata_source`) into prompt for auditability.
-  - Parses strict JSON output and validates safety/obligations without mutating LLM SQL text.
-  - Fails fast when exactly 3 valid candidates are not produced (no synthetic fallback SQL and no SQL repair path).
-  - Enforces row-limit policy via validation (`FETCH FIRST 200 ROWS ONLY`) and blocks semicolon-delimited SQL.
+  - Uses parse-only candidate policy (no `validate_candidate`, no generation-time repair).
+  - Fails fast when exactly 3 parseable candidates are not produced (no synthetic fallback SQL and no SQL repair path).
 - `talk_to_data/sql_guardrails.py`
   - Execution-time SQL validation before Oracle run.
-  - Re-checks safety, table allowlist, alias/column metadata compatibility, and mandatory filter obligations.
-  - Evaluates both static `mandatory_rules` and runtime-generated `runtime_mandatory_rules`.
-  - Does not synthesize obligations from performance-rule text; validates explicit metadata/requirements obligations only.
+  - Re-checks safety, table allowlist, and alias/column metadata compatibility.
+  - Mandatory filter obligation enforcement is disabled globally.
   - Accepts optional full `validation_catalog` for execution-time column checks.
 - `talk_to_data/sql_validation.py`
   - Builds full table-column validation catalog from raw metadata documents.
@@ -133,7 +129,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - includes: `intent`, `required_filters`, `measures`, `dimensions`, `grain`, `time_range`, `report_period`, `time_granularity`, `time_value`, `join_needs`, `row_limit`, `security_constraints`.
 - `retrieve_relevant_metadata(requirements, user_request) -> dict`
   - includes: `relevant_items`, `guardrails`, `mandatory_rules`, `runtime_mandatory_rules`.
-- `generate_sql_candidates(user_request, requirements, metadata, llm_client, retry_context=None) -> list[dict]`
+- `generate_sql_candidates(user_request, requirements, metadata, llm_client, retry_context=None, agent_rules=None) -> list[dict]`
   - each: `{id, sql, rationale_short, risk_notes}`.
 - `describe_sql_candidate(candidate, metadata) -> str`
 - `select_best_sql_option_id(user_request, metadata_used, candidates, llm_client=None, validation_catalog=None) -> str`
@@ -153,10 +149,9 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `SELECT *` is blocked.
 - SQL comments are blocked.
 - Row limit is enforced by validation: every SQL must include `FETCH FIRST 200 ROWS ONLY`.
-- Mandatory metadata filters are propagated and enforced.
-- SQL generation does not mutate LLM SQL output; invalid SQL is rejected instead of repaired/rewritten.
-- SQL generation fails fast when exactly 3 valid candidates cannot be produced.
-- Missing mandatory filters are handled by validation (no SQL text injection/repair).
+- Mandatory filter obligation enforcement is disabled (generation, judge, execution).
+- SQL generation does not mutate LLM SQL output; parse-only candidate handling is used.
+- SQL generation fails fast when exactly 3 parseable candidates cannot be produced.
 - Execution-time guardrails validate SQL `alias.column` references against metadata-derived table-column sets.
 - Execution-time guardrails use full metadata validation catalog (when provided) instead of compact top-60 columns.
 - Ambiguous bare table references (same table name in multiple schemas) are blocked with explicit candidate-table details.
@@ -296,21 +291,40 @@ Default registry contract:
       "id": "hasar",
       "label": "Hasar",
       "metadata_path": "metadata_vectored_hasar.json",
+      "rules_path": "rules/hasar.json",
       "description": "Hasar verisi agenti"
     },
     {
       "id": "uretim",
       "label": "Uretim",
       "metadata_path": "metadata_vectored_uretim.json",
+      "rules_path": "rules/uretim.json",
       "description": "Uretim verisi agenti"
     },
     {
       "id": "satis",
       "label": "Satis",
       "metadata_path": "metadata_vectored_satis.json",
+      "rules_path": "rules/satis.json",
       "description": "Satis verisi agenti"
     }
   ]
+}
+```
+
+## Agent Rule Files
+
+- `metadata/agents/rules/hasar.json`
+- `metadata/agents/rules/uretim.json`
+- `metadata/agents/rules/satis.json`
+
+Rule JSON schema:
+
+```json
+{
+  "agent_id": "uretim",
+  "sql_prompt_rules": ["..."],
+  "time_expression_guidance": ["..."]
 }
 ```
 

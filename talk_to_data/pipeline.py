@@ -15,6 +15,7 @@ from .agent_registry import (
     AgentRegistryError,
     load_agent_registry,
 )
+from .agent_rules import AgentRulesError, load_agent_rules
 from .config import AppConfig
 from .db import DatabaseExecutionError, execute_sql
 from .llm_client import LLMClient, try_build_llm_client
@@ -68,6 +69,7 @@ class TalkToDataService:
             timeout_sec=self.config.llm_timeout_sec,
         )
         self._metadata_documents_by_path: dict[Path, list[dict[str, Any]]] = {}
+        self._agent_rules_by_path: dict[Path, dict[str, Any]] = {}
         self._agent_registry: AgentRegistry | None = None
 
     def list_agents(self) -> list[dict[str, str]]:
@@ -86,6 +88,13 @@ class TalkToDataService:
             raise PipelineError("Please provide a request.")
 
         agent = self._resolve_agent(agent_id)
+        try:
+            agent_rules = self._get_agent_rules(agent)
+        except AgentRulesError as exc:
+            raise PipelineError(
+                f"Selected agent rules could not be loaded "
+                f"(agent='{agent.id}', path='{agent.rules_path}'): {exc}"
+            ) from exc
 
         try:
             metadata_docs = self._get_metadata_documents(agent.metadata_path)
@@ -125,11 +134,7 @@ class TalkToDataService:
             user_request=request,
             documents=metadata_docs,
             metadata_path=agent.metadata_path,
-<<<<<<< ours
-            top_k=2000,
-=======
             top_k=500,
->>>>>>> theirs
         )
         run_dir = create_run_dir(self.config.runs_dir)
         attempt_one_candidates: list[dict[str, Any]] | None = None
@@ -149,6 +154,7 @@ class TalkToDataService:
                     metadata=metadata_used,
                     llm_client=self.llm_client,
                     retry_context=retry_context,
+                    agent_rules=agent_rules,
                 )
             except SQLGenerationError as exc:
                 raise PipelineError(f"SQL generation failed: {exc}") from exc
@@ -227,6 +233,7 @@ class TalkToDataService:
                     "label": agent.label,
                     "description": agent.description,
                     "metadata_path": str(agent.metadata_path),
+                    "rules_path": str(agent.rules_path),
                 },
                 judge_result=final_judge_result,
             )
@@ -250,6 +257,7 @@ class TalkToDataService:
                 "label": agent.label,
                 "description": agent.description,
                 "metadata_path": str(agent.metadata_path),
+                "rules_path": str(agent.rules_path),
             },
             judge_result=final_judge_result,
         )
@@ -265,6 +273,7 @@ class TalkToDataService:
             "agent_id": agent.id,
             "agent_label": agent.label,
             "agent_metadata_path": str(agent.metadata_path),
+            "agent_rules_path": str(agent.rules_path),
             "requirements": requirements,
             "metadata_used": metadata_used,
             "validation_catalog": validation_catalog,
@@ -413,6 +422,15 @@ class TalkToDataService:
         documents = load_metadata_documents(metadata_path)
         self._metadata_documents_by_path[key] = documents
         return documents
+
+    def _get_agent_rules(self, agent: AgentConfig) -> dict[str, Any]:
+        key = agent.rules_path.resolve()
+        cached = self._agent_rules_by_path.get(key)
+        if cached is not None:
+            return cached
+        rules = load_agent_rules(agent.rules_path, expected_agent_id=agent.id)
+        self._agent_rules_by_path[key] = rules
+        return rules
 
     def _apply_connection_override(
         self,

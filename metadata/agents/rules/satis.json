@@ -1,0 +1,12 @@
+{
+  "agent_id": "satis",
+  "sql_prompt_rules": [
+    "Use only metadata-backed Oracle tables, columns, and join paths.",
+    "Prefer predicates and joins that match sales domain semantics in metadata.",
+    "Return executable SQL statements with FETCH FIRST 200 ROWS ONLY and no semicolon."
+  ],
+  "time_expression_guidance": [
+    "When request explicitly contains a period/date scope, express it with bind variables.",
+    "Use metadata-consistent date columns and avoid inventing non-existent period fields."
+  ]
+}

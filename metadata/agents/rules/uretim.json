@@ -1,0 +1,14 @@
+{
+  "agent_id": "uretim",
+  "sql_prompt_rules": [
+    "Use only metadata-backed Oracle tables, columns, and join paths.",
+    "Do not force mandatory filter obligations; generate SQL aligned strictly to the user request.",
+    "Return executable SQL statements with FETCH FIRST 200 ROWS ONLY and no semicolon."
+  ],
+  "time_expression_guidance": [
+    "If request contains YYYY (year), use a year predicate with :year_value and YYYY mask logic.",
+    "If request contains YYYYMM or asks for month scope, use a month predicate with :report_period and YYYYMM mask logic.",
+    "If request contains YYYYMMDD or day scope, use a day predicate with :date_value and YYYYMMDD mask logic.",
+    "Select metadata-valid date columns for these predicates; do not invent columns."
+  ]
+}

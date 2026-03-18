@@ -42,6 +42,7 @@ def generate_sql_candidates(
     metadata: dict[str, Any],
     llm_client: LLMClient | None = None,
     retry_context: dict[str, Any] | None = None,
+    agent_rules: dict[str, Any] | None = None,
 ) -> list[dict[str, str]]:
     """
     Generate exactly 3 Oracle SQL candidates.
@@ -51,14 +52,13 @@ def generate_sql_candidates(
     if llm_client is None:
         raise SQLGenerationError("LLM client is required for SQL generation.")
 
-    required_filters = _required_filters(requirements, metadata)
     candidates = _generate_with_llm(
         llm_client=llm_client,
         user_request=user_request,
         requirements=requirements,
         metadata=metadata,
-        required_filters=required_filters,
         retry_context=retry_context,
+        agent_rules=agent_rules,
     )
 
     if len(candidates) != 3:
@@ -66,16 +66,23 @@ def generate_sql_candidates(
             f"Model returned {len(candidates)} SQL candidate(s); expected exactly 3."
         )
 
-    validated: list[dict[str, str]] = []
+    normalized: list[dict[str, str]] = []
     for idx, candidate in enumerate(candidates, start=1):
-        validated.append(
-            _validate_candidate(
-                candidate=candidate,
-                idx=idx,
-                required_filters=required_filters,
-            )
+        sql = str(candidate.get("sql", "")).strip()
+        if not sql:
+            raise SQLGenerationError(f"Candidate option_{idx} SQL is empty.")
+        candidate_id = str(candidate.get("id") or f"option_{idx}").strip() or f"option_{idx}"
+        normalized.append(
+            {
+                "id": candidate_id,
+                "sql": sql,
+                "rationale_short": str(candidate.get("rationale_short", "")).strip()
+                or "Alternative interpretation.",
+                "risk_notes": str(candidate.get("risk_notes", "")).strip()
+                or "Verify business definitions before execution.",
+            }
         )
-    return validated
+    return normalized
 
 
 def sanity_check_sql(sql: str) -> tuple[bool, str]:
@@ -123,15 +130,15 @@ def _generate_with_llm(
     user_request: str,
     requirements: dict[str, Any],
     metadata: dict[str, Any],
-    required_filters: list[str],
     retry_context: dict[str, Any] | None,
+    agent_rules: dict[str, Any] | None,
 ) -> list[dict[str, str]]:
     prompt = _build_sql_prompt(
         user_request=user_request,
         requirements=requirements,
         metadata=metadata,
-        required_filters=required_filters,
         retry_context=retry_context,
+        agent_rules=agent_rules,
     )
     raw = _call_llm(
         llm_client=llm_client,
@@ -148,12 +155,13 @@ def _build_sql_prompt(
     user_request: str,
     requirements: dict[str, Any],
     metadata: dict[str, Any],
-    required_filters: list[str],
     retry_context: dict[str, Any] | None,
+    agent_rules: dict[str, Any] | None,
 ) -> str:
     metadata_text = _metadata_prompt_text(metadata)
-    sql_rule_text = _sql_rule_prompt_text(requirements, required_filters)
+    sql_rule_text = _sql_rule_prompt_text(requirements, agent_rules)
     retry_text = _retry_context_prompt_text(retry_context)
+    agent_rules_text = _agent_rules_prompt_text(agent_rules)
     return (
         "You are a senior SQL engineer. "
         "Generate three Oracle SQL candidates strictly from the provided metadata and request.\n\n"
@@ -166,11 +174,8 @@ def _build_sql_prompt(
         "- Do not use SELECT *.\n"
         "- Do not include semicolons.\n"
         f"- Every SQL must include FETCH FIRST {DEFAULT_SQL_LIMIT} ROWS ONLY.\n"
-        "- If request includes time tokens, infer SQL time predicates in SQL generation stage:\n"
-        "  * YYYY means year-level filtering\n"
-        "  * YYYYMM (or YYYY-MM) means month-level filtering\n"
-        "  * YYYYMMDD (or YYYY-MM-DD) means day-level filtering\n"
         "- Do not return INVALID_REQUEST.\n\n"
+        f"Agent Rules:\n{agent_rules_text}\n\n"
         f"Metadata:\n{metadata_text}\n\n"
         f"Request (original):\n{user_request}\n\n"
         f"Sql Rule:\n{sql_rule_text}\n\n"
@@ -270,89 +275,6 @@ def _candidate_from_value(item: Any, idx: int) -> dict[str, str] | None:
     }
 
 
-def _validate_candidate(
-    *,
-    candidate: dict[str, str],
-    idx: int,
-    required_filters: list[str],
-) -> dict[str, str]:
-    candidate_id = str(candidate.get("id") or f"option_{idx}").strip() or f"option_{idx}"
-    sql = str(candidate.get("sql", "")).strip()
-    if not sql:
-        raise SQLGenerationError(f"Candidate option_{idx} SQL is empty.")
-    if sql.upper() == "INVALID_REQUEST":
-        raise SQLGenerationError(f"Candidate option_{idx} returned INVALID_REQUEST.")
-
-    ok, reason = sanity_check_sql(sql)
-    if not ok:
-        raise SQLGenerationError(f"Candidate option_{idx} failed safety checks: {reason}")
-
-    missing = _find_missing_required_filters(sql, required_filters=required_filters)
-    if missing:
-        raise SQLGenerationError(
-            f"Candidate option_{idx} missing required filters: {', '.join(missing)}"
-        )
-
-    return {
-        "id": candidate_id,
-        "sql": sql,
-        "rationale_short": str(candidate.get("rationale_short", "")).strip()
-        or "Alternative interpretation.",
-        "risk_notes": str(candidate.get("risk_notes", "")).strip()
-        or "Verify business definitions before execution.",
-    }
-
-
-def _required_filters(
-    requirements: dict[str, Any],
-    metadata: dict[str, Any],
-) -> list[str]:
-    required: list[str] = []
-    for flt in _as_string_list(requirements.get("required_filters")):
-        normalized = _normalize_space(flt)
-        if normalized and normalized not in required:
-            required.append(normalized)
-    for flt in _as_string_list(metadata.get("mandatory_rules")):
-        normalized = _normalize_space(flt)
-        if normalized and normalized not in required:
-            required.append(normalized)
-    for flt in _as_string_list(metadata.get("runtime_mandatory_rules")):
-        normalized = _normalize_space(flt)
-        if normalized and normalized not in required:
-            required.append(normalized)
-    return required
-
-
-def _find_missing_required_filters(sql: str, *, required_filters: list[str]) -> list[str]:
-    normalized_sql = _normalize_space(sql).lower()
-    where_clause = _extract_where_clause(sql).lower()
-    missing: list[str] = []
-    for flt in required_filters:
-        obligation = _normalize_space(flt)
-        if not obligation:
-            continue
-        if obligation.lower() in normalized_sql:
-            continue
-        column = _extract_column_token(obligation)
-        if column and re.search(rf"\b{re.escape(column.lower())}\b", where_clause):
-            continue
-        missing.append(flt)
-    return missing
-
-
-def _extract_column_token(obligation: str) -> str:
-    lhs = re.split(
-        r"(=|<>|!=|<=|>=|<|>|\blike\b|\bbetween\b|\bin\b|\bis\b)",
-        obligation,
-        maxsplit=1,
-        flags=re.IGNORECASE,
-    )[0]
-    candidates = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", lhs)
-    if not candidates:
-        return ""
-    return candidates[-1]
-
-
 def _clean_sql_for_validation(sql: str) -> str:
     return _strip_fence(str(sql)).strip()
 
@@ -384,17 +306,6 @@ def _has_semicolon(sql: str) -> bool:
 
 def _normalize_space(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
-
-
-def _extract_where_clause(sql: str) -> str:
-    match = re.search(
-        r"\bwhere\b(.*?)(\bgroup\s+by\b|\border\s+by\b|\bhaving\b|\bfetch\s+first\b|$)",
-        sql,
-        flags=re.IGNORECASE | re.DOTALL,
-    )
-    if not match:
-        return ""
-    return match.group(1)
 
 
 def _strip_fence(text: str) -> str:
@@ -502,19 +413,19 @@ def _short_metadata_text(value: Any, *, limit: int) -> str:
 
 def _sql_rule_prompt_text(
     requirements: dict[str, Any],
-    required_filters: list[str],
+    agent_rules: dict[str, Any] | None,
 ) -> str:
     lines: list[str] = [
         "- Oracle SQL dialect is mandatory.",
         f"- Every query must include FETCH FIRST {DEFAULT_SQL_LIMIT} ROWS ONLY.",
-        "- Every query must include all mandatory filters in WHERE.",
+        "- Use only metadata-backed tables, columns, and join paths.",
         "- SQL must be executable without semicolon terminators.",
     ]
 
-    if required_filters:
-        lines.append(f"- Mandatory filters: {', '.join(required_filters)}")
-    else:
-        lines.append("- Mandatory filters: none")
+    for rule in _as_string_list((agent_rules or {}).get("sql_prompt_rules")):
+        lines.append(f"- Agent rule: {rule}")
+    for rule in _as_string_list((agent_rules or {}).get("time_expression_guidance")):
+        lines.append(f"- Time guidance: {rule}")
 
     time_granularity = str(requirements.get("time_granularity", "")).strip()
     if time_granularity:
@@ -532,6 +443,28 @@ def _sql_rule_prompt_text(
         if end:
             lines.append(f"- Runtime hint end_date: {end}")
 
+    return "\n".join(lines)
+
+
+def _agent_rules_prompt_text(agent_rules: dict[str, Any] | None) -> str:
+    if not isinstance(agent_rules, dict):
+        return "- No agent-specific prompt rules provided."
+    lines: list[str] = []
+    agent_id = str(agent_rules.get("agent_id", "")).strip()
+    if agent_id:
+        lines.append(f"- Agent ID: {agent_id}")
+    sql_rules = _as_string_list(agent_rules.get("sql_prompt_rules"))
+    if sql_rules:
+        lines.append("- SQL Prompt Rules:")
+        for rule in sql_rules:
+            lines.append(f"  - {rule}")
+    time_rules = _as_string_list(agent_rules.get("time_expression_guidance"))
+    if time_rules:
+        lines.append("- Time Expression Guidance:")
+        for rule in time_rules:
+            lines.append(f"  - {rule}")
+    if not lines:
+        lines.append("- No agent-specific prompt rules provided.")
     return "\n".join(lines)
 
 

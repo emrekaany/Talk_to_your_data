@@ -21,7 +21,8 @@ def validate_sql_before_execution(
     llm_client: LLMClient | None = None,
     validation_catalog: dict[str, Any] | None = None,
 ) -> None:
-    """Validate SQL safety, allowlisted tables/columns, and filter obligations."""
+    """Validate SQL safety and metadata allowlist compatibility."""
+    del llm_client
     ok, reason = sanity_check_sql(sql)
     if not ok:
         raise SQLGuardrailError(f"Safety validation failed: {reason}")
@@ -73,25 +74,6 @@ def validate_sql_before_execution(
             "Column allowlist validation failed. "
             f"Unknown alias.column references: {details}"
         )
-
-    obligation_map = _build_table_obligations(metadata_used, selected_tables)
-    missing = _find_missing_obligations(sql, obligation_map)
-    if missing and llm_client is not None:
-        checked = _llm_check_obligations(
-            sql=sql,
-            selected_tables=selected_tables,
-            obligation_map=obligation_map,
-            llm_client=llm_client,
-        )
-        if checked is not None:
-            missing = checked
-
-    if missing:
-        raise SQLGuardrailError(
-            "Filter obligation validation failed. Missing obligations: "
-            f"{'; '.join(missing)}"
-        )
-
 
 def _extract_selected_tables(sql: str) -> list[str]:
     matches = re.findall(

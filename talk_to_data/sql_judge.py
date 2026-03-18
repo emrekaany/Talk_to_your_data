@@ -243,16 +243,14 @@ def _build_judge_prompt(
         "Task:\n"
         "Select which SQL candidate best satisfies the request using the provided metadata context and constraints.\n\n"
         "Decision policy (hard rules):\n"
-        "- Disqualify any candidate that violates mandatory filters.\n"
         "- Disqualify any candidate that conflicts with guardrails/security notes.\n"
         "- Disqualify any candidate that uses tables/columns not supported by metadata context.\n"
         "- Disqualify any candidate that does not match Oracle SELECT/CTE intent.\n\n"
         "Ranking criteria (in order):\n"
         "1) Request satisfaction and semantic correctness\n"
-        "2) Mandatory filter compliance\n"
-        "3) Correct grain/aggregation for the request intent\n"
-        "4) Minimal unnecessary columns/joins\n"
-        "5) Performance-safe structure (early filters, sensible grouping)\n\n"
+        "2) Correct grain/aggregation for the request intent\n"
+        "3) Minimal unnecessary columns/joins\n"
+        "4) Performance-safe structure (early filters, sensible grouping)\n\n"
         "Output rule:\n"
         "- Return ONLY one token: option_1 or option_2 or option_3\n"
         "- No JSON, no explanation, no extra text.\n\n"
@@ -288,10 +286,6 @@ def _evaluate_candidates(
     candidates: list[dict[str, str]],
     validation_catalog: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
-    required_filters = _normalized_filter_list(metadata_used.get("mandatory_rules"))
-    for flt in _normalized_filter_list(metadata_used.get("runtime_mandatory_rules")):
-        if flt not in required_filters:
-            required_filters.append(flt)
     request_tokens = _tokenize(user_request)
     needs_aggregation = _request_mentions_aggregation(user_request)
     needs_detail = _request_mentions_detail(user_request)
@@ -321,7 +315,6 @@ def _evaluate_candidates(
         score = _fallback_score(
             candidate=candidate,
             request_tokens=request_tokens,
-            required_filters=required_filters,
             needs_aggregation=needs_aggregation,
             needs_detail=needs_detail,
         )
@@ -373,7 +366,6 @@ def _fallback_score(
     *,
     candidate: dict[str, str],
     request_tokens: Counter[str],
-    required_filters: list[str],
     needs_aggregation: bool,
     needs_detail: bool,
 ) -> float:
@@ -391,10 +383,6 @@ def _fallback_score(
     overlap_sql = _token_overlap(request_tokens, sql_tokens)
     overlap_explanation = _token_overlap(request_tokens, explanation_tokens)
     score = (2.0 * overlap_sql) + (0.5 * overlap_explanation)
-
-    if required_filters:
-        satisfied = _count_satisfied_filters(sql, required_filters)
-        score += 4.0 * (satisfied / max(1, len(required_filters)))
 
     has_aggregation = bool(
         re.search(r"\b(sum|count|avg|min|max)\s*\(", sql, flags=re.IGNORECASE)
@@ -418,33 +406,6 @@ def _fallback_score(
     select_count = _estimated_select_column_count(sql)
     score -= max(0, select_count - 15) * 0.05
     return score
-
-
-def _count_satisfied_filters(sql: str, required_filters: list[str]) -> int:
-    where_clause = _extract_where_clause(sql).lower()
-    count = 0
-    for flt in required_filters:
-        normalized = _normalize_filter_expression(flt).lower()
-        if not normalized:
-            continue
-        if normalized in where_clause:
-            count += 1
-            continue
-        column = _extract_column_token(normalized)
-        if column and re.search(rf"\b{re.escape(column.lower())}\b", where_clause):
-            count += 1
-    return count
-
-
-def _extract_where_clause(sql: str) -> str:
-    match = re.search(
-        r"\bwhere\b(.*?)(\bgroup\s+by\b|\border\s+by\b|\bhaving\b|\bfetch\s+first\b|$)",
-        sql,
-        flags=re.IGNORECASE | re.DOTALL,
-    )
-    if not match:
-        return ""
-    return match.group(1)
 
 
 def _estimated_select_column_count(sql: str) -> int:
@@ -507,13 +468,6 @@ def _token_overlap(left: Counter[str], right: Counter[str]) -> float:
     return float(sum(min(left[token], right[token]) for token in overlap))
 
 
-def _extract_column_token(obligation: str) -> str | None:
-    match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\b", obligation)
-    if not match:
-        return None
-    return match.group(1)
-
-
 def _as_string_list(value: Any) -> list[str]:
     if value is None:
         return []
@@ -527,26 +481,6 @@ def _as_string_list(value: Any) -> list[str]:
                 out.append(text)
         return out
     return [str(value).strip()]
-
-
-def _normalize_space(text: str) -> str:
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def _normalized_filter_list(value: Any) -> list[str]:
-    normalized: list[str] = []
-    for text in _as_string_list(value):
-        expr = _normalize_filter_expression(text)
-        if expr and expr not in normalized:
-            normalized.append(expr)
-    return normalized
-
-
-def _normalize_filter_expression(filter_text: str) -> str:
-    text = _normalize_space(str(filter_text))
-    if not text:
-        return ""
-    return text
 
 
 def _dedupe_strings(values: list[str]) -> list[str]:

@@ -50,7 +50,9 @@ The system converts a natural-language analytics request into safe Oracle SQL op
   - Persists retry attempt artifacts for observability.
 - `talk_to_data/agent_registry.py`
   - Loads and validates `metadata/agents/agents.json`.
-  - Resolves selected/default agent and metadata path.
+  - Resolves selected/default agent, metadata path, and rules path.
+- `talk_to_data/agent_rules.py`
+  - Loads and validates per-agent SQL prompt rule files.
 - `talk_to_data/config.py`
   - Environment-driven runtime config.
   - Loads root `.env` (dotenv if available, fallback parser otherwise).
@@ -63,21 +65,20 @@ The system converts a natural-language analytics request into safe Oracle SQL op
   - Loads metadata JSON documents.
   - Enforces JSON and document-shape validity at metadata load time.
   - Join-key column quality gate is currently disabled at load time (documented in change log).
-  - Performs high-recall token/cosine retrieval (up to top 2000).
+  - Performs high-recall token/cosine retrieval (up to top 500).
   - Produces compact relevant metadata + static `mandatory_rules` + runtime `runtime_mandatory_rules` container + guardrails.
 - `talk_to_data/sql_generator.py`
   - Requires LLM and generates exactly 3 candidates.
+  - Accepts `agent_rules` and injects them into SQL-generation prompts.
   - Accepts optional `retry_context` so second-attempt generation can avoid first-attempt failure patterns.
-  - Uses prompt engineering (at SQL generation stage) for temporal token interpretation (`YYYY`, `YYYYMM`, `YYYYMMDD`).
-  - Parses strict JSON candidate output and validates safety + mandatory filters.
-  - Does not rewrite/repair/normalize LLM SQL text; invalid candidates are rejected.
-  - Enforces row-limit policy via validation (`FETCH FIRST 200 ROWS ONLY`) and blocks semicolon-delimited SQL.
+  - Uses prompt-only time-expression policy via agent rule JSON.
+  - Parses strict JSON candidate output and applies parse-only candidate normalization.
+  - Does not rewrite/repair/normalize LLM SQL text and does not run generation-time `validate_candidate`.
 - `talk_to_data/sql_explainer.py`
   - Generates plain-language explanation per SQL candidate.
 - `talk_to_data/sql_guardrails.py`
-  - Execution-time safety + allowlist + alias/column metadata + mandatory obligation validation.
-  - Evaluates both static `mandatory_rules` and runtime `runtime_mandatory_rules`.
-  - Does not synthesize new obligations from performance-rule text.
+  - Execution-time safety + allowlist + alias/column metadata validation.
+  - Mandatory filter obligation enforcement is disabled globally.
   - Accepts optional full `validation_catalog` for execution-time column checks.
 - `talk_to_data/sql_validation.py`
   - Builds full validation catalog from raw metadata documents.
@@ -105,7 +106,7 @@ The system converts a natural-language analytics request into safe Oracle SQL op
 
 - `extract_requirements(user_request, llm_client, metadata_overview) -> dict`
 - `retrieve_relevant_metadata(requirements, user_request, documents, metadata_path, top_k) -> dict`
-- `generate_sql_candidates(user_request, requirements, metadata, llm_client, retry_context=None) -> list[dict]`
+- `generate_sql_candidates(user_request, requirements, metadata, llm_client, retry_context=None, agent_rules=None) -> list[dict]`
 - `describe_sql_candidate(candidate, metadata, llm_client) -> str`
 - `choose_best_sql_candidate(user_request, metadata_used, candidates, llm_client, validation_catalog) -> dict`
 - `validate_sql_before_execution(sql, metadata_used, llm_client, validation_catalog) -> None`
@@ -121,17 +122,16 @@ The system converts a natural-language analytics request into safe Oracle SQL op
 - Multiple statements are blocked.
 - `SELECT *` is blocked.
 - SQL comments are blocked.
-- Mandatory filters from requirements/metadata are enforced.
 - Metadata load enforces JSON/document-shape validity before SQL generation.
-- SQL generation does not mutate LLM SQL text; invalid candidates fail fast.
-- Missing mandatory filters are blocked via validation (no SQL text injection/repair).
+- SQL generation does not mutate LLM SQL text; candidates are parse-only at generation phase.
+- SQL generation fails fast when exactly 3 parseable candidates are not produced.
+- Mandatory filter obligation enforcement is disabled globally (generation/judge/execution).
 - Oracle row limit is enforced: `FETCH FIRST 200 ROWS ONLY`.
 - Execution checks include:
   - safety validation
   - table allowlist validation
   - alias.column vs metadata table-column validation
   - ambiguous bare-table reference validation across schemas
-  - mandatory filter obligation validation
 - Full metadata `validation_catalog` can be supplied so execution-time checks are not limited by compact retrieval column caps.
 - Bind placeholders are resolved from normalized requirements and generic requirement keys (date-range binds, row-limit aliases, and backward-compatible legacy binds).
 
@@ -142,6 +142,7 @@ The system converts a natural-language analytics request into safe Oracle SQL op
   - `id`
   - `label`
   - `metadata_path`
+  - `rules_path`
   - optional `description`
 - Selected agent metadata file is the source of truth for retrieval and SQL generation context.
 - Effective metadata source is recorded in `metadata_used.json` (`retrieval_debug.metadata_source`).
@@ -209,3 +210,4 @@ Entries:
 - 2026-03-17 - Codex: Disabled metadata join-key fail-fast at load time by removing runtime gate invocation so metadata files with partial join-key column coverage still load | Remove user-blocking metadata-load error while preserving rest of flow | `talk_to_data/metadata_retriever.py`, `README.md`, `architecture.md`
 - 2026-03-17 - Codex: Synced architecture document to runtime behavior by documenting auto-run-on-generate UI flow, manual override path, and current metadata-load validation scope | Keep `architecture.md` accurate/canonical for all future Codex sessions | `architecture.md`
 - 2026-03-17 - Codex: Removed request-side extraction transformations and SQL rewrite/repair paths; moved time-token handling to SQL-generation prompt rules; removed report-period-specific auto-obligation injection while preserving validation-first fail-fast behavior | Align runtime with raw-request prompting and no SQL mutation requirement while keeping safety invariants | `talk_to_data/requirements_extractor.py`, `talk_to_data/sql_generator.py`, `talk_to_data/metadata_retriever.py`, `talk_to_data/sql_guardrails.py`, `talk_to_data/sql_judge.py`, `talk_to_data/pipeline.py`, `README.md`, `architecture.md`
+- 2026-03-18 - Codex: Added per-agent SQL rule JSON configuration (`rules_path`), injected agent rules into SQL-generation prompt, removed generation-time `validate_candidate` path, and disabled mandatory filter obligation enforcement in judge/execution guardrails | Shift to prompt-only SQL policy while preserving execution safety/allowlist checks and 3-candidate contract | `metadata/agents/agents.json`, `metadata/agents/rules/*.json`, `talk_to_data/agent_registry.py`, `talk_to_data/agent_rules.py`, `talk_to_data/pipeline.py`, `talk_to_data/sql_generator.py`, `talk_to_data/sql_guardrails.py`, `talk_to_data/sql_judge.py`, `README.md`, `architecture.md`

@@ -120,11 +120,7 @@ def retrieve_relevant_metadata(
     documents: list[dict[str, Any]] | None = None,
     *,
     metadata_path: Path | None = None,
-<<<<<<< ours
-    top_k: int = 2000,
-=======
     top_k: int = 500,
->>>>>>> theirs
 ) -> dict[str, Any]:
     """
     Retrieve token-efficient relevant metadata.
@@ -140,11 +136,7 @@ def retrieve_relevant_metadata(
     else:
         documents = _normalize_documents(documents)
 
-<<<<<<< ours
-    effective_top_k = max(1, min(_safe_int(top_k, fallback=2000), 2000))
-=======
     effective_top_k = max(1, min(_safe_int(top_k, fallback=500), 500))
->>>>>>> theirs
     min_score_threshold = 0.005
 
     query_tokens = _query_tokens(requirements, user_request)

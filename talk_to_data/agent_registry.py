@@ -20,6 +20,7 @@ class AgentConfig:
     id: str
     label: str
     metadata_path: Path
+    rules_path: Path
     description: str
 
 
@@ -38,6 +39,7 @@ class AgentRegistry:
                 "label": agent.label,
                 "description": agent.description,
                 "metadata_path": str(agent.metadata_path),
+                "rules_path": str(agent.rules_path),
             }
             for agent in self.agents
         ]
@@ -119,15 +121,24 @@ def _parse_agent(raw: dict[str, Any], base_dir: Path, *, index: int) -> AgentCon
         raise AgentRegistryError(
             f"Agent '{agent_id}' is missing required field 'metadata_path'."
         )
+    raw_rules_path = str(raw.get("rules_path", "")).strip()
+    if not raw_rules_path:
+        raise AgentRegistryError(
+            f"Agent '{agent_id}' is missing required field 'rules_path'."
+        )
 
     metadata_path = Path(raw_metadata_path)
     if not metadata_path.is_absolute():
         metadata_path = (base_dir / metadata_path).resolve()
+    rules_path = Path(raw_rules_path)
+    if not rules_path.is_absolute():
+        rules_path = (base_dir / rules_path).resolve()
 
     return AgentConfig(
         id=agent_id,
         label=label,
         metadata_path=metadata_path,
+        rules_path=rules_path,
         description=description,
     )
 
