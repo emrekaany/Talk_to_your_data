@@ -7,6 +7,7 @@ import re
 from typing import Any
 
 from .llm_client import LLMClient, LLMError
+from .prompt_budget import EXPLAINER_PROMPT_PROFILE, build_prompt_metadata_summary
 
 
 def describe_sql_candidate(
@@ -81,36 +82,10 @@ def _describe_with_llm(
 
 
 def _metadata_summary_for_prompt(metadata: dict[str, Any]) -> str:
-    summary: dict[str, Any] = {
-        "dialect": metadata.get("dialect", "oracle sql"),
-        "mandatory_rules": _as_string_list(metadata.get("mandatory_rules"))[:12],
-        "guardrails": _as_string_list(metadata.get("guardrails"))[:12],
-        "tables": [],
-    }
-
-    relevant = metadata.get("relevant_items")
-    if isinstance(relevant, list):
-        for item in relevant[:6]:
-            if not isinstance(item, dict):
-                continue
-            table_name = str(item.get("table", "")).strip()
-            columns = item.get("columns", [])
-            column_names: list[str] = []
-            if isinstance(columns, list):
-                for col in columns[:12]:
-                    if isinstance(col, dict):
-                        name = str(col.get("name", "")).strip()
-                        if name:
-                            column_names.append(name)
-            summary["tables"].append(
-                {
-                    "table": table_name,
-                    "columns": column_names,
-                    "joins": _as_string_list(item.get("joins"))[:8],
-                    "mandatory_filters": _as_string_list(item.get("mandatory_filters"))[:8],
-                }
-            )
-
+    summary = build_prompt_metadata_summary(
+        metadata,
+        profile=EXPLAINER_PROMPT_PROFILE,
+    )
     return json.dumps(summary, ensure_ascii=False, indent=2)
 
 

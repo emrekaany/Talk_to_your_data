@@ -6,7 +6,8 @@ import re
 from collections import Counter
 from typing import Any
 
-from .llm_client import LLMClient, LLMError, compact_json
+from .llm_client import LLMClient, LLMError
+from .prompt_budget import JUDGE_PROMPT_PROFILE, build_prompt_metadata_summary, compact_prompt_json
 from .sql_generator import sanity_check_sql
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
 
@@ -238,6 +239,17 @@ def _build_judge_prompt(
     option_1 = option_map.get("option_1", {"sql": "", "explanation": ""})
     option_2 = option_map.get("option_2", {"sql": "", "explanation": ""})
     option_3 = option_map.get("option_3", {"sql": "", "explanation": ""})
+    metadata_summary = compact_prompt_json(
+        build_prompt_metadata_summary(
+            metadata_used,
+            profile=JUDGE_PROMPT_PROFILE,
+            candidate_sqls={
+                "option_1": option_1.get("sql", ""),
+                "option_2": option_2.get("sql", ""),
+                "option_3": option_3.get("sql", ""),
+            },
+        )
+    )
 
     return (
         "Task:\n"
@@ -258,7 +270,7 @@ def _build_judge_prompt(
         "REQUEST:\n"
         f"{user_request}\n\n"
         "METADATA_CONTEXT_JSON:\n"
-        f"{compact_json(metadata_used)}\n\n"
+        f"{metadata_summary}\n\n"
         "SQL_CANDIDATES:\n"
         "option_1:\n"
         f"SQL: {option_1['sql']}\n"

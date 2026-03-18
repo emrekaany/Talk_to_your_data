@@ -191,6 +191,7 @@ Secrets must remain env-driven and must not be hardcoded.
 5. Core contracts and env-based secret handling must stay backward-compatible unless explicitly documented as breaking.
 
 ## Architecture Change Log (Mandatory)
+- 2026-03-18 - Codex: Added `talk_to_data/prompt_budget.py` and switched judge/explainer prompts to prompt-budget-aware metadata summaries so low-token prompts exclude long workbook/column-description text while preserving selected tables and compact guardrail context.
 
 Any architecture-impacting change must be recorded here by the implementing agent.
 

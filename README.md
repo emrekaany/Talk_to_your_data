@@ -64,6 +64,9 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Uses single-pass strict JSON parsing (no fix-json retry call).
   - Performs minimal type normalization only; no in-code time token extraction/normalization and no calendar-token hard-fail.
   - Heuristic fallback when LLM is unavailable.
+- `talk_to_data/prompt_budget.py`
+  - Extracts candidate physical table names for prompt-budget summaries.
+  - Distinguishes leading CTE aliases from base tables so prompt summaries keep real source tables only.
 - `talk_to_data/metadata_retriever.py`
   - Loads selected agent metadata JSON.
   - Validates JSON/document structure and normalizes metadata payload for retrieval.
@@ -94,13 +97,18 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Builds full table-column validation catalog from raw metadata documents.
   - Parses quoted/unquoted references (`a.c`, `"a"."c"`, `table.col`, `"SCHEMA"."TABLE"."COL"` last two parts).
   - Detects ambiguous bare-table references and unknown alias.column references.
+- `talk_to_data/prompt_budget.py`
+  - Builds prompt-budget-aware metadata summaries for LLM prompts.
+  - Keeps judge/explainer prompt context compact by excluding long workbook text and oversized column descriptions.
 - `talk_to_data/sql_judge.py`
   - Evaluates 3 SQL candidates and picks best option id.
   - Uses strict LLM judge prompt with `temperature=0.0` and `max_tokens=32`.
+  - Sends only compact prompt-safe metadata context (selected tables, candidate SQL tables, short guardrail notes) to the judge prompt.
   - Applies deterministic fallback (hard disqualify + local scoring + fewer-disqualify tie-break + stable option order).
   - Emits judge outcome metadata: `judge_error_kind`, `all_candidates_disqualified`, `disqualified_count`, `retry_recommended`.
 - `talk_to_data/sql_explainer.py`
   - Implements `describe_sql_candidate(...) -> str`.
+  - Uses compact prompt-budget metadata summary to avoid passing long workbook descriptions into explainer prompts.
 - `talk_to_data/db.py`
   - Oracle execution and bind variable preparation.
   - Supports generic placeholders plus date-range binds and row-limit bind aliases (legacy support for `:report_period`, `:year_value`, `:date_value` remains backward compatible).
