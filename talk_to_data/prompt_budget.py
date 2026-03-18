@@ -137,11 +137,16 @@ def _candidate_table_map(candidate_sqls: dict[str, str]) -> dict[str, list[str]]
     return output
 
 
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 def _normalize_identifier_token(token: str) -> str:
     value = token.strip()
     if value.startswith('"') and value.endswith('"') and len(value) >= 2:
         return value[1:-1].replace('""', '"').lower()
     return value.lower()
+
 
 
 def _extract_cte_names(sql: str) -> set[str]:
@@ -191,6 +196,7 @@ def _extract_cte_names(sql: str) -> set[str]:
     return cte_names
 
 
+
 def _extract_table_names(sql: str) -> list[str]:
     """Extract deduplicated physical table tokens referenced by FROM/JOIN clauses."""
     if not sql:
@@ -220,6 +226,10 @@ def _extract_table_names(sql: str) -> list[str]:
     return table_names
 
 
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 def _guardrail_notes(metadata: dict[str, Any], *, limit: int, max_chars: int) -> list[str]:
     notes = _as_string_list(metadata.get("guardrails")) + _as_string_list(
         metadata.get("mandatory_rules")
@@ -234,6 +244,10 @@ def _guardrail_notes(metadata: dict[str, Any], *, limit: int, max_chars: int) ->
     return _dedupe(shortened)
 
 
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 def _shorten_text(text: str, max_chars: int) -> str:
     compact = re.sub(r"\s+", " ", str(text or "")).strip()
     if not compact:
@@ -243,6 +257,10 @@ def _shorten_text(text: str, max_chars: int) -> str:
     return compact[: max_chars - 1].rstrip() + "…"
 
 
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 def _dedupe(values: list[str]) -> list[str]:
     seen: set[str] = set()
     output: list[str] = []
@@ -255,6 +273,10 @@ def _dedupe(values: list[str]) -> list[str]:
     return output
 
 
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 def _as_string_list(value: Any) -> list[str]:
     if value is None:
         return []
@@ -272,10 +294,15 @@ def _as_string_list(value: Any) -> list[str]:
     return [text] if text else []
 
 
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 def _skip_whitespace(text: str, index: int) -> int:
     while index < len(text) and text[index].isspace():
         index += 1
     return index
+
 
 
 def _consume_balanced(text: str, index: int, opening: str, closing: str) -> int:
@@ -301,6 +328,7 @@ def _consume_balanced(text: str, index: int, opening: str, closing: str) -> int:
     return index
 
 
+
 def _consume_quoted_identifier(text: str, index: int) -> int:
     index += 1
     while index < len(text):
@@ -313,6 +341,7 @@ def _consume_quoted_identifier(text: str, index: int) -> int:
     return index
 
 
+
 def _consume_string_literal(text: str, index: int) -> int:
     index += 1
     while index < len(text):
@@ -323,6 +352,7 @@ def _consume_string_literal(text: str, index: int) -> int:
             return index + 1
         index += 1
     return index
+
 
 
 def _assert_cte_candidate_table_extraction() -> None:
