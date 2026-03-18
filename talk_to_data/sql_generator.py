@@ -171,6 +171,12 @@ def _build_sql_prompt(
         '{"id":"option_2","sql":"...","rationale_short":"...","risk_notes":"..."},'
         '{"id":"option_3","sql":"...","rationale_short":"...","risk_notes":"..."}]}.\n'
         "- Use only tables, columns, and joins present in metadata.\n"
+        "- Never invent, rename, infer, or alias a missing metadata column into existence.\n"
+        "- Every referenced identifier must match a metadata table/column exactly, including in SELECT, JOIN, WHERE, GROUP BY, HAVING, and ORDER BY.\n"
+        "- Treat the metadata table column lists as the complete allowlist; if a column is absent there, do not use it.\n"
+        "- Keep SELECT minimal: include only columns required for the final answer, plus columns strictly required for aggregate output ordering or grouping.\n"
+        "- Do not project join-only, filter-only, helper, or intermediate calculation columns unless the user explicitly asked to see them.\n"
+        "- Prefer aggregate expressions or ORDER BY aliases instead of exposing extra raw columns in SELECT.\n"
         "- Do not use SELECT *.\n"
         "- Do not include semicolons.\n"
         f"- Every SQL must include FETCH FIRST {DEFAULT_SQL_LIMIT} ROWS ONLY.\n"
@@ -325,7 +331,7 @@ def _metadata_prompt_text(metadata: dict[str, Any]) -> str:
         metadata_source = str(retrieval_debug.get("metadata_source", "")).strip()
         if metadata_source:
             lines.append(f"- Metadata source: {metadata_source}")
-    lines.append("- Tables:")
+    lines.append("- Tables (complete allowlist; only these columns may be referenced):")
 
     relevant = metadata.get("relevant_items")
     if not isinstance(relevant, list) or not relevant:
@@ -420,6 +426,9 @@ def _sql_rule_prompt_text(
         f"- Every query must include FETCH FIRST {DEFAULT_SQL_LIMIT} ROWS ONLY.",
         "- Use only metadata-backed tables, columns, and join paths.",
         "- SQL must be executable without semicolon terminators.",
+        "- Every projected SELECT expression must be necessary for the requested output.",
+        "- Keep filter and join support columns out of SELECT unless the request explicitly asks for them.",
+        "- If ordering by a derived aggregate already selected, reuse that expression or alias instead of adding extra columns.",
     ]
 
     for rule in _as_string_list((agent_rules or {}).get("sql_prompt_rules")):

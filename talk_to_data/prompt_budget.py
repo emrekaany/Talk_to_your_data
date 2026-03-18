@@ -1,4 +1,4 @@
-"""Prompt-budget-aware metadata serializers for LLM prompts."""
+﻿"""Prompt-budget-aware metadata serializers for LLM prompts."""
 
 from __future__ import annotations
 
@@ -136,15 +136,12 @@ def _candidate_table_map(candidate_sqls: dict[str, str]) -> dict[str, list[str]]
         output[str(candidate_id)] = _extract_table_names(sql)
     return output
 
-
-<<<<<<< ours
 <<<<<<< ours
 
-=======
->>>>>>> theirs
+
+
 
 =======
-
 >>>>>>> theirs
 def _normalize_identifier_token(token: str) -> str:
     value = token.strip()
@@ -153,28 +150,29 @@ def _normalize_identifier_token(token: str) -> str:
     return value.lower()
 
 
-
 def _extract_cte_names(sql: str) -> set[str]:
     """Return normalized CTE names defined in the leading WITH clause."""
     text = sql.lstrip()
     if not re.match(r"with\b", text, flags=re.IGNORECASE):
         return set()
 
-    index = 4
+    index = len("with")
     length = len(text)
     cte_names: set[str] = set()
+    recursive_consumed = False
 
     while index < length:
         index = _skip_whitespace(text, index)
-        if re.match(r"recursive\b", text[index:], flags=re.IGNORECASE):
+        if not recursive_consumed and re.match(r"recursive\b", text[index:], flags=re.IGNORECASE):
             index += len("recursive")
-            index = _skip_whitespace(text, index)
+            recursive_consumed = True
+            continue
 
         match = re.match(_IDENTIFIER_PATTERN, text[index:])
         if not match:
             break
-        cte_name = match.group(0)
-        cte_names.add(_normalize_identifier_token(cte_name))
+
+        cte_names.add(_normalize_identifier_token(match.group(0)))
         index += match.end()
         index = _skip_whitespace(text, index)
 
@@ -201,7 +199,6 @@ def _extract_cte_names(sql: str) -> set[str]:
     return cte_names
 
 
-
 def _extract_table_names(sql: str) -> list[str]:
     """Extract deduplicated physical table tokens referenced by FROM/JOIN clauses."""
     if not sql:
@@ -220,8 +217,7 @@ def _extract_table_names(sql: str) -> list[str]:
         ]
         if not normalized_parts:
             continue
-        bare_name = normalized_parts[-1]
-        if bare_name in cte_names:
+        if normalized_parts[-1] in cte_names:
             continue
         seen_key = ".".join(normalized_parts)
         if seen_key in seen:
@@ -231,20 +227,9 @@ def _extract_table_names(sql: str) -> list[str]:
     return table_names
 
 
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-=======
 
->>>>>>> theirs
-=======
-=======
->>>>>>> theirs
 
-=======
 
->>>>>>> theirs
 def _guardrail_notes(metadata: dict[str, Any], *, limit: int, max_chars: int) -> list[str]:
     notes = _as_string_list(metadata.get("guardrails")) + _as_string_list(
         metadata.get("mandatory_rules")
@@ -259,43 +244,21 @@ def _guardrail_notes(metadata: dict[str, Any], *, limit: int, max_chars: int) ->
     return _dedupe(shortened)
 
 
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-=======
 
->>>>>>> theirs
-=======
-=======
->>>>>>> theirs
 
-=======
 
->>>>>>> theirs
 def _shorten_text(text: str, max_chars: int) -> str:
     compact = re.sub(r"\s+", " ", str(text or "")).strip()
     if not compact:
         return ""
     if len(compact) <= max_chars:
         return compact
-    return compact[: max_chars - 1].rstrip() + "…"
+    return compact[: max_chars - 1].rstrip() + "â€¦"
 
 
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-=======
 
->>>>>>> theirs
-=======
-=======
->>>>>>> theirs
 
-=======
 
->>>>>>> theirs
 def _dedupe(values: list[str]) -> list[str]:
     seen: set[str] = set()
     output: list[str] = []
@@ -308,20 +271,9 @@ def _dedupe(values: list[str]) -> list[str]:
     return output
 
 
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-=======
 
->>>>>>> theirs
-=======
-=======
->>>>>>> theirs
 
-=======
 
->>>>>>> theirs
 def _as_string_list(value: Any) -> list[str]:
     if value is None:
         return []
@@ -339,25 +291,13 @@ def _as_string_list(value: Any) -> list[str]:
     return [text] if text else []
 
 
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-=======
 
->>>>>>> theirs
-=======
-=======
->>>>>>> theirs
 
-=======
 
->>>>>>> theirs
 def _skip_whitespace(text: str, index: int) -> int:
     while index < len(text) and text[index].isspace():
         index += 1
     return index
-
 
 
 def _consume_balanced(text: str, index: int, opening: str, closing: str) -> int:
@@ -383,7 +323,6 @@ def _consume_balanced(text: str, index: int, opening: str, closing: str) -> int:
     return index
 
 
-
 def _consume_quoted_identifier(text: str, index: int) -> int:
     index += 1
     while index < len(text):
@@ -396,7 +335,6 @@ def _consume_quoted_identifier(text: str, index: int) -> int:
     return index
 
 
-
 def _consume_string_literal(text: str, index: int) -> int:
     index += 1
     while index < len(text):
@@ -407,7 +345,6 @@ def _consume_string_literal(text: str, index: int) -> int:
             return index + 1
         index += 1
     return index
-
 
 
 def _assert_cte_candidate_table_extraction() -> None:

@@ -72,6 +72,7 @@ The system converts a natural-language analytics request into safe Oracle SQL op
   - Accepts `agent_rules` and injects them into SQL-generation prompts.
   - Accepts optional `retry_context` so second-attempt generation can avoid first-attempt failure patterns.
   - Uses prompt-only time-expression policy via agent rule JSON.
+  - SQL prompt treats metadata table/column lists as a strict identifier allowlist and explicitly minimizes SELECT projection.
   - Parses strict JSON candidate output and applies parse-only candidate normalization.
   - Does not rewrite/repair/normalize LLM SQL text and does not run generation-time `validate_candidate`.
 - `talk_to_data/sql_explainer.py`
@@ -194,6 +195,7 @@ Secrets must remain env-driven and must not be hardcoded.
 - 2026-03-18 - Codex: Added `talk_to_data/prompt_budget.py` and switched judge/explainer prompts to prompt-budget-aware metadata summaries so low-token prompts exclude long workbook/column-description text while preserving selected tables and compact guardrail context.
 
 Any architecture-impacting change must be recorded here by the implementing agent.
+- 2026-03-18 - Codex: Strengthened SQL-generation prompt policy so metadata table/column lists are treated as a strict identifier allowlist and SELECT clauses stay minimal (no invented metadata columns, no unnecessary projected helper columns) | Reduce hallucinated columns and over-wide result sets without changing execution contracts | `talk_to_data/sql_generator.py`, `README.md`, `architecture.md`
 
 Entry format:
 

@@ -83,6 +83,8 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Accepts agent-specific prompt rules (`agent_rules`) and injects them into SQL generation prompt.
   - Accepts optional retry context (`retry_context`) so second-attempt prompts can avoid first-attempt disqualify patterns.
   - Builds LLM prompt with explicit `Metadata`, `Request`, and `Sql Rule` sections.
+  - Prompt now treats metadata column lists as a strict allowlist and explicitly forbids inventing non-metadata columns.
+  - Prompt now enforces minimal SELECT projection so join/filter helper columns are not surfaced unless requested.
   - Uses prompt-only policy for time-expression behavior; agent-specific time guidance is supplied via rule JSON.
   - Includes column-level context in prompt (`type`, `description`, `semantic_type`, `keywords`, selected properties when available).
   - Carries metadata source trace (`retrieval_debug.metadata_source`) into prompt for auditability.
@@ -159,6 +161,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - Row limit is enforced by validation: every SQL must include `FETCH FIRST 200 ROWS ONLY`.
 - Mandatory filter obligation enforcement is disabled (generation, judge, execution).
 - SQL generation does not mutate LLM SQL output; parse-only candidate handling is used.
+- SQL-generation prompts explicitly prohibit non-metadata columns and instruct the model to keep SELECT lists minimal.
 - SQL generation fails fast when exactly 3 parseable candidates cannot be produced.
 - Execution-time guardrails validate SQL `alias.column` references against metadata-derived table-column sets.
 - Execution-time guardrails use full metadata validation catalog (when provided) instead of compact top-60 columns.

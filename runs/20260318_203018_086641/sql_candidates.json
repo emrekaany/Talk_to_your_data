@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID AND f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND o.KAYNAK_SISTEM_ID = 'tanzimli' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Aggregates total production from the FACT_POL_POLICE_EK table joined with POL_POLICE_OZET and GNL_TARIH, filtered by the year 2025 and organization 'tanzimli'.",
+    "risk_notes": "Relies on correct join paths and date filtering logic.",
+    "description": "Question answered: What was the total production (in TL) for policies sourced from the system \"tanzimli\" in the year 2025?  \nTables used: `AS_DWH.FACT_POL_POLICE_EK`, `AS_DWH.POL_POLICE_OZET`, `AS_DWH.GNL_TARIH`  \nFilters: Policies sourced from the \"tanzimli\" system and with a year of 2025  \nGrouping/measures: Sum of the `BRUT_PRIM_TL` column (total production)  \nExpected output columns: `total_production`  \nAssumptions: The query is intended to fetch a limited sample (200 rows) likely for testing or validation purposes.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(f.VOP_TL) AS total_production FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID AND f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND o.KAYNAK_SISTEM_ID = 'tanzimli' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Calculates total production using the VOP_TL field from FACT_POL_POLICE_TEM_ASSET, joined with POL_POLICE_OZET and GNL_TARIH, filtered by year and organization.",
+    "risk_notes": "Uses a different measure (VOP_TL) than BRUT_PRIM_TL; ensure alignment with business definition of production.",
+    "description": "Question answered: What was the total production (in TL) for policies sourced from the system \"tanzimli\" in the year 2025?  \nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH  \nFilters: Year is 2025, source system is \"tanzimli\"  \nGrouping/measures: Sum of VOP_TL (total production)  \nExpected output columns: total_production  \nAssumptions: VOP_TL represents production value in Turkish Lira (TL), and the query limits results to 200 rows (though only one row is expected due to aggregation).",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(p.POLICE_SAYISI) * AVG(f.BRUT_PRIM_TL) AS total_production FROM AS_DWH.POLICE_SAYISI p JOIN AS_DWH.POL_POLICE_OZET o ON p.POLICE_ID = o.POLICE_ID JOIN AS_DWH.FACT_POL_POLICE_EK f ON o.POLICE_ID = f.POLICE_ID AND o.KAYNAK_SISTEM_ID = f.KAYNAK_SISTEM_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND o.KAYNAK_SISTEM_ID = 'tanzimli' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Estimates total production by multiplying policy count with average BRUT_PRIM_TL, filtered by year and organization.",
+    "risk_notes": "Uses an estimated calculation based on averages; may not reflect actual production values.",
+    "description": "Question answered: What is the total production value (calculated as total police count multiplied by average gross premium) for policies sourced from the \"tanzimli\" system in the year 2025?\n\nTables used: AS_DWH.POLICE_SAYISI, AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\n\nFilters: \n- Policies with a source system ID of \"tanzimli\"\n- Policies with a date in the year 2025\n\nGrouping/measures: \n- Sum of police count (`POLICE_SAYISI`)\n- Average of gross premium (`BRUT_PRIM_TL`)\n- Multiplied together to calculate total production value\n\nExpected output columns: \n- `total_production`: The calculated total production value\n\nAssumptions: \n- The join keys are correct and consistent with the database schema.\n- The date filter (`TARIH`) refers to the effective or registration date of the policy.\n- The query limits output to 200 rows, though the result is a single aggregated value.",
+    "recommended": false
+  }
+]

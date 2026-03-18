@@ -1,0 +1,28 @@
+{
+  "intent": "total production",
+  "required_filters": [
+    "{'year': '2025', 'organization': 'tanzimli'}"
+  ],
+  "measures": [
+    "{'total_production': True}"
+  ],
+  "dimensions": [
+    "{'year': True, 'organization': True}"
+  ],
+  "grain": [
+    "year",
+    "organization"
+  ],
+  "join_needs": [],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "User is asking for total production in the year 2025 for the organization 'tanzimli'.",
+  "row_limit": 1,
+  "report_period": "yearly",
+  "time_granularity": "year",
+  "time_value": "2025",
+  "time_range": {
+    "start": "2025-01-01",
+    "end": "2025-12-31"
+  }
+}

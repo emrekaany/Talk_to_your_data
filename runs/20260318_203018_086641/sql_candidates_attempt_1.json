@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID AND f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH) = '2025' AND o.KAYNAK_SISTEM_ID = 'tanzimli' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Calculates total production for 2025 using BRUT_PRIM_TL from tanzimli source system, filtered by tanzimli and tarih_id matching year 2025.",
+    "risk_notes": "Relies on TARIH table mapping to 2025 correctly.",
+    "description": "Question answered: What is the total production (in TL) for policies sourced from the system 'tanzimli' in the year 2025?  \nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH  \nFilters: Policies sourced from the 'tanzimli' system and with a date in the year 2025  \nGrouping/measures: Sum of the BRUT_PRIM_TL column (total production)  \nExpected output columns: total_production  \nAssumptions: The date filter refers to the policy registration date, and only the first 200 rows are returned (though grouping is not applied, so this may be redundant).",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(f.VOP_TL) AS total_production FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID AND f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH) = '2025' AND o.KAYNAK_SISTEM_ID = 'tanzimli' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Calculates total production using VOP_TL from tanzimli source system, filtered by tanzimli and tarih_id matching year 2025.",
+    "risk_notes": "Uses VOP_TL instead of BRUT_PRIM_TL; may differ slightly due to tax exclusions.",
+    "description": "Question answered: What is the total production value for policies sourced from the system 'tanzimli' in the year 2025?  \nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH  \nFilters: Year is 2025 and source system is 'tanzimli'.  \nGrouping/measures: Sum of VOP_TL (total production value).  \nExpected output columns: total_production  \nAssumptions: VOP_TL represents production value, and the query limits output to 200 rows (though only one row is expected due to aggregation).",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(p.POLICE_SAYISI) * AVG(f.BRUT_PRIM_TL) AS total_production FROM AS_DWH.POLICE_SAYISI p JOIN AS_DWH.FACT_POL_POLICE_EK f ON p.POLICE_ID = f.POLICE_ID JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID AND f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH) = '2025' AND o.KAYNAK_SISTEM_ID = 'tanzimli' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Estimates total production by multiplying average BRUT_PRIM_TL with total policy count for 2025.",
+    "risk_notes": "Estimation method may not reflect actual total production accurately.",
+    "description": "Question answered: What is the total production value for policies configured in the \"tanzimli\" source system in the year 2025?  \nTables used: AS_DWH.POLICE_SAYISI, AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH  \nFilters: Policies configured in the year 2025 and source system \"tanzimli\"  \nGrouping/measures: Sum of policy counts multiplied by average gross premium per policy  \nExpected output columns: total_production  \nAssumptions: The query assumes that policy count and premium data are correctly joined and that the multiplication represents a meaningful business metric (e.g., total production value).",
+    "recommended": false
+  }
+]

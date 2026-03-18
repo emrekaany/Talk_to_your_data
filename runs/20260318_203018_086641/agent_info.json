@@ -1,0 +1,7 @@
+{
+  "id": "uretim",
+  "label": "Uretim",
+  "description": "Uretim verisi agenti",
+  "metadata_path": "C:\\Users\\ky4642\\talk-to-your-data-v0\\metadata\\agents\\metadata_vectored_uretim.json",
+  "rules_path": "C:\\Users\\ky4642\\talk-to-your-data-v0\\metadata\\agents\\rules\\uretim.json"
+}
