@@ -125,7 +125,11 @@ class TalkToDataService:
             user_request=request,
             documents=metadata_docs,
             metadata_path=agent.metadata_path,
+<<<<<<< ours
             top_k=2000,
+=======
+            top_k=500,
+>>>>>>> theirs
         )
         run_dir = create_run_dir(self.config.runs_dir)
         attempt_one_candidates: list[dict[str, Any]] | None = None

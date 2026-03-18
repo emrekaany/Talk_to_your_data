@@ -68,9 +68,14 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - High-recall retrieval using Unicode-aware token cosine similarity.
   - Returns broader relevant payload (more tables/columns) and mandatory rules.
   - Initializes `runtime_mandatory_rules` container for generation-time obligations without mutating static metadata obligations.
+<<<<<<< ours
   - Builds compact metadata overview for extractor prompts (`tables`, `mandatory_filters`, `performance_rules`, source path).
   - Does not auto-add partitioning-derived `REPORT_PERIOD` obligations.
   - Supports high-recall retrieval up to top 2000 metadata documents per request.
+=======
+  - Builds metadata overview hints (`has_report_period_column`, `time_filter_policy`) for extractor prompts.
+  - Supports high-recall retrieval up to top 500 metadata documents per request.
+>>>>>>> theirs
 - `talk_to_data/sql_generator.py`
   - Implements `generate_sql_candidates(...) -> list[dict]`.
   - Produces exactly 3 candidates.
