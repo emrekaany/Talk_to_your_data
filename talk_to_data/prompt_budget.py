@@ -1,11 +1,3 @@
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
 """Prompt-budget-aware metadata serializers for LLM prompts."""
 
 from __future__ import annotations
@@ -47,8 +39,10 @@ EXPLAINER_PROMPT_PROFILE = PromptBudgetProfile(
     max_columns_per_table=12,
 )
 
-_TABLE_PATTERN = re.compile(
-    r'(?:\bfrom\b|\bjoin\b)\s+(?:"[^"]+"\.)?("[^"]+"|[A-Za-z0-9_.$#]+)',
+_IDENTIFIER_PATTERN = r'(?:"(?:[^"]|"")+"|[A-Za-z_][A-Za-z0-9_$#]*)'
+_TABLE_TOKEN_PATTERN = rf"{_IDENTIFIER_PATTERN}(?:\s*\.\s*{_IDENTIFIER_PATTERN})?"
+_TABLE_REF_PATTERN = re.compile(
+    rf"\b(?:from|join)\s+({_TABLE_TOKEN_PATTERN})",
     flags=re.IGNORECASE,
 )
 
@@ -143,86 +137,6 @@ def _candidate_table_map(candidate_sqls: dict[str, str]) -> dict[str, list[str]]
     return output
 
 
-def _extract_table_names(sql: str) -> list[str]:
-    if not sql:
-        return []
-    names: list[str] = []
-    for match in _TABLE_PATTERN.finditer(sql):
-        token = match.group(1).strip()
-        if token:
-            names.append(token.replace('"', ""))
-    return _dedupe(names)
-
-
-def _guardrail_notes(metadata: dict[str, Any], *, limit: int, max_chars: int) -> list[str]:
-    notes = _as_string_list(metadata.get("guardrails")) + _as_string_list(
-        metadata.get("mandatory_rules")
-    )
-    shortened: list[str] = []
-    for note in notes:
-        compact = _shorten_text(note, max_chars)
-        if compact:
-            shortened.append(compact)
-        if len(shortened) >= limit:
-            break
-    return _dedupe(shortened)
-
-
-def _shorten_text(text: str, max_chars: int) -> str:
-    compact = re.sub(r"\s+", " ", str(text or "")).strip()
-    if not compact:
-        return ""
-    if len(compact) <= max_chars:
-        return compact
-    return compact[: max_chars - 1].rstrip() + "…"
-
-
-def _dedupe(values: list[str]) -> list[str]:
-    seen: set[str] = set()
-    output: list[str] = []
-    for value in values:
-        key = value.lower()
-        if key in seen:
-            continue
-        seen.add(key)
-        output.append(value)
-    return output
-
-
-def _as_string_list(value: Any) -> list[str]:
-    if value is None:
-        return []
-    if isinstance(value, str):
-        text = value.strip()
-        return [text] if text else []
-    if isinstance(value, list):
-        items: list[str] = []
-        for item in value:
-            text = str(item).strip()
-            if text:
-                items.append(text)
-        return items
-    text = str(value).strip()
-    return [text] if text else []
-<<<<<<< ours
-<<<<<<< ours
-=======
-=======
->>>>>>> theirs
-"""Prompt-budget helpers for summarizing SQL candidates."""
-
-from __future__ import annotations
-
-import re
-
-_IDENTIFIER_PATTERN = r'(?:"(?:[^"]|"")+"|[A-Za-z_][A-Za-z0-9_$#]*)'
-_TABLE_TOKEN_PATTERN = rf"{_IDENTIFIER_PATTERN}(?:\s*\.\s*{_IDENTIFIER_PATTERN})?"
-_TABLE_REF_PATTERN = re.compile(
-    rf"\b(?:from|join)\s+({_TABLE_TOKEN_PATTERN})",
-    flags=re.IGNORECASE,
-)
-
-
 def _normalize_identifier_token(token: str) -> str:
     value = token.strip()
     if value.startswith('"') and value.endswith('"') and len(value) >= 2:
@@ -279,6 +193,9 @@ def _extract_cte_names(sql: str) -> set[str]:
 
 def _extract_table_names(sql: str) -> list[str]:
     """Extract deduplicated physical table tokens referenced by FROM/JOIN clauses."""
+    if not sql:
+        return []
+
     cte_names = _extract_cte_names(sql)
     table_names: list[str] = []
     seen: set[str] = set()
@@ -301,6 +218,58 @@ def _extract_table_names(sql: str) -> list[str]:
         seen.add(seen_key)
         table_names.append(token)
     return table_names
+
+
+def _guardrail_notes(metadata: dict[str, Any], *, limit: int, max_chars: int) -> list[str]:
+    notes = _as_string_list(metadata.get("guardrails")) + _as_string_list(
+        metadata.get("mandatory_rules")
+    )
+    shortened: list[str] = []
+    for note in notes:
+        compact = _shorten_text(note, max_chars)
+        if compact:
+            shortened.append(compact)
+        if len(shortened) >= limit:
+            break
+    return _dedupe(shortened)
+
+
+def _shorten_text(text: str, max_chars: int) -> str:
+    compact = re.sub(r"\s+", " ", str(text or "")).strip()
+    if not compact:
+        return ""
+    if len(compact) <= max_chars:
+        return compact
+    return compact[: max_chars - 1].rstrip() + "…"
+
+
+def _dedupe(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    output: list[str] = []
+    for value in values:
+        key = value.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        output.append(value)
+    return output
+
+
+def _as_string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        text = value.strip()
+        return [text] if text else []
+    if isinstance(value, list):
+        items: list[str] = []
+        for item in value:
+            text = str(item).strip()
+            if text:
+                items.append(text)
+        return items
+    text = str(value).strip()
+    return [text] if text else []
 
 
 def _skip_whitespace(text: str, index: int) -> int:
@@ -382,11 +351,3 @@ def _assert_cte_candidate_table_extraction() -> None:
 if __name__ == "__main__":
     _assert_cte_candidate_table_extraction()
     print("prompt_budget assertions passed")
-<<<<<<< ours
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
