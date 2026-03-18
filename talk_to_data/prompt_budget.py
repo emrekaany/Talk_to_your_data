@@ -137,8 +137,7 @@ def _candidate_table_map(candidate_sqls: dict[str, str]) -> dict[str, list[str]]
     return output
 
 
-<<<<<<< ours
-=======
+
 
 >>>>>>> theirs
 def _normalize_identifier_token(token: str) -> str:
@@ -227,6 +226,10 @@ def _extract_table_names(sql: str) -> list[str]:
 
 
 <<<<<<< ours
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 =======
 
 >>>>>>> theirs
@@ -245,6 +248,10 @@ def _guardrail_notes(metadata: dict[str, Any], *, limit: int, max_chars: int) ->
 
 
 <<<<<<< ours
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 =======
 
 >>>>>>> theirs
@@ -258,6 +265,10 @@ def _shorten_text(text: str, max_chars: int) -> str:
 
 
 <<<<<<< ours
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 =======
 
 >>>>>>> theirs
@@ -274,6 +285,10 @@ def _dedupe(values: list[str]) -> list[str]:
 
 
 <<<<<<< ours
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 =======
 
 >>>>>>> theirs
@@ -295,6 +310,10 @@ def _as_string_list(value: Any) -> list[str]:
 
 
 <<<<<<< ours
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
 =======
 
 >>>>>>> theirs
