@@ -125,7 +125,7 @@ class TalkToDataService:
             user_request=request,
             documents=metadata_docs,
             metadata_path=agent.metadata_path,
-            top_k=200,
+            top_k=2000,
         )
         run_dir = create_run_dir(self.config.runs_dir)
         attempt_one_candidates: list[dict[str, Any]] | None = None
@@ -330,7 +330,7 @@ class TalkToDataService:
             dataframe = execute_sql(sql, requirements, active_config)
         except DatabaseExecutionError as exc:
             hint = (
-                "Hint: check bind variables (:report_period, :year_value, :date_value, :start_date, :end_date, :n), "
+                "Hint: check bind variables (:start_date, :end_date, :n and other SQL placeholders), "
                 "mandatory filters, and Oracle object names."
             )
             raise PipelineError(f"Oracle execution error: {exc}. {hint}") from exc
@@ -477,10 +477,6 @@ def _build_retry_context(
         sql_low = sql.lower()
         patterns = (
             "select *",
-            ":report_period",
-            ":year_value",
-            ":date_value",
-            "report_period",
             "tanzim_tarih_id",
             "tarih_id",
         )

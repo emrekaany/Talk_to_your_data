@@ -182,14 +182,8 @@ def _build_table_obligations(
 
 
 def _obligations_from_performance_rules(rules: list[str]) -> list[str]:
-    obligations: list[str] = []
-    for rule in rules:
-        low = rule.lower()
-        if "report_period" in low and any(
-            token in low for token in ("mandatory", "required", "without", "zorunlu")
-        ):
-            obligations.append("REPORT_PERIOD = :report_period")
-    return obligations
+    del rules
+    return []
 
 
 def _find_missing_obligations(

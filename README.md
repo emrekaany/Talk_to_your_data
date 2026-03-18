@@ -58,10 +58,9 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `talk_to_data/requirements_extractor.py`
   - Implements `extract_requirements(user_request: str) -> dict`.
   - Uses `talk_to_data/llm_client.py` for LLM calls.
-  - JSON validation + one retry via fix-json prompt.
-  - Extracts normalized `time_granularity` + `time_value` from `YYYY`, `YYYYMM`, `YYYYMMDD` and separated forms (`YYYY-MM`, `YYYY-MM-DD`).
-  - Enforces calendar validation for explicit day tokens; invalid `YYYYMMDD` / `YYYY-MM-DD` requests fail fast with extraction error.
-  - Applies metadata-aware period policy: does not auto-inject `REPORT_PERIOD` filters when selected metadata indicates a different time basis (for example `uretim` ek tanzim policy).
+  - Sends the original user request text to LLM as-is (no request-side prompt transformation).
+  - Uses single-pass strict JSON parsing (no fix-json retry call).
+  - Performs minimal type normalization only; no in-code time token extraction/normalization and no calendar-token hard-fail.
   - Heuristic fallback when LLM is unavailable.
 - `talk_to_data/metadata_retriever.py`
   - Loads selected agent metadata JSON.
@@ -69,39 +68,26 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - High-recall retrieval using Unicode-aware token cosine similarity.
   - Returns broader relevant payload (more tables/columns) and mandatory rules.
   - Initializes `runtime_mandatory_rules` container for generation-time obligations without mutating static metadata obligations.
-  - Builds metadata overview hints (`has_report_period_column`, `time_filter_policy`) for extractor prompts.
-  - Supports high-recall retrieval up to top 200 metadata documents per request.
+  - Builds compact metadata overview for extractor prompts (`tables`, `mandatory_filters`, `performance_rules`, source path).
+  - Does not auto-add partitioning-derived `REPORT_PERIOD` obligations.
+  - Supports high-recall retrieval up to top 2000 metadata documents per request.
 - `talk_to_data/sql_generator.py`
   - Implements `generate_sql_candidates(...) -> list[dict]`.
   - Produces exactly 3 candidates.
   - Uses `talk_to_data/llm_client.py` for LLM calls.
   - Accepts optional retry context (`retry_context`) so second-attempt prompts can avoid first-attempt disqualify patterns.
   - Builds LLM prompt with explicit `Metadata`, `Request`, and `Sql Rule` sections.
-  - Builds granularity-aware mandatory filters for DATE/TIMESTAMP targets:
-    - `TO_CHAR(<date_col>, 'yyyy') = :year_value`
-    - `TO_CHAR(<date_col>, 'yyyymm') = :report_period`
-    - `TO_CHAR(<date_col>, 'yyyymmdd') = :date_value`
-  - Supports controlled date-like NUMBER targets (strong metadata signals only) with digit-safe predicate generation.
-  - If request signals tanzim period intent, prioritizes `TANZIM_TARIH_ID -> GNL_TARIH.TARIH` route while selecting date target from metadata.
+  - Moves `YYYY` / `YYYYMM` / `YYYYMMDD` handling to SQL-generation prompt engineering stage.
   - Includes column-level context in prompt (`type`, `description`, `semantic_type`, `keywords`, selected properties when available).
   - Carries metadata source trace (`retrieval_debug.metadata_source`) into prompt for auditability.
-  - Requests SQL-only output first, then normalizes/parses into app candidate format.
-  - Applies SQL safety checks and regeneration/repair path.
-  - Does not inject missing predicates directly into SQL text; enforces mandatory filters through validation + LLM repair + revalidation.
-  - Enforces strict granularity bind policy:
-    - `year` -> `:year_value` only
-    - `month` -> `:report_period` only
-    - `day` -> `:date_value` only
-  - Fails with explicit error when model output cannot be normalized into 3 valid SQL candidates (no synthetic fallback SQL).
-  - Normalizes mandatory filters (for example `REPORT_PERIOD` -> `REPORT_PERIOD = :report_period`) before enforcement.
-  - Stores generation-time obligations in `runtime_mandatory_rules` to avoid mutating static `mandatory_rules`.
-  - Enforces `uretim`-only ek tanzim period policy during candidate validation/repair (rejects `REPORT_PERIOD` column predicates when ek tanzim basis is active).
-  - Enforces Oracle row limit style `FETCH FIRST 200 ROWS ONLY`.
+  - Parses strict JSON output and validates safety/obligations without mutating LLM SQL text.
+  - Fails fast when exactly 3 valid candidates are not produced (no synthetic fallback SQL and no SQL repair path).
+  - Enforces row-limit policy via validation (`FETCH FIRST 200 ROWS ONLY`) and blocks semicolon-delimited SQL.
 - `talk_to_data/sql_guardrails.py`
   - Execution-time SQL validation before Oracle run.
   - Re-checks safety, table allowlist, alias/column metadata compatibility, and mandatory filter obligations.
-  - Validates granular date obligations (`:year_value`, `:report_period`, `:date_value`) with bind+mask aware pattern checks, including `TO_CHAR` variants with `TRUNC/CAST`.
   - Evaluates both static `mandatory_rules` and runtime-generated `runtime_mandatory_rules`.
+  - Does not synthesize obligations from performance-rule text; validates explicit metadata/requirements obligations only.
   - Accepts optional full `validation_catalog` for execution-time column checks.
 - `talk_to_data/sql_validation.py`
   - Builds full table-column validation catalog from raw metadata documents.
@@ -116,7 +102,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Implements `describe_sql_candidate(...) -> str`.
 - `talk_to_data/db.py`
   - Oracle execution and bind variable preparation.
-  - Supports `:report_period`, `:year_value`, `:date_value`, date-range binds, and row-limit bind aliases.
+  - Supports generic placeholders plus date-range binds and row-limit bind aliases (legacy support for `:report_period`, `:year_value`, `:date_value` remains backward compatible).
   - Provides shared SQL display renderer (`render_sql_for_display`) so UI preview matches bind mapping logic.
   - Sanitized error messages (no secret leakage).
 - `talk_to_data/summarizer.py`
@@ -160,21 +146,17 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - Blocked keywords include: `DROP`, `DELETE`, `INSERT`, `UPDATE`, `MERGE`, `ALTER`, `TRUNCATE`.
 - Multiple statements are blocked.
 - `SELECT *` is blocked.
-- Row limit is always enforced with `FETCH FIRST 200 ROWS ONLY`.
+- SQL comments are blocked.
+- Row limit is enforced by validation: every SQL must include `FETCH FIRST 200 ROWS ONLY`.
 - Mandatory metadata filters are propagated and enforced.
-- Granular time filters can be enforced via `TO_CHAR` predicates with binds (`:year_value`, `:report_period`, `:date_value`) when DATE/TIMESTAMP targets are available.
-- Controlled date-like NUMBER columns can be used for granular time filters only with strong metadata signals.
-- Granularity bind policy is strict (`year -> :year_value`, `month -> :report_period`, `day -> :date_value`).
-- Bare mandatory filter names are normalized to bind-safe predicates before SQL generation.
-- SQL output normalization rejects `INVALID_REQUEST` marker responses and keeps SQL-generation flow active.
-- SQL generation fails fast when 3 valid candidates cannot be produced after normalization/repair.
-- Missing mandatory filters are handled via validation+repair, not SQL text injection.
-- `uretim` metadata only: when guardrails indicate ek tanzim period basis, SQL generation blocks `REPORT_PERIOD` column filters and requires ek tanzim date context with `:report_period`.
+- SQL generation does not mutate LLM SQL output; invalid SQL is rejected instead of repaired/rewritten.
+- SQL generation fails fast when exactly 3 valid candidates cannot be produced.
+- Missing mandatory filters are handled by validation (no SQL text injection/repair).
 - Execution-time guardrails validate SQL `alias.column` references against metadata-derived table-column sets.
 - Execution-time guardrails use full metadata validation catalog (when provided) instead of compact top-60 columns.
 - Ambiguous bare table references (same table name in multiple schemas) are blocked with explicit candidate-table details.
 - SQL judge output is parsed with regex for `option_[123]`; if parse fails, deterministic fallback is applied.
-- Bind placeholders are used for runtime values (`:report_period`, `:year_value`, `:date_value`, date-range binds, etc.).
+- Bind placeholders are resolved from extracted requirements and generic requirement keys.
 - Oracle errors are sanitized to avoid leaking secrets.
 
 ## Run Artifacts
@@ -386,7 +368,7 @@ Stub explains expected schema for table docs, columns, joins, mandatory filters,
 - Oracle connection errors
   - verify `ORACLE_USER`, `ORACLE_PASSWORD`, `ORACLE_DSN`.
 - Bind variable errors
-  - provide values implied by request and placeholders, especially `:report_period`, `:year_value`, and `:date_value`.
+  - provide values implied by request and SQL placeholders (for example date-range or custom bind names).
 - Missing metadata file
   - provide the selected agent metadata file under `metadata/agents/` or inspect generated schema stub.
 - Agent metadata is empty

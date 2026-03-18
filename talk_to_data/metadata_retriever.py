@@ -26,8 +26,8 @@ def expected_metadata_schema_stub() -> dict[str, Any]:
                 "name": "IFRS_PRIM_VERISI",
                 "description": "Business description",
                 "grain": "1 row per key set",
-                "mandatory_filters": ["REPORT_PERIOD = :report_period"],
-                "performance_rules": ["REPORT_PERIOD filter is required"],
+                "mandatory_filters": ["STATUS = :status"],
+                "performance_rules": ["Status filter is required"],
                 "columns": [
                     {"name": "REPORT_PERIOD", "type": "NUMBER(6)"},
                     {"name": "PRIM_TL", "type": "NUMBER"},
@@ -90,7 +90,6 @@ def build_metadata_overview(
     tables: list[str] = []
     mandatory_filters: list[str] = []
     performance_rules: list[str] = []
-    has_report_period_column = False
     for doc in documents:
         table_name = _table_name(doc)
         if table_name:
@@ -98,37 +97,20 @@ def build_metadata_overview(
         for flt in _normalized_filter_list(doc.get("mandatory_filters")):
             if flt not in mandatory_filters:
                 mandatory_filters.append(flt)
-        partitioning = doc.get("partitioning")
-        if isinstance(partitioning, dict) and partitioning.get("mandatory_filter"):
-            column = str(partitioning.get("column", "REPORT_PERIOD"))
-            expr = f"{column} = :report_period"
-            if expr not in mandatory_filters:
-                mandatory_filters.append(expr)
-
-        if not has_report_period_column and _doc_has_column(doc, "REPORT_PERIOD"):
-            has_report_period_column = True
 
         for rule in _as_string_list(doc.get("performance_rules")):
             if rule and rule not in performance_rules:
                 performance_rules.append(rule)
 
     metadata_source = str(metadata_path) if metadata_path is not None else ""
-    time_filter_policy = _detect_time_filter_policy(
-        performance_rules=performance_rules,
-        metadata_source=metadata_source,
-    )
-
     overview = {
         "tables": tables[:30],
         "mandatory_filters": mandatory_filters[:20],
-        "has_report_period_column": has_report_period_column,
     }
     if metadata_source:
         overview["metadata_source"] = metadata_source
     if performance_rules:
         overview["performance_rules"] = performance_rules[:12]
-    if time_filter_policy:
-        overview["time_filter_policy"] = time_filter_policy
     return overview
 
 
@@ -138,7 +120,7 @@ def retrieve_relevant_metadata(
     documents: list[dict[str, Any]] | None = None,
     *,
     metadata_path: Path | None = None,
-    top_k: int = 200,
+    top_k: int = 2000,
 ) -> dict[str, Any]:
     """
     Retrieve token-efficient relevant metadata.
@@ -154,7 +136,7 @@ def retrieve_relevant_metadata(
     else:
         documents = _normalize_documents(documents)
 
-    effective_top_k = max(1, min(_safe_int(top_k, fallback=200), 200))
+    effective_top_k = max(1, min(_safe_int(top_k, fallback=2000), 2000))
     min_score_threshold = 0.005
 
     query_tokens = _query_tokens(requirements, user_request)
@@ -374,41 +356,9 @@ def _normalize_column_name(value: Any) -> str:
     return text.upper() if text else ""
 
 
-def _doc_has_column(doc: dict[str, Any], column_name: str) -> bool:
-    raw_columns = doc.get("columns")
-    if not isinstance(raw_columns, list):
-        return False
-    target = column_name.strip().upper()
-    if not target:
-        return False
-    for column in raw_columns:
-        if not isinstance(column, dict):
-            continue
-        name = str(column.get("name", "")).strip().upper()
-        if name == target:
-            return True
-    return False
-
-
-def _detect_time_filter_policy(
-    *,
-    performance_rules: list[str],
-    metadata_source: str,
-) -> str | None:
-    source_low = metadata_source.lower()
-    is_uretim_source = "uretim" in source_low
-    if not is_uretim_source:
-        return None
-
-    text = _normalize_space(" ".join(performance_rules)).lower()
-    if "ek tanzim" in text:
-        return "ek_tanzim_date"
-    return None
-
-
 def _query_tokens(requirements: dict[str, Any], user_request: str) -> Counter[str]:
     texts: list[str] = [user_request]
-    for key in ("intent", "report_period", "notes"):
+    for key in ("intent", "notes"):
         value = requirements.get(key)
         if value:
             texts.append(str(value))
@@ -459,14 +409,6 @@ def _compact_doc(
     columns = _select_columns(doc, query_tokens)
     joins = _extract_joins(doc)
     mandatory_filters = _normalized_filter_list(doc.get("mandatory_filters"))
-
-    partitioning = doc.get("partitioning")
-    if isinstance(partitioning, dict) and partitioning.get("mandatory_filter"):
-        column = str(partitioning.get("column", "REPORT_PERIOD")).strip()
-        if column:
-            expr = _normalize_filter_expression(f"{column} = :report_period")
-            if expr not in mandatory_filters:
-                mandatory_filters.append(expr)
 
     return {
         "score": round(score, 4),
@@ -712,18 +654,7 @@ def _normalize_filter_expression(filter_text: str) -> str:
     text = _normalize_space(filter_text)
     if not text:
         return ""
-    if re.search(r"\b(and|or)\b", text, flags=re.IGNORECASE):
-        return text
-    if re.search(r"(=|<>|!=|<=|>=|<|>|\blike\b|\bbetween\b|\bin\b|\bis\b)", text, flags=re.IGNORECASE):
-        return text
-
-    token_match = re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", text)
-    if not token_match:
-        return text
-
-    column = token_match.group(0).upper()
-    bind_name = "report_period" if column.lower() == "report_period" else column.lower()
-    return f"{column} = :{bind_name}"
+    return text
 
 
 def _normalize_space(text: str) -> str:

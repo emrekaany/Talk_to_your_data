@@ -546,20 +546,7 @@ def _normalize_filter_expression(filter_text: str) -> str:
     text = _normalize_space(str(filter_text))
     if not text:
         return ""
-    if re.search(
-        r"(=|<>|!=|<=|>=|<|>|\blike\b|\bbetween\b|\bin\b|\bis\b)",
-        text,
-        flags=re.IGNORECASE,
-    ):
-        return text
-
-    token_match = re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", text)
-    if not token_match:
-        return text
-
-    column = token_match.group(0).upper()
-    bind_name = "report_period" if column.lower() == "report_period" else column.lower()
-    return f"{column} = :{bind_name}"
+    return text
 
 
 def _dedupe_strings(values: list[str]) -> list[str]:
