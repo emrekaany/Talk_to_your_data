@@ -1,0 +1,8 @@
+{
+  "retry_triggered": true,
+  "trigger_attempt": 1,
+  "trigger_reason": "all_candidates_disqualified",
+  "judge_error_kind": "llm_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3
+}

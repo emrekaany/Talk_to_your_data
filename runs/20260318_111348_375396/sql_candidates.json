@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(fpp.BRUT_PRIM_TL) AS prim_üretim_tutarı FROM AS_DWH.FACT_POL_POLICE_EK fpp JOIN AS_DWH.POL_POLICE_OZET ppo ON fpp.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpp.POLICE_ID = ppo.POLICE_ID JOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID WHERE TO_CHAR(gt.TARIH, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses the TANZIM_TARIH_ID from POL_POLICE_OZET joined with GNL_TARIH to filter by December 2025 and sums BRUT_PRIM_TL from FACT_POL_POLICE_EK.",
+    "risk_notes": "Relies on TANZIM_TARIH_ID which may not be the correct date column for production reporting.",
+    "description": "Question answered: What is the total production value (BRUT_PRIM_TL) for December 2025 based on the additional policy date?  \nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH  \nFilters: Only records where the additional policy date falls in December 2025 (`YYYYMM` format).  \nGrouping/measures: Summing the `BRUT_PRIM_TL` column to calculate total production value.  \nExpected output columns: `prim_üretim_tutarı` (total production value).  \nAssumptions: The query assumes that production reports are based on the additional policy date (`TANZIM_TARIH_ID`) and not the main policy start date. It also limits results to 200 rows, though no grouping is applied.",
+    "recommended": false
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(fpp.BRUT_PRIM_TL) AS prim_üretim_tutarı FROM AS_DWH.FACT_POL_POLICE_EK fpp JOIN AS_DWH.POL_POLICE_OZET ppo ON fpp.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpp.POLICE_ID = ppo.POLICE_ID JOIN AS_DWH.GNL_TARIH gt ON ppo.ANA_POLICE_TANZIM_TARIH_ID = gt.TARIH_ID WHERE TO_CHAR(gt.TARIH, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses ANA_POLICE_TANZIM_TARIH_ID from POL_POLICE_OZET joined with GNL_TARIH to filter by December 2025 and sums BRUT_PRIM_TL from FACT_POL_POLICE_EK.",
+    "risk_notes": "ANA_POLICE_TANZIM_TARIH_ID may not represent the correct tanzim date for individual policies.",
+    "description": "Question answered: What is the total production value (BRUT_PRIM_TL) for policies with an effective date in December 2025?\n\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\n\nFilters: Only records where the effective date (ANA_POLICE_TANZIM_TARIH) falls in December 2025 (`YYYYMM` format is '202512').\n\nGrouping/measures: Summing the `BRUT_PRIM_TL` column to calculate total production value.\n\nExpected output columns: `prim_üretim_tutarı` (total production value in Turkish Lira)\n\nAssumptions: \n- The query is intended for production reporting based on the effective date (`ANA_POLICE_TANZIM_TARIH`), as per business rules.\n- The `FETCH FIRST 200 ROWS ONLY` clause is likely a safeguard or testing limit, though it may not be necessary given the aggregation.\n- The join keys used are consistent with standard join definitions in the metadata.",
+    "recommended": true
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(fpp.BRUT_PRIM_TL) AS prim_üretim_tutarı FROM AS_DWH.FACT_POL_POLICE_EK fpp JOIN AS_DWH.POL_POLICE_OZET ppo ON fpp.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpp.POLICE_ID = ppo.POLICE_ID WHERE TO_CHAR(ppo.TANZIM_TARIH_ID, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Filters directly on TANZIM_TARIH_ID from POL_POLICE_OZET without joining to GNL_TARIH, assuming it contains the YYYYMM format.",
+    "risk_notes": "Assumes TANZIM_TARIH_ID is already in YYYYMM format, which may not be reliable.",
+    "description": "Question answered: What is the total production value (BRUT_PRIM_TL) for policies with an effective date in December 2025?\n\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET\n\nFilters: Only records where the effective date (TANZIM_TARIH_ID) falls in December 2025 (`YYYYMM` format is `'202512'`).\n\nGrouping/measures: Summing the `BRUT_PRIM_TL` column to calculate total production value.\n\nExpected output columns: `prim_üretim_tutarı` (total production value in Turkish Lira)\n\nAssumptions: \n- The join between `FACT_POL_POLICE_EK` and `POL_POLICE_OZET` is based on `KAYNAK_SISTEM_ID` and `POLICE_ID`, which are standard key-based joins.\n- The query is intended for production reporting and uses the effective date (`TANZIM_TARIH_ID`) as the basis for filtering, consistent with business rules.\n- The `FETCH FIRST 200 ROWS ONLY` clause is likely a safeguard or testing limit, though it may not be needed in production.",
+    "recommended": false
+  }
+]

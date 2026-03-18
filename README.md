@@ -190,6 +190,7 @@ Added and wired the following:
 - `app.py`
 - `talk_to_data/__init__.py`
 - `talk_to_data/config.py`
+- `talk_to_data/agent_rules.py`
 - `talk_to_data/llm_client.py`
 - `talk_to_data/requirements_extractor.py`
 - `talk_to_data/metadata_retriever.py`
@@ -202,6 +203,10 @@ Added and wired the following:
 - `talk_to_data/summarizer.py`
 - `talk_to_data/runs.py`
 - `talk_to_data/pipeline.py`
+- `metadata/agents/agents.json`
+- `metadata/agents/rules/hasar.json`
+- `metadata/agents/rules/uretim.json`
+- `metadata/agents/rules/satis.json`
 - `requirements.txt`
 - `.gitignore`
 - this `README.md`
@@ -349,9 +354,10 @@ These are intentionally empty stubs. Until they are populated with valid metadat
 How to add a new agent:
 
 1. Create metadata file under `metadata/agents/`.
-2. Add a new entry in `metadata/agents/agents.json`.
-3. Set `default_agent_id` if needed.
-4. Restart the app.
+2. Create rules file under `metadata/agents/rules/` with `agent_id`, `sql_prompt_rules`, `time_expression_guidance`.
+3. Add a new entry in `metadata/agents/agents.json` with `metadata_path` and `rules_path`.
+4. Set `default_agent_id` if needed.
+5. Restart the app.
 
 ## Metadata Source
 

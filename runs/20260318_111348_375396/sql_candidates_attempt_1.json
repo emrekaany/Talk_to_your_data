@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(fpp.BRUT_PRIM_TL) AS prim_üretim_tutarı FROM AS_DWH.FACT_POL_POLICE_EK fpp JOIN AS_DWH.POL_POLICE_OZET ppo ON fpp.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpp.POLICE_ID = ppo.POLICE_ID JOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID WHERE TO_CHAR(gt.TARIH) = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses the TANZIM_TARIH_ID from POL_POLICE_OZET joined with GNL_TARIH to filter by December 2025 and sums BRUT_PRIM_TL from FACT_POL_POLICE_EK.",
+    "risk_notes": "Relies on correct mapping between TANZIM_TARIH_ID and GNL_TARIH.TARIH.",
+    "description": "Question answered: What is the total production value (BRUT_PRIM_TL) for policies with an additional policy date of December 2025?\n\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\n\nFilters: Only records where the additional policy date (TANZIM_TARIH_ID) corresponds to December 2025.\n\nGrouping/measures: Summing the BRUT_PRIM_TL column to calculate the total production value.\n\nExpected output columns: prim_üretim_tutarı (total production value in Turkish Lira)\n\nAssumptions: \n- The query assumes that the additional policy date (ek tanzim tarihi) is the correct basis for production reporting in this context.\n- The date filter is applied via the GNL_TARIH table using the string format '202512'.\n- The query limits results to 200 rows, though this may be redundant if the filter returns fewer than 200 rows.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(fpp.BRUT_PRIM_TL) AS prim_üretim_tutarı FROM AS_DWH.FACT_POL_POLICE_EK fpp JOIN AS_DWH.POL_POLICE_OZET ppo ON fpp.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpp.POLICE_ID = ppo.POLICE_ID WHERE TO_CHAR(ppo.TANZIM_TARIH_ID) = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Filters directly on POL_POLICE_OZET.TANZIM_TARIH_ID using the YYYYMM format specified in the request.",
+    "risk_notes": "Assumes TANZIM_TARIH_ID is stored as a numeric or string value compatible with '202512'.",
+    "description": "Question answered: What is the total production value (BRUT_PRIM_TL) for policies with an additional policy date of December 2025?\n\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET\n\nFilters: Only records where the additional policy date (TANZIM_TARIH_ID) is December 2025 (`TO_CHAR(ppo.TANZIM_TARIH_ID) = '202512'`).\n\nGrouping/measures: Summing the `BRUT_PRIM_TL` column to calculate total production value.\n\nExpected output columns: `prim_üretim_tutarı` (total production value in Turkish Lira).\n\nAssumptions: \n- The query is intended for production reporting based on additional policy date (`TANZIM_TARIH_ID`), as per business rules.\n- The `FETCH FIRST 200 ROWS ONLY` clause is likely a safeguard or testing limit, though it may not be necessary given the aggregation.\n- The join is based on policy identifiers (`KAYNAK_SISTEM_ID`, `POLICE_ID`) as per standard join definitions.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(fpp.BRUT_PRIM_TL) AS prim_üretim_tutarı FROM AS_DWH.FACT_POL_POLICE_EK fpp JOIN AS_DWH.POL_POLICE_OZET ppo ON fpp.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpp.POLICE_ID = ppo.POLICE_ID JOIN AS_DWH.GNL_TARIH gt ON ppo.ANA_POLICE_TANZIM_TARIH_ID = gt.TARIH_ID WHERE TO_CHAR(gt.TARIH) = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses ANA_POLICE_TANZIM_TARIH_ID from POL_POLICE_OZET joined with GNL_TARIH to filter by December 2025.",
+    "risk_notes": "ANA_POLICE_TANZIM_TARIH_ID may not always align with the actual tanzim date of the policy.",
+    "description": "Question answered: What is the total production value (BRUT_PRIM_TL) for policies with an effective date in December 2025?\n\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\n\nFilters: Only records where the effective date (ANA_POLICE_TANZIM_TARIH_ID) is December 2025.\n\nGrouping/measures: Summing the BRUT_PRIM_TL column to calculate total production value.\n\nExpected output columns: prim_üretim_tutarı (total production value in Turkish Lira)\n\nAssumptions: \n- The query assumes that production is measured based on the effective date (ek tanzim tarihi) as per business rules.\n- The date filter is applied via the GNL_TARIH table using TARIH_ID.\n- The result is limited to 200 rows, though this may be redundant if the filter returns fewer than 200 records.",
+    "recommended": false
+  }
+]

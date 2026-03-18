@@ -1,0 +1,40 @@
+{
+  "recommended_candidate_id": "option_2",
+  "recommended_canonical_id": "option_2",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM judge failed: LLM HTTP error 400: {\"error\":{\"message\":\"litellm.ContextWindowExceededError: litellm.BadRequestError: ContextWindowExceededError: Hosted_vllmException - This model's maximum context length is 32768 tokens. However, your request has 90350 input tokens. Please reduce the length of the input messages. None\\nmodel=florence",
+  "judge_error_kind": "llm_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3,
+  "retry_recommended": true,
+  "llm_raw_output": "",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: fpp.KAYNAK_SISTEM_ID (expected metadata table: AS_DWH.FACT_POL_POLICE_EK); ppo.KAYNAK_SISTEM_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); fpp.POLICE_ID (expected metadata table: AS_DWH.FACT_POL_POLICE_EK); ppo.POLICE_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); ppo.TANZIM_TARIH_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); gt.TARIH_ID (expected metadata table: AS_DWH.GNL_TARIH)"
+      ],
+      "fallback_score": 4.0
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: fpp.KAYNAK_SISTEM_ID (expected metadata table: AS_DWH.FACT_POL_POLICE_EK); ppo.KAYNAK_SISTEM_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); fpp.POLICE_ID (expected metadata table: AS_DWH.FACT_POL_POLICE_EK); ppo.POLICE_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); ppo.ANA_POLICE_TANZIM_TARIH_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); gt.TARIH_ID (expected metadata table: AS_DWH.GNL_TARIH)"
+      ],
+      "fallback_score": 4.5
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: fpp.KAYNAK_SISTEM_ID (expected metadata table: AS_DWH.FACT_POL_POLICE_EK); ppo.KAYNAK_SISTEM_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); fpp.POLICE_ID (expected metadata table: AS_DWH.FACT_POL_POLICE_EK); ppo.POLICE_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); ppo.TANZIM_TARIH_ID (expected metadata table: AS_DWH.POL_POLICE_OZET)"
+      ],
+      "fallback_score": 4.5
+    }
+  ]
+}

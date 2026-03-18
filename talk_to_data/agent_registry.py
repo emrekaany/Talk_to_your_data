@@ -133,6 +133,10 @@ def _parse_agent(raw: dict[str, Any], base_dir: Path, *, index: int) -> AgentCon
     rules_path = Path(raw_rules_path)
     if not rules_path.is_absolute():
         rules_path = (base_dir / rules_path).resolve()
+    if not rules_path.exists():
+        raise AgentRegistryError(
+            f"Agent '{agent_id}' rules_path does not exist: '{rules_path}'."
+        )
 
     return AgentConfig(
         id=agent_id,
