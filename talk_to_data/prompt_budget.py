@@ -136,13 +136,10 @@ def _candidate_table_map(candidate_sqls: dict[str, str]) -> dict[str, list[str]]
         output[str(candidate_id)] = _extract_table_names(sql)
     return output
 
-<<<<<<< ours
 
 
 
 
-=======
->>>>>>> theirs
 def _normalize_identifier_token(token: str) -> str:
     value = token.strip()
     if value.startswith('"') and value.endswith('"') and len(value) >= 2:
@@ -253,12 +250,13 @@ def _shorten_text(text: str, max_chars: int) -> str:
         return ""
     if len(compact) <= max_chars:
         return compact
-    return compact[: max_chars - 1].rstrip() + "â€¦"
+    return compact[: max_chars - 3].rstrip() + "..."
 
 
 
 
 
+    return compact[: max_chars - 1].rstrip() + "…"
 def _dedupe(values: list[str]) -> list[str]:
     seen: set[str] = set()
     output: list[str] = []

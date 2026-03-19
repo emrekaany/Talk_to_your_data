@@ -19,6 +19,7 @@ from .agent_rules import AgentRulesError, load_agent_rules
 from .config import AppConfig
 from .db import DatabaseExecutionError, execute_sql
 from .llm_client import LLMClient, try_build_llm_client
+from .llm_logging import capture_llm_calls
 from .metadata_retriever import (
     MetadataFileError,
     build_metadata_overview,
@@ -29,17 +30,23 @@ from .requirements_extractor import RequirementsExtractionError, extract_require
 from .runs import (
     create_run_dir,
     save_json_artifact,
+    save_llm_usage,
     save_result_excel,
     save_result_interpretation,
     save_result_preview,
     save_run_artifacts,
 )
-from .sql_explainer import describe_sql_candidate
+from .sql_explainer import describe_sql_candidates
 from .sql_generator import SQLGenerationError, generate_sql_candidates
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
 from .sql_judge import choose_best_sql_candidate
 from .sql_validation import build_validation_catalog
 from .summarizer import summarize_result
+from .table_metadata import (
+    TableMetadataFileError,
+    load_table_metadata_documents,
+    merge_table_metadata_into_documents,
+)
 
 
 class PipelineError(RuntimeError):
@@ -69,6 +76,7 @@ class TalkToDataService:
             timeout_sec=self.config.llm_timeout_sec,
         )
         self._metadata_documents_by_path: dict[Path, list[dict[str, Any]]] = {}
+        self._table_metadata_documents_by_path: dict[Path, list[dict[str, Any]]] = {}
         self._agent_rules_by_path: dict[Path, dict[str, Any]] = {}
         self._agent_registry: AgentRegistry | None = None
 
@@ -87,141 +95,212 @@ class TalkToDataService:
         if not request:
             raise PipelineError("Please provide a request.")
 
-        agent = self._resolve_agent(agent_id)
-        try:
-            agent_rules = self._get_agent_rules(agent)
-        except AgentRulesError as exc:
-            raise PipelineError(
-                f"Selected agent rules could not be loaded "
-                f"(agent='{agent.id}', path='{agent.rules_path}'): {exc}"
-            ) from exc
-
-        try:
-            metadata_docs = self._get_metadata_documents(agent.metadata_path)
-        except MetadataFileError as exc:
-            raise PipelineError(
-                f"Selected agent metadata could not be loaded "
-                f"(agent='{agent.id}', path='{agent.metadata_path}'): {exc}"
-            ) from exc
-
-        metadata_overview = build_metadata_overview(
-            metadata_docs,
-            metadata_path=agent.metadata_path,
-        )
-        validation_catalog = build_validation_catalog(metadata_docs)
-
-        try:
-            requirements = extract_requirements(
-                request,
-                llm_client=self.llm_client,
-                metadata_overview=metadata_overview,
-            )
-        except RequirementsExtractionError as exc:
-            raise PipelineError(f"Requirement extraction failed: {exc}") from exc
-
-        if requirements.get("invalid_request"):
-            reason = str(requirements.get("notes") or "Request marked as invalid by extractor.").strip()
-            requirements["invalid_request"] = False
-            existing_notes = str(requirements.get("notes", "")).strip()
-            requirements["notes"] = (
-                f"{existing_notes} Proceeding with conservative SQL generation."
-                if existing_notes
-                else f"{reason} Proceeding with conservative SQL generation."
-            )
-
-        metadata_used = retrieve_relevant_metadata(
-            requirements=requirements,
-            user_request=request,
-            documents=metadata_docs,
-            metadata_path=agent.metadata_path,
-            top_k=500,
-        )
-        run_dir = create_run_dir(self.config.runs_dir)
-        attempt_one_candidates: list[dict[str, Any]] | None = None
-        attempt_one_judge_result: dict[str, Any] | None = None
-        retry_decision: dict[str, Any] | None = None
-
-        final_candidates: list[dict[str, Any]] | None = None
-        final_judge_result: dict[str, Any] | None = None
-        final_attempt = 0
-        retry_context: dict[str, Any] | None = None
-
-        for attempt in (1, 2):
+        with capture_llm_calls("prepare_candidates") as llm_capture:
+            agent = self._resolve_agent(agent_id)
             try:
-                candidates = generate_sql_candidates(
-                    user_request=request,
-                    requirements=requirements,
-                    metadata=metadata_used,
-                    llm_client=self.llm_client,
-                    retry_context=retry_context,
-                    agent_rules=agent_rules,
-                )
-            except SQLGenerationError as exc:
-                raise PipelineError(f"SQL generation failed: {exc}") from exc
+                agent_rules = self._get_agent_rules(agent)
+            except AgentRulesError as exc:
+                raise PipelineError(
+                    f"Selected agent rules could not be loaded "
+                    f"(agent='{agent.id}', path='{agent.rules_path}'): {exc}"
+                ) from exc
 
-            for candidate in candidates:
-                candidate["description"] = describe_sql_candidate(
-                    candidate,
+            try:
+                table_metadata_docs = self._get_table_metadata_documents(
+                    agent.table_metadata_path
+                )
+            except TableMetadataFileError as exc:
+                raise PipelineError(
+                    f"Selected agent table metadata could not be loaded "
+                    f"(agent='{agent.id}', path='{agent.table_metadata_path}'): {exc}"
+                ) from exc
+
+            try:
+                metadata_docs = self._get_metadata_documents(agent.metadata_path)
+            except MetadataFileError as exc:
+                raise PipelineError(
+                    f"Selected agent metadata could not be loaded "
+                    f"(agent='{agent.id}', path='{agent.metadata_path}'): {exc}"
+                ) from exc
+            metadata_docs = merge_table_metadata_into_documents(
+                metadata_docs,
+                table_metadata_docs,
+            )
+
+            metadata_overview = build_metadata_overview(
+                metadata_docs,
+                metadata_path=agent.metadata_path,
+            )
+            validation_catalog = build_validation_catalog(metadata_docs)
+
+            try:
+                requirements = extract_requirements(
+                    request,
+                    llm_client=self.llm_client,
+                    metadata_overview=metadata_overview,
+                )
+            except RequirementsExtractionError as exc:
+                raise PipelineError(f"Requirement extraction failed: {exc}") from exc
+
+            if requirements.get("invalid_request"):
+                reason = str(
+                    requirements.get("notes")
+                    or "Request marked as invalid by extractor."
+                ).strip()
+                requirements["invalid_request"] = False
+                existing_notes = str(requirements.get("notes", "")).strip()
+                requirements["notes"] = (
+                    f"{existing_notes} Proceeding with conservative SQL generation."
+                    if existing_notes
+                    else f"{reason} Proceeding with conservative SQL generation."
+                )
+
+            metadata_used = retrieve_relevant_metadata(
+                requirements=requirements,
+                user_request=request,
+                documents=metadata_docs,
+                metadata_path=agent.metadata_path,
+                table_metadata_path=agent.table_metadata_path,
+                top_k=500,
+            )
+            run_dir = create_run_dir(self.config.runs_dir)
+            attempt_one_candidates: list[dict[str, Any]] | None = None
+            attempt_one_judge_result: dict[str, Any] | None = None
+            retry_decision: dict[str, Any] | None = None
+
+            final_candidates: list[dict[str, Any]] | None = None
+            final_judge_result: dict[str, Any] | None = None
+            final_attempt = 0
+            retry_context: dict[str, Any] | None = None
+
+            for attempt in (1, 2):
+                try:
+                    candidates = generate_sql_candidates(
+                        user_request=request,
+                        requirements=requirements,
+                        metadata=metadata_used,
+                        llm_client=self.llm_client,
+                        retry_context=retry_context,
+                        agent_rules=agent_rules,
+                    )
+                except SQLGenerationError as exc:
+                    raise PipelineError(f"SQL generation failed: {exc}") from exc
+
+                descriptions = describe_sql_candidates(
+                    candidates,
                     metadata_used,
                     llm_client=self.llm_client,
+                    llm_enabled=self.config.sql_explainer_enabled,
+                    batch_enabled=self.config.sql_explainer_batch_enabled,
+                )
+                for candidate, description in zip(candidates, descriptions):
+                    candidate["description"] = description
+
+                judge_result = choose_best_sql_candidate(
+                    user_request=request,
+                    metadata_used=metadata_used,
+                    candidates=candidates,
+                    llm_client=self.llm_client,
+                    validation_catalog=validation_catalog,
+                )
+                recommended_candidate_id = str(
+                    judge_result.get("recommended_candidate_id", "")
+                ).strip()
+                if not recommended_candidate_id and candidates:
+                    recommended_candidate_id = str(
+                        candidates[0].get("id", "option_1")
+                    ).strip()
+                for candidate in candidates:
+                    candidate["recommended"] = (
+                        str(candidate.get("id", "")).strip() == recommended_candidate_id
+                    )
+
+                retry_recommended = bool(judge_result.get("retry_recommended", False))
+                if attempt == 1 and retry_recommended:
+                    attempt_one_candidates = deepcopy(candidates)
+                    attempt_one_judge_result = deepcopy(judge_result)
+                    retry_context = _build_retry_context(judge_result, candidates)
+                    retry_decision = {
+                        "retry_triggered": True,
+                        "trigger_attempt": 1,
+                        "trigger_reason": _retry_reason(judge_result),
+                        "judge_error_kind": str(
+                            judge_result.get("judge_error_kind", "none")
+                        ),
+                        "all_candidates_disqualified": bool(
+                            judge_result.get("all_candidates_disqualified", False)
+                        ),
+                        "disqualified_count": int(
+                            judge_result.get("disqualified_count", 0)
+                        ),
+                    }
+                    continue
+
+                final_candidates = candidates
+                final_judge_result = judge_result
+                final_attempt = attempt
+                break
+
+            if final_candidates is None or final_judge_result is None:
+                raise PipelineError(
+                    "SQL candidate generation did not produce a final result."
                 )
 
-            judge_result = choose_best_sql_candidate(
-                user_request=request,
-                metadata_used=metadata_used,
-                candidates=candidates,
-                llm_client=self.llm_client,
-                validation_catalog=validation_catalog,
-            )
             recommended_candidate_id = str(
-                judge_result.get("recommended_candidate_id", "")
+                final_judge_result.get("recommended_candidate_id", "")
             ).strip()
-            if not recommended_candidate_id and candidates:
-                recommended_candidate_id = str(candidates[0].get("id", "option_1")).strip()
-            for candidate in candidates:
+            if not recommended_candidate_id and final_candidates:
+                recommended_candidate_id = str(
+                    final_candidates[0].get("id", "option_1")
+                ).strip()
+            for candidate in final_candidates:
                 candidate["recommended"] = (
                     str(candidate.get("id", "")).strip() == recommended_candidate_id
                 )
 
-            retry_recommended = bool(judge_result.get("retry_recommended", False))
-            if attempt == 1 and retry_recommended:
-                attempt_one_candidates = deepcopy(candidates)
-                attempt_one_judge_result = deepcopy(judge_result)
-                retry_context = _build_retry_context(judge_result, candidates)
-                retry_decision = {
-                    "retry_triggered": True,
-                    "trigger_attempt": 1,
-                    "trigger_reason": _retry_reason(judge_result),
-                    "judge_error_kind": str(judge_result.get("judge_error_kind", "none")),
-                    "all_candidates_disqualified": bool(
-                        judge_result.get("all_candidates_disqualified", False)
-                    ),
-                    "disqualified_count": int(judge_result.get("disqualified_count", 0)),
-                }
-                continue
+            llm_usage = llm_capture.to_dict()
+            llm_usage["request"] = request
+            llm_usage["attempt_count"] = final_attempt
+            llm_usage["retry_attempted"] = final_attempt > 1
 
-            final_candidates = candidates
-            final_judge_result = judge_result
-            final_attempt = attempt
-            break
+            if (
+                final_attempt == 2
+                and bool(final_judge_result.get("all_candidates_disqualified", False))
+            ):
+                save_run_artifacts(
+                    run_dir,
+                    user_request=request,
+                    requirements=requirements,
+                    metadata_used=metadata_used,
+                    sql_candidates=final_candidates,
+                    agent_info={
+                        "id": agent.id,
+                        "label": agent.label,
+                        "description": agent.description,
+                        "metadata_path": str(agent.metadata_path),
+                        "table_metadata_path": str(agent.table_metadata_path),
+                        "rules_path": str(agent.rules_path),
+                    },
+                    judge_result=final_judge_result,
+                )
+                save_llm_usage(run_dir, llm_usage)
+                if attempt_one_candidates is not None and attempt_one_judge_result is not None:
+                    save_json_artifact(
+                        run_dir,
+                        "sql_candidates_attempt_1.json",
+                        attempt_one_candidates,
+                    )
+                    save_json_artifact(
+                        run_dir,
+                        "judge_result_attempt_1.json",
+                        attempt_one_judge_result,
+                    )
+                if retry_decision is not None:
+                    save_json_artifact(run_dir, "retry_decision.json", retry_decision)
+                raise PipelineError(
+                    "Auto-selection failed after one retry: all SQL candidates were disqualified."
+                )
 
-        if final_candidates is None or final_judge_result is None:
-            raise PipelineError("SQL candidate generation did not produce a final result.")
-
-        recommended_candidate_id = str(
-            final_judge_result.get("recommended_candidate_id", "")
-        ).strip()
-        if not recommended_candidate_id and final_candidates:
-            recommended_candidate_id = str(final_candidates[0].get("id", "option_1")).strip()
-        for candidate in final_candidates:
-            candidate["recommended"] = (
-                str(candidate.get("id", "")).strip() == recommended_candidate_id
-            )
-
-        if (
-            final_attempt == 2
-            and bool(final_judge_result.get("all_candidates_disqualified", False))
-        ):
             save_run_artifacts(
                 run_dir,
                 user_request=request,
@@ -233,58 +312,50 @@ class TalkToDataService:
                     "label": agent.label,
                     "description": agent.description,
                     "metadata_path": str(agent.metadata_path),
+                    "table_metadata_path": str(agent.table_metadata_path),
                     "rules_path": str(agent.rules_path),
                 },
                 judge_result=final_judge_result,
             )
+            save_llm_usage(run_dir, llm_usage)
             if attempt_one_candidates is not None and attempt_one_judge_result is not None:
-                save_json_artifact(run_dir, "sql_candidates_attempt_1.json", attempt_one_candidates)
-                save_json_artifact(run_dir, "judge_result_attempt_1.json", attempt_one_judge_result)
+                save_json_artifact(
+                    run_dir,
+                    "sql_candidates_attempt_1.json",
+                    attempt_one_candidates,
+                )
+                save_json_artifact(
+                    run_dir,
+                    "judge_result_attempt_1.json",
+                    attempt_one_judge_result,
+                )
             if retry_decision is not None:
                 save_json_artifact(run_dir, "retry_decision.json", retry_decision)
-            raise PipelineError(
-                "Auto-selection failed after one retry: all SQL candidates were disqualified."
-            )
 
-        save_run_artifacts(
-            run_dir,
-            user_request=request,
-            requirements=requirements,
-            metadata_used=metadata_used,
-            sql_candidates=final_candidates,
-            agent_info={
-                "id": agent.id,
-                "label": agent.label,
-                "description": agent.description,
-                "metadata_path": str(agent.metadata_path),
-                "rules_path": str(agent.rules_path),
-            },
-            judge_result=final_judge_result,
-        )
-        if attempt_one_candidates is not None and attempt_one_judge_result is not None:
-            save_json_artifact(run_dir, "sql_candidates_attempt_1.json", attempt_one_candidates)
-            save_json_artifact(run_dir, "judge_result_attempt_1.json", attempt_one_judge_result)
-        if retry_decision is not None:
-            save_json_artifact(run_dir, "retry_decision.json", retry_decision)
-
-        return {
-            "run_dir": str(run_dir),
-            "request": request,
-            "agent_id": agent.id,
-            "agent_label": agent.label,
-            "agent_metadata_path": str(agent.metadata_path),
-            "agent_rules_path": str(agent.rules_path),
-            "requirements": requirements,
-            "metadata_used": metadata_used,
-            "validation_catalog": validation_catalog,
-            "candidates": final_candidates,
-            "recommended_candidate_id": recommended_candidate_id,
-            "selection_mode": str(final_judge_result.get("selection_mode", "fallback")),
-            "judge_result": final_judge_result,
-            "attempt_count": final_attempt,
-            "retry_attempted": final_attempt > 1,
-            "llm_mode": "enabled" if self.llm_client is not None else "heuristic_fallback",
-        }
+            return {
+                "run_dir": str(run_dir),
+                "request": request,
+                "agent_id": agent.id,
+                "agent_label": agent.label,
+                "agent_metadata_path": str(agent.metadata_path),
+                "agent_table_metadata_path": str(agent.table_metadata_path),
+                "agent_rules_path": str(agent.rules_path),
+                "requirements": requirements,
+                "metadata_used": metadata_used,
+                "validation_catalog": validation_catalog,
+                "candidates": final_candidates,
+                "recommended_candidate_id": recommended_candidate_id,
+                "selection_mode": str(
+                    final_judge_result.get("selection_mode", "fallback")
+                ),
+                "judge_result": final_judge_result,
+                "attempt_count": final_attempt,
+                "retry_attempted": final_attempt > 1,
+                "llm_mode": (
+                    "enabled" if self.llm_client is not None else "heuristic_fallback"
+                ),
+                "llm_usage": llm_usage,
+            }
 
     def execute_selected_candidate(
         self,
@@ -421,6 +492,19 @@ class TalkToDataService:
 
         documents = load_metadata_documents(metadata_path)
         self._metadata_documents_by_path[key] = documents
+        return documents
+
+    def _get_table_metadata_documents(
+        self,
+        table_metadata_path: Path,
+    ) -> list[dict[str, Any]]:
+        key = table_metadata_path.resolve()
+        cached = self._table_metadata_documents_by_path.get(key)
+        if cached is not None:
+            return cached
+
+        documents = load_table_metadata_documents(table_metadata_path)
+        self._table_metadata_documents_by_path[key] = documents
         return documents
 
     def _get_agent_rules(self, agent: AgentConfig) -> dict[str, Any]:

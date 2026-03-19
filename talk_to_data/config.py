@@ -33,6 +33,8 @@ class AppConfig:
     llm_timeout_sec: int
     llm_summarizer_enabled: bool
     llm_summarizer_required: bool
+    sql_explainer_enabled: bool
+    sql_explainer_batch_enabled: bool
     result_chart_render_enabled: bool
     oracle_user: str
     oracle_password: str
@@ -58,6 +60,14 @@ class AppConfig:
             llm_summarizer_required=_safe_bool(
                 os.getenv("LLM_SUMMARIZER_REQUIRED"),
                 False,
+            ),
+            sql_explainer_enabled=_safe_bool(
+                os.getenv("SQL_EXPLAINER_ENABLED"),
+                True,
+            ),
+            sql_explainer_batch_enabled=_safe_bool(
+                os.getenv("SQL_EXPLAINER_BATCH_ENABLED"),
+                True,
             ),
             result_chart_render_enabled=_safe_bool(
                 os.getenv("RESULT_CHART_RENDER_ENABLED"),

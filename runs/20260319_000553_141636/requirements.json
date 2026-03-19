@@ -1,0 +1,25 @@
+{
+  "intent": "retrieve_data",
+  "required_filters": [
+    "{'tanzim_tarihi': '2025'}"
+  ],
+  "measures": [
+    "total_üretim"
+  ],
+  "dimensions": [],
+  "grain": [
+    "total_üretim"
+  ],
+  "join_needs": [],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "Kullanıcı, 2025 tarihli toplam üretim verisini istiyor. 'Tanzim tarihi' filtresi olarak 2025 yılını belirtmiş.",
+  "row_limit": 1,
+  "report_period": "year",
+  "time_granularity": "year",
+  "time_value": "2025",
+  "time_range": {
+    "start": "2025-01-01",
+    "end": "2025-12-31"
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.POL_POLICE_OZET p JOIN AS_DWH.FACT_POL_POLICE_EK f ON p.POLICE_ID = f.POLICE_ID WHERE TO_CHAR(p.TANZIM_TARIH_ID) = '2025' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Toplam üretim, 2025 tanzim tarihli poliçelerin brüt prim toplamı üzerinden hesaplanır.",
+    "risk_notes": "Sadece tanzim tarihi 2025 olan poliçeler dahil edilir.",
+    "description": "Question answered: What is the total production (in TL) for policies created in the year 2025?\nTables used: POL_POLICE_OZET, FACT_POL_POLICE_EK\nFilters: Policies created in the year 2025\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: BRUT_PRIM_TL represents the gross premium amount in Turkish Lira.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(f.VOP_TL) AS total_üretim FROM AS_DWH.POL_POLICE_OZET p JOIN AS_DWH.FACT_POL_POLICE_TEM_ASSET f ON p.POLICE_ID = f.POLICE_ID WHERE TO_CHAR(p.TANZIM_TARIH_ID) = '2025' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Toplam üretim, vergi öncesi prim üzerinden 2025 tanzim tarihli poliçelerle hesaplanır.",
+    "risk_notes": "Vergi öncesi prim üzerinden hesaplama, brüt primle farklılık gösterebilir.",
+    "description": "Question answered: What is the total production (in TL) for policies created in the year 2025 based on the VOP_TL field?\nTables used: POL_POLICE_OZET, FACT_POL_POLICE_TEM_ASSET\nFilters: Policies created in the year 2025\nGrouping/measures: Summing the VOP_TL column\nExpected output columns: total_üretim\nAssumptions: VOP_TL represents a specific type of production value related to policies.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(p.POLICE_SAYISI) AS total_üretim FROM AS_DWH.POL_POLICE_OZET p JOIN AS_DWH.POLICE_SAYISI s ON p.POLICE_ID = s.POLICE_ID WHERE TO_CHAR(p.TANZIM_TARIH_ID) = '2025' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Toplam üretim, 2025 tanzim tarihli poliçe sayısına göre hesaplanır.",
+    "risk_notes": "Sayısal bir üretim ölçütü sunar ancak finansal değerleme içermez.",
+    "description": "Question answered: What is the total number of policies created in the year 2025?\nTables used: POL_POLICE_OZET, POLICE_SAYISI\nFilters: Policies created in the year 2025\nGrouping/measures: Summing the POLICE_SAYISI column\nExpected output columns: total_üretim\nAssumptions: POLICE_SAYISI represents the count of policies.",
+    "recommended": false
+  }
+]

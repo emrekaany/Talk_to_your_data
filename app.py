@@ -142,13 +142,20 @@ def generate_sql_options(
     selected_agent_id = str(context.get("agent_id", "")).strip()
     recommended_candidate_id = str(context.get("recommended_candidate_id", "")).strip()
     selection_mode = str(context.get("selection_mode", "fallback")).strip() or "fallback"
+    llm_usage = context.get("llm_usage")
+    llm_call_count = 0
+    if isinstance(llm_usage, dict):
+        try:
+            llm_call_count = int(llm_usage.get("total_calls", 0))
+        except (TypeError, ValueError):
+            llm_call_count = 0
     if not recommended_candidate_id and radio_choices:
         recommended_candidate_id = radio_choices[0][1]
     status = (
         f"Generated 3 SQL options for agent '{selected_agent_label or selected_agent_id}'. "
         f"Auto-selected: {recommended_candidate_id or 'n/a'} ({selection_mode}). "
         f"Run folder: {context.get('run_dir')} "
-        f"(LLM mode: {context.get('llm_mode')})."
+        f"(LLM mode: {context.get('llm_mode')}, request LLM calls: {llm_call_count})."
     )
     selected_default = recommended_candidate_id or (radio_choices[0][1] if radio_choices else None)
     option_1 = option_values[0]

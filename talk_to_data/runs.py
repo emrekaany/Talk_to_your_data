@@ -70,6 +70,13 @@ def save_result_interpretation(
     return output_path
 
 
+def save_llm_usage(run_dir: Path, usage: dict[str, Any]) -> Path:
+    """Persist request-scoped LLM usage summary."""
+    output_path = run_dir / "llm_usage.json"
+    _save_json(output_path, usage)
+    return output_path
+
+
 def save_json_artifact(run_dir: Path, filename: str, payload: Any) -> Path:
     """Persist additional JSON artifact under run directory."""
     safe_name = str(filename).replace("\\", "/").split("/")[-1].strip()

@@ -120,6 +120,7 @@ def retrieve_relevant_metadata(
     documents: list[dict[str, Any]] | None = None,
     *,
     metadata_path: Path | None = None,
+    table_metadata_path: Path | None = None,
     top_k: int = 500,
 ) -> dict[str, Any]:
     """
@@ -128,6 +129,9 @@ def retrieve_relevant_metadata(
     Contract target: retrieve_relevant_metadata(requirements: dict, user_request: str) -> dict
     """
     metadata_source = str(metadata_path) if metadata_path is not None else "in_memory_documents"
+    table_metadata_source = (
+        str(table_metadata_path) if table_metadata_path is not None else ""
+    )
     if documents is None:
         if metadata_path is None:
             metadata_path = Path("metadata_vectored.json")
@@ -173,6 +177,7 @@ def retrieve_relevant_metadata(
             "effective_top_k": effective_top_k,
             "min_score_threshold": min_score_threshold,
             "metadata_source": metadata_source,
+            "table_metadata_source": table_metadata_source,
         },
     }
 
@@ -422,7 +427,41 @@ def _compact_doc(
         "performance_rules": _as_string_list(doc.get("performance_rules")),
         "security": doc.get("security", {}),
         "keywords": _as_string_list(doc.get("keywords"))[:20],
+        "table_metadata": _extract_table_metadata(doc),
     }
+
+
+def _extract_table_metadata(doc: dict[str, Any]) -> dict[str, Any]:
+    raw_table_metadata = doc.get("table_metadata")
+    if isinstance(raw_table_metadata, dict):
+        return raw_table_metadata
+
+    table_keys = (
+        "description",
+        "grain",
+        "keywords",
+        "business_notes",
+        "table_types",
+        "parent_business_assets",
+        "primary_key_candidate",
+        "mandatory_filters",
+        "performance_rules",
+        "relationships",
+        "security",
+        "source_lineage",
+        "business_assets",
+        "version",
+        "updated_at",
+        "agent_lookup_sheet_stats",
+        "agent_lookup_sample_rows",
+    )
+    metadata: dict[str, Any] = {}
+    for key in table_keys:
+        value = doc.get(key)
+        if value in (None, "", [], {}):
+            continue
+        metadata[key] = value
+    return metadata
 
 
 def _select_columns(doc: dict[str, Any], query_tokens: Counter[str]) -> list[dict[str, Any]]:

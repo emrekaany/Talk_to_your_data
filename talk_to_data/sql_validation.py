@@ -95,7 +95,12 @@ def build_validation_catalog(documents: list[dict[str, Any]]) -> dict[str, Any]:
         table_key = _normalize_qualified_identifier(table_display)
         if not table_key:
             continue
-        columns = _extract_column_names(doc.get("columns"))
+        columns = _extract_column_names(
+            doc.get("columns"),
+            table_key=table_key,
+            raw_joins=doc.get("joins"),
+            raw_relationships=doc.get("relationships"),
+        )
         _merge_catalog_table(
             tables=tables,
             bare_to_full=bare_to_full,
@@ -175,7 +180,12 @@ def _build_catalog_from_metadata_used(metadata_used: dict[str, Any]) -> dict[str
         table_key = _normalize_qualified_identifier(table_display)
         if not table_key:
             continue
-        columns = _extract_column_names(item.get("columns"))
+        columns = _extract_column_names(
+            item.get("columns"),
+            table_key=table_key,
+            raw_joins=item.get("joins"),
+            raw_relationships=item.get("relationships"),
+        )
         _merge_catalog_table(
             tables=tables,
             bare_to_full=bare_to_full,
@@ -435,10 +445,16 @@ def _find_unknown_columns(
     return violations
 
 
-def _extract_column_names(raw_columns: Any) -> set[str]:
+def _extract_column_names(
+    raw_columns: Any,
+    *,
+    table_key: str,
+    raw_joins: Any,
+    raw_relationships: Any,
+) -> set[str]:
     column_names: set[str] = set()
     if not isinstance(raw_columns, list):
-        return column_names
+        raw_columns = []
     for column in raw_columns:
         if isinstance(column, dict):
             raw_name = column.get("name", "")
@@ -447,7 +463,66 @@ def _extract_column_names(raw_columns: Any) -> set[str]:
         name = _normalize_identifier_token(str(raw_name))
         if name:
             column_names.add(name)
+    column_names.update(_extract_join_column_names(table_key, raw_joins))
+    column_names.update(_extract_join_column_names(table_key, raw_relationships))
     return column_names
+
+
+def _extract_join_column_names(table_key: str, raw_joins: Any) -> set[str]:
+    if not table_key or not isinstance(raw_joins, list):
+        return set()
+    out: set[str] = set()
+    for join in raw_joins:
+        if isinstance(join, dict):
+            left_table = _normalize_qualified_identifier(
+                str(join.get("left_table", ""))
+            )
+            right_table = _normalize_qualified_identifier(
+                str(join.get("right_table", ""))
+            )
+            left_column = _normalize_identifier_token(str(join.get("left_column", "")))
+            right_column = _normalize_identifier_token(
+                str(join.get("right_column", ""))
+            )
+            if left_table == table_key and left_column:
+                out.add(left_column)
+            if right_table == table_key and right_column:
+                out.add(right_column)
+            continue
+        if isinstance(join, str):
+            out.update(_extract_join_column_names_from_text(table_key, join))
+    return out
+
+
+def _extract_join_column_names_from_text(table_key: str, join_text: str) -> set[str]:
+    if not join_text:
+        return set()
+    out: set[str] = set()
+    parts = str(join_text).split("=")
+    if len(parts) != 2:
+        return out
+    left = _split_table_column_reference(parts[0])
+    right = _split_table_column_reference(parts[1])
+    if left is not None and left[0] == table_key:
+        out.add(left[1])
+    if right is not None and right[0] == table_key:
+        out.add(right[1])
+    return out
+
+
+def _split_table_column_reference(value: str) -> tuple[str, str] | None:
+    parts = _split_identifier_parts(value)
+    if len(parts) < 2:
+        return None
+    column = parts[-1]
+    table_parts = parts[:-1]
+    if len(table_parts) >= 2:
+        table_key = ".".join(table_parts[-2:])
+    else:
+        table_key = table_parts[0]
+    if not table_key or not column:
+        return None
+    return table_key, column
 
 
 def _table_name_from_document(doc: dict[str, Any]) -> str:

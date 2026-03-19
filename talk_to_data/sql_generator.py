@@ -346,6 +346,15 @@ def _metadata_prompt_text(metadata: dict[str, Any]) -> str:
             columns = _metadata_columns_text(item.get("columns"))
             if columns:
                 lines.append(f"  - {table}({columns})")
+                table_metadata = item.get("table_metadata")
+                if isinstance(table_metadata, dict) and table_metadata:
+                    lines.append("    Table Metadata:")
+                    for line in json.dumps(
+                        table_metadata,
+                        ensure_ascii=False,
+                        indent=2,
+                    ).splitlines():
+                        lines.append(f"      {line}")
             else:
                 lines.append(f"  - {table}")
 

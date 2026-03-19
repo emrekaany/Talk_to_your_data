@@ -27,7 +27,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
    - `extract_requirements()`
    - `retrieve_relevant_metadata()`
    - `generate_sql_candidates()`
-   - `describe_sql_candidate()`
+   - `describe_sql_candidates()`
    - `choose_best_sql_candidate()`
    - artifact persistence under `runs/<timestamp>/`
 3. UI displays 3 candidate cards and highlights auto-selected candidate.
@@ -49,7 +49,10 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Auto-loads root `.env` with `python-dotenv` when available and built-in fallback parser otherwise.
 - `talk_to_data/agent_registry.py`
   - Loads `metadata/agents/agents.json`.
-  - Resolves selected/default agent, metadata path, and SQL rules path.
+  - Resolves selected/default agent, column/object metadata path, table metadata path, and SQL rules path.
+- `talk_to_data/table_metadata.py`
+  - Loads agent-specific table metadata files.
+  - Merges table-level metadata into base column/object metadata docs by normalized `schema.table`.
 - `talk_to_data/agent_rules.py`
   - Loads and validates per-agent SQL prompt rule JSON files.
 - `talk_to_data/llm_client.py`
@@ -57,6 +60,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Centralized LLM error handling.
 - `talk_to_data/llm_logging.py`
   - Persists each outbound LLM prompt as JSONL log entries.
+  - Supports request-scoped LLM call counting via `capture_llm_calls(...)`.
 - `talk_to_data/requirements_extractor.py`
   - Implements `extract_requirements(user_request: str) -> dict`.
   - Uses `talk_to_data/llm_client.py` for LLM calls.
@@ -69,6 +73,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Distinguishes leading CTE aliases from base tables so prompt summaries keep real source tables only.
 - `talk_to_data/metadata_retriever.py`
   - Loads selected agent metadata JSON.
+  - Carries per-table full `table_metadata` blocks in `relevant_items`.
   - Validates JSON/document structure and normalizes metadata payload for retrieval.
   - High-recall retrieval using Unicode-aware token cosine similarity.
   - Returns broader relevant payload (more tables/columns) and mandatory rules.
@@ -87,6 +92,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Prompt now enforces minimal SELECT projection so join/filter helper columns are not surfaced unless requested.
   - Uses prompt-only policy for time-expression behavior; agent-specific time guidance is supplied via rule JSON.
   - Includes column-level context in prompt (`type`, `description`, `semantic_type`, `keywords`, selected properties when available).
+  - For tables that contribute at least one column to prompt context, includes full `table_metadata` block in SQL prompt.
   - Carries metadata source trace (`retrieval_debug.metadata_source`) into prompt for auditability.
   - Uses parse-only candidate policy (no `validate_candidate`, no generation-time repair).
   - Fails fast when exactly 3 parseable candidates are not produced (no synthetic fallback SQL and no SQL repair path).
@@ -97,6 +103,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Accepts optional full `validation_catalog` for execution-time column checks.
 - `talk_to_data/sql_validation.py`
   - Builds full table-column validation catalog from raw metadata documents.
+  - Relaxes unknown alias.column checks only for join-declared columns by adding metadata join key columns to each table catalog.
   - Parses quoted/unquoted references (`a.c`, `"a"."c"`, `table.col`, `"SCHEMA"."TABLE"."COL"` last two parts).
   - Detects ambiguous bare-table references and unknown alias.column references.
 - `talk_to_data/prompt_budget.py`
@@ -109,8 +116,9 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Applies deterministic fallback (hard disqualify + local scoring + fewer-disqualify tie-break + stable option order).
   - Emits judge outcome metadata: `judge_error_kind`, `all_candidates_disqualified`, `disqualified_count`, `retry_recommended`.
 - `talk_to_data/sql_explainer.py`
-  - Implements `describe_sql_candidate(...) -> str`.
+  - Implements `describe_sql_candidate(...) -> str` and batched `describe_sql_candidates(...) -> list[str]`.
   - Uses compact prompt-budget metadata summary to avoid passing long workbook descriptions into explainer prompts.
+  - Can be disabled or batched through env flags to reduce per-request LLM call count.
 - `talk_to_data/db.py`
   - Oracle execution and bind variable preparation.
   - Supports generic placeholders plus date-range binds and row-limit bind aliases (legacy support for `:report_period`, `:year_value`, `:date_value` remains backward compatible).
@@ -125,8 +133,10 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
   - Chart rendering can be toggled by `RESULT_CHART_RENDER_ENABLED` and is disabled by default.
 - `talk_to_data/runs.py`
   - Run folder creation + JSON/text/Excel persistence.
+  - Persists `llm_usage.json` with request-scoped LLM call counts.
 - `talk_to_data/pipeline.py`
   - End-to-end application service orchestration.
+  - Loads both agent metadata files (`metadata_path` + `table_metadata_path`) and merges them before extraction/retrieval/validation.
   - Builds and carries full metadata validation catalog for judge + execution guardrails.
   - Runs generate+judge flow with at most one retry (`attempt_1` + `attempt_2`) when judge fails or all options are disqualified.
   - Fail-fast blocks generation if second attempt still has all candidates disqualified.
@@ -137,7 +147,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 
 - `extract_requirements(user_request) -> dict`
   - includes: `intent`, `required_filters`, `measures`, `dimensions`, `grain`, `time_range`, `report_period`, `time_granularity`, `time_value`, `join_needs`, `row_limit`, `security_constraints`.
-- `retrieve_relevant_metadata(requirements, user_request) -> dict`
+- `retrieve_relevant_metadata(requirements, user_request, documents=None, metadata_path=None, table_metadata_path=None, top_k=500) -> dict`
   - includes: `relevant_items`, `guardrails`, `mandatory_rules`, `runtime_mandatory_rules`.
 - `generate_sql_candidates(user_request, requirements, metadata, llm_client, retry_context=None, agent_rules=None) -> list[dict]`
   - each: `{id, sql, rationale_short, risk_notes}`.
@@ -149,6 +159,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - `summarize_result(df) -> ResultInterpretation`
   - fields: `summary_text`, `chart_plan`, `llm_used`, `chart_render_enabled`, `summary_mode`, `fallback_reason`, `validation_errors`
 - `TalkToDataService.prepare_candidates(user_request, agent_id=None) -> dict`
+  - includes `llm_usage` with `total_calls` and `by_source`.
 - `TalkToDataService.list_agents() -> list[dict[str, str]]`
 
 ## Safety and Guardrails
@@ -178,6 +189,7 @@ Each generation creates `runs/<timestamp>/` with:
 - `metadata_used.json`
 - `sql_candidates.json`
 - `judge_result.json`
+- `llm_usage.json`
 - `sql_candidates_attempt_1.json` (retry path only)
 - `judge_result_attempt_1.json` (retry path only)
 - `retry_decision.json` (retry path only)
@@ -193,6 +205,7 @@ Each execution also writes:
 Global LLM prompt log:
 
 - `runs/llm_prompts.log` (JSONL; one entry per outbound prompt)
+- Generation status also surfaces `request LLM calls: N` from the request-scoped counter.
 
 ## Implemented in This Session
 
@@ -202,6 +215,7 @@ Added and wired the following:
 - `talk_to_data/__init__.py`
 - `talk_to_data/config.py`
 - `talk_to_data/agent_rules.py`
+- `talk_to_data/table_metadata.py`
 - `talk_to_data/llm_client.py`
 - `talk_to_data/requirements_extractor.py`
 - `talk_to_data/metadata_retriever.py`
@@ -218,6 +232,9 @@ Added and wired the following:
 - `metadata/agents/rules/hasar.json`
 - `metadata/agents/rules/uretim.json`
 - `metadata/agents/rules/satis.json`
+- `metadata/agents/table_metadata_hasar.json`
+- `metadata/agents/table_metadata_uretim.json`
+- `metadata/agents/table_metadata_satis.json`
 - `requirements.txt`
 - `.gitignore`
 - this `README.md`
@@ -257,6 +274,8 @@ LLM:
 - `LLM_TIMEOUT_SEC` (optional; default `60`)
 - `LLM_SUMMARIZER_ENABLED` (optional; `true/1/on` enables LLM result summarization step)
 - `LLM_SUMMARIZER_REQUIRED` (optional; `true/1/on` makes LLM summary mandatory; execution fails with controlled error when fallback would be used)
+- `SQL_EXPLAINER_ENABLED` (optional; `false/0/off` disables LLM SQL explanation calls and uses local heuristic explanations)
+- `SQL_EXPLAINER_BATCH_ENABLED` (optional; default `true`; when enabled, explanations for 3 SQL candidates are generated in a single batched LLM prompt)
 - `RESULT_CHART_RENDER_ENABLED` (optional; `true/1/on` enables chart rendering path; default is disabled)
 - `LLM_PROMPT_LOG_PATH` (optional; default `runs/llm_prompts.log`)
 - Runtime LLM calls flow through `talk_to_data/llm_client.py`.
@@ -307,6 +326,7 @@ Default registry contract:
       "id": "hasar",
       "label": "Hasar",
       "metadata_path": "metadata_vectored_hasar.json",
+      "table_metadata_path": "table_metadata_hasar.json",
       "rules_path": "rules/hasar.json",
       "description": "Hasar verisi agenti"
     },
@@ -314,6 +334,7 @@ Default registry contract:
       "id": "uretim",
       "label": "Uretim",
       "metadata_path": "metadata_vectored_uretim.json",
+      "table_metadata_path": "table_metadata_uretim.json",
       "rules_path": "rules/uretim.json",
       "description": "Uretim verisi agenti"
     },
@@ -321,6 +342,7 @@ Default registry contract:
       "id": "satis",
       "label": "Satis",
       "metadata_path": "metadata_vectored_satis.json",
+      "table_metadata_path": "table_metadata_satis.json",
       "rules_path": "rules/satis.json",
       "description": "Satis verisi agenti"
     }
@@ -346,13 +368,25 @@ Rule JSON schema:
 
 ## Agent Metadata Layout
 
-Default files:
+Default column/object metadata files:
 
 - `metadata/agents/metadata_vectored_hasar.json`
 - `metadata/agents/metadata_vectored_uretim.json`
 - `metadata/agents/metadata_vectored_satis.json`
 
-Current bootstrap content for each file:
+Default table metadata files:
+
+- `metadata/agents/table_metadata_hasar.json`
+- `metadata/agents/table_metadata_uretim.json`
+- `metadata/agents/table_metadata_satis.json`
+
+Dual-file model per agent:
+
+- `metadata_vectored_<agent>.json` keeps SQL-generation structural fields (`doc_type`, `id`, `schema`, `name`, `columns`, `joins`, `indexes`).
+- `table_metadata_<agent>.json` keeps table-level fields (`description`, `grain`, `keywords`, `business_notes`, `security`, `mandatory_filters`, `performance_rules`, `business_assets`, etc.).
+- Runtime pipeline merges both files by normalized `schema.table`.
+
+Current bootstrap content for `hasar` and `satis` files:
 
 ```json
 {
@@ -360,13 +394,13 @@ Current bootstrap content for each file:
 }
 ```
 
-These are intentionally empty stubs. Until they are populated with valid metadata documents, generation is blocked for that agent with a clear error.
+`hasar` and `satis` are intentionally empty stubs. Until both metadata files are populated for an agent, generation is blocked for that agent with a clear error.
 
 How to add a new agent:
 
 1. Create metadata file under `metadata/agents/`.
 2. Create rules file under `metadata/agents/rules/` with `agent_id`, `sql_prompt_rules`, `time_expression_guidance`.
-3. Add a new entry in `metadata/agents/agents.json` with `metadata_path` and `rules_path`.
+3. Add a new entry in `metadata/agents/agents.json` with `metadata_path`, `table_metadata_path`, and `rules_path`.
 4. Set `default_agent_id` if needed.
 5. Restart the app.
 
@@ -374,8 +408,11 @@ How to add a new agent:
 
 Primary retrieval file:
 
-- selected agent metadata file from registry (for example `metadata/agents/metadata_vectored_hasar.json`)
-- Effective source path is stored at runtime in `metadata_used.json` under `retrieval_debug.metadata_source`.
+- selected agent column/object metadata file from registry (for example `metadata/agents/metadata_vectored_hasar.json`)
+- selected agent table metadata file from registry (for example `metadata/agents/table_metadata_hasar.json`)
+- Effective source paths are stored at runtime in `metadata_used.json` under:
+  - `retrieval_debug.metadata_source`
+  - `retrieval_debug.table_metadata_source`
 
 If missing, app raises a clear error and writes:
 
@@ -408,7 +445,7 @@ Stub explains expected schema for table docs, columns, joins, mandatory filters,
 - Missing metadata file
   - provide the selected agent metadata file under `metadata/agents/` or inspect generated schema stub.
 - Agent metadata is empty
-  - populate selected agent metadata file under `metadata/agents/` with valid documents.
+  - populate selected agent `metadata_path` and `table_metadata_path` files under `metadata/agents/` with valid documents.
 
 ## Change Management
 
