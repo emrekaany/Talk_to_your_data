@@ -1,0 +1,21 @@
+{
+  "summary": "Sorgu sonucu 2 satir ve 2 kolon dondurdu. PREMIUM_PRODUCTION alani icin toplam 162,203,215,355.77, ortalama 81,101,607,677.89. YEAR dagiliminda en sik degerler: 2024=1, 2025=1. Bu ozet mevcut sonuc kumesi uzerinden uretilmistir.",
+  "chart_plan": {
+    "draw_chart": false,
+    "chart_type": "none",
+    "x": null,
+    "y": null,
+    "aggregation": "none",
+    "top_n": null,
+    "sort": "none",
+    "title_tr": "Grafik devre disi",
+    "reason_tr": "Grafik uretimi konfigrasyonda devre disi."
+  },
+  "llm_used": false,
+  "summary_mode": "heuristic",
+  "fallback_reason": "LLM summarizer disabled by configuration.",
+  "validation_errors": [],
+  "chart_render_enabled": false,
+  "selected_candidate_id": "option_2",
+  "executed_sql": "SELECT TO_CHAR(t.TARIH, 'YYYY') AS year, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.ANA_POLICE_TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') IN ('2024', '2025') GROUP BY TO_CHAR(t.TARIH, 'YYYY') ORDER BY year FETCH FIRST 200 ROWS ONLY"
+}

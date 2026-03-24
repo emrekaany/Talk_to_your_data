@@ -1,0 +1,31 @@
+{
+  "intent": "Compare 2025 and 2024 production by year",
+  "required_filters": [
+    "{'year': ['2024', '2025']}"
+  ],
+  "measures": [
+    "prim"
+  ],
+  "dimensions": [
+    "year"
+  ],
+  "grain": [
+    "year"
+  ],
+  "join_needs": [
+    "{'tables': ['AS_DWH.FACT_POL_POLICE_EK', 'AS_DWH.POL_POLICE_OZET', 'AS_DWH.GNL_TARIH'], 'joins': [{'from': 'AS_DWH.FACT_POL_POLICE_EK', 'to': 'AS_DWH.POL_POLICE_OZET', 'on': 'POLICE_ID'}, {'from': 'AS_DWH.POL_POLICE_OZET', 'to': 'AS_DWH.GNL_TARIH', 'on': 'EK_TANZIM_TARIHI'}]}"
+  ],
+  "security_constraints": [
+    "{'user_access': 'default', 'data_masking': 'none'}"
+  ],
+  "invalid_request": false,
+  "notes": "The request is to compare production (prim) values for the years 2024 and 2025 grouped by year. Based on performance rules, the production is calculated using the 'ek tanzim tarihi' (additional adjustment date). The join logic follows standard joins between policy and date tables.",
+  "row_limit": 200,
+  "report_period": "yearly",
+  "time_granularity": "year",
+  "time_value": "['2024', '2025']",
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

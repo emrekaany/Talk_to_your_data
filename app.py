@@ -47,6 +47,20 @@ def _empty_candidate_outputs() -> tuple[str, ...]:
     return ("", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
 
 
+def _suggestion_markdown(suggestion_text: str, suggested_questions: list[str]) -> str:
+    """Format suggestion as Markdown for display."""
+    if not suggestion_text and not suggested_questions:
+        return ""
+    lines = ["### Bunu mu sormak istediniz? / Did you mean?\n"]
+    if suggestion_text:
+        lines.append(f"**Neden:** {suggestion_text}\n")
+    if suggested_questions:
+        lines.append("**Onerilen sorular:**")
+        for idx, q in enumerate(suggested_questions, start=1):
+            lines.append(f"{idx}. {q}")
+    return "\n".join(lines)
+
+
 def _load_agent_choices() -> tuple[list[tuple[str, str]], str | None, str]:
     try:
         agents = SERVICE.list_agents()
@@ -75,6 +89,7 @@ def generate_sql_options(
     jdbc_url: str = "",
     username: str = "",
     password: str = "",
+    use_all_metadata: bool = False,
 ) -> tuple[Any, ...]:
     request = user_request.strip()
     if not request:
@@ -89,10 +104,14 @@ def generate_sql_options(
             "",
             "",
             None,
+            "",
+            "",
         )
 
     try:
-        context = SERVICE.prepare_candidates(request, agent_id=agent_id)
+        context = SERVICE.prepare_candidates(
+            request, agent_id=agent_id, use_all_metadata=use_all_metadata,
+        )
     except PipelineError as exc:
         c = _empty_candidate_outputs()
         return (
@@ -105,13 +124,26 @@ def generate_sql_options(
             "",
             "",
             None,
+            "",
+            "",
         )
+
+    has_suggestion = bool(context.get("has_suggestion", False))
+    suggestion_text = str(context.get("suggestion_text", "")).strip()
+    suggested_questions = context.get("suggested_questions", [])
+    if not isinstance(suggested_questions, list):
+        suggested_questions = []
+    suggestion_md = _suggestion_markdown(suggestion_text, suggested_questions)
+    first_suggestion = suggested_questions[0] if suggested_questions else ""
 
     candidates = context.get("candidates", [])
     if not isinstance(candidates, list) or len(candidates) != 3:
         c = _empty_candidate_outputs()
+        status = "Generation could not produce valid SQL candidates."
+        if has_suggestion:
+            status = f"SQL olusturulamadi. Asagidaki onerilere bakin.\n{suggestion_text}"
         return (
-            "Generation failed: expected exactly 3 candidates.",
+            status,
             *c,
             gr.update(choices=[], value=None),
             None,
@@ -120,6 +152,8 @@ def generate_sql_options(
             "",
             "",
             None,
+            suggestion_md,
+            first_suggestion,
         )
 
     requirements = context.get("requirements")
@@ -151,12 +185,22 @@ def generate_sql_options(
             llm_call_count = 0
     if not recommended_candidate_id and radio_choices:
         recommended_candidate_id = radio_choices[0][1]
-    status = (
-        f"Generated 3 SQL options for agent '{selected_agent_label or selected_agent_id}'. "
-        f"Auto-selected: {recommended_candidate_id or 'n/a'} ({selection_mode}). "
-        f"Run folder: {context.get('run_dir')} "
-        f"(LLM mode: {context.get('llm_mode')}, request LLM calls: {llm_call_count})."
-    )
+    warning = str(context.get("warning", "")).strip()
+    if warning:
+        status = (
+            f"\u26a0 {warning}\n"
+            f"Generated 3 SQL options for agent '{selected_agent_label or selected_agent_id}'. "
+            f"Auto-selected: {recommended_candidate_id or 'n/a'} ({selection_mode}). "
+            f"Run folder: {context.get('run_dir')} "
+            f"(LLM mode: {context.get('llm_mode')}, request LLM calls: {llm_call_count})."
+        )
+    else:
+        status = (
+            f"Generated 3 SQL options for agent '{selected_agent_label or selected_agent_id}'. "
+            f"Auto-selected: {recommended_candidate_id or 'n/a'} ({selection_mode}). "
+            f"Run folder: {context.get('run_dir')} "
+            f"(LLM mode: {context.get('llm_mode')}, request LLM calls: {llm_call_count})."
+        )
     selected_default = recommended_candidate_id or (radio_choices[0][1] if radio_choices else None)
     option_1 = option_values[0]
     option_2 = option_values[1]
@@ -234,6 +278,8 @@ def generate_sql_options(
         result_summary,
         result_chart_plan,
         result_file_path,
+        suggestion_md,
+        first_suggestion,
     )
 
 
@@ -346,6 +392,7 @@ def _format_chart_plan(chart_plan: dict[str, Any] | None) -> str:
 def build_app() -> gr.Blocks:
     with gr.Blocks(title="Talk to Your Data") as demo:
         context_state = gr.State(value=None)
+        suggestion_state = gr.State(value="")
         agent_choices, default_agent, agent_warning = _load_agent_choices()
 
         with gr.Column(elem_id="panel"):
@@ -392,8 +439,18 @@ def build_app() -> gr.Blocks:
                 placeholder="Example: 202501 donemi icin BRANS_KODU bazinda toplam PRIM_TL getir.",
                 lines=4,
             )
+            all_metadata_checkbox = gr.Checkbox(
+                label="All Metadata (retrieval bypass)",
+                value=False,
+            )
             generate_btn = gr.Button("Generate SQL Options", variant="primary")
             generation_status = gr.Markdown(label="Generation status")
+            suggestion_box = gr.Markdown(value="", elem_id="suggestion-box")
+            resubmit_btn = gr.Button(
+                "Oneriyi kullan / Use suggestion",
+                variant="secondary",
+                visible=True,
+            )
 
         with gr.Column(elem_id="panel"):
             gr.Markdown("### Did you mean this?")
@@ -459,6 +516,7 @@ def build_app() -> gr.Blocks:
                 jdbc_url_box,
                 oracle_user_box,
                 oracle_password_box,
+                all_metadata_checkbox,
             ],
             outputs=[
                 generation_status,
@@ -484,7 +542,18 @@ def build_app() -> gr.Blocks:
                 summary_box,
                 chart_plan_box,
                 result_file,
+                suggestion_box,
+                suggestion_state,
             ],
+        )
+
+        def _apply_suggestion(suggested_text: str) -> str:
+            return str(suggested_text).strip()
+
+        resubmit_btn.click(
+            fn=_apply_suggestion,
+            inputs=[suggestion_state],
+            outputs=[request_box],
         )
 
         run_btn.click(

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT f.POLICE_ID, SUM(f.BRUT_PRIM_TL) AS total_premium, a.ACENTE_ADI, a.ACENTE_NO FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID JOIN AS_DWH.ACE_ACENTE_ADRES ad ON a.ACENTE_ID = ad.ACENTE_ID JOIN AS_DWH.GNL_TARIH t ON f.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND ad.IL = 'ISTANBUL' GROUP BY f.POLICE_ID, a.ACENTE_ADI, a.ACENTE_NO ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and ACENTE tables to calculate total premium per agency in Istanbul for 2025.",
+    "risk_notes": "Assumes POLICE_ID is unique per agency and that BRUT_PRIM_TL is the correct measure for premium production.",
+    "description": "Question answered: What are the top 200 police policies by total premium amount in Istanbul for the year 2025, including police ID, total premium, agent name, and agent number?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.ACE_ACENTE_ADRES, AS_DWH.GNL_TARIH\nFilters: Policies created in 2025 and located in Istanbul\nGrouping/measures: Grouped by police ID, agent name, and agent number; sum of BRUT_PRIM_TL as total_premium\nExpected output columns: POLICE_ID, total_premium, ACENTE_ADI, ACENTE_NO\nAssumptions: Each police policy is uniquely identified by POLICE_ID and is associated with one agent.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT a.ACENTE_ADI, a.ACENTE_NO, SUM(f.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID JOIN AS_DWH.ACE_ACENTE_ADRES ad ON a.ACENTE_ID = ad.ACENTE_ID JOIN AS_DWH.GNL_TARIH t ON f.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND ad.IL = 'ISTANBUL' GROUP BY a.ACENTE_ADI, a.ACENTE_NO ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups results by agency name and ID to show total premium production per agency in Istanbul for 2025.",
+    "risk_notes": "May not account for multiple police entries per agency correctly if POLICE_ID is not unique per agency.",
+    "description": "Question answered: What are the top 200 agents by total premium amount in Istanbul for the year 2025, including agent name, agent number, and total premium?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.ACE_ACENTE_ADRES, AS_DWH.GNL_TARIH\nFilters: Policies created in 2025 and located in Istanbul\nGrouping/measures: Grouped by agent name and agent number; sum of BRUT_PRIM_TL as total_premium\nExpected output columns: ACENTE_ADI, ACENTE_NO, total_premium\nAssumptions: Each agent can have multiple policies, and the total premium is aggregated per agent.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID JOIN AS_DWH.ACE_ACENTE_ADRES ad ON a.ACENTE_ID = ad.ACENTE_ID JOIN AS_DWH.GNL_TARIH t ON f.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND ad.IL = 'ISTANBUL' GROUP BY a.ACENTE_ADI ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups results by agency name only to show total premium production per agency in Istanbul for 2025.",
+    "risk_notes": "May merge agencies with the same name but different IDs if they exist.",
+    "description": "Question answered: What are the top 200 agents by total premium amount in Istanbul for the year 2025, including agent name and total premium?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.ACE_ACENTE_ADRES, AS_DWH.GNL_TARIH\nFilters: Policies created in 2025 and located in Istanbul\nGrouping/measures: Grouped by agent name; sum of BRUT_PRIM_TL as total_premium\nExpected output columns: ACENTE_ADI, total_premium\nAssumptions: Each agent can have multiple policies, and the total premium is aggregated per agent name.",
+    "recommended": false
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT a.ACENTE_ID, a.AD AS agency_name, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID JOIN ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID JOIN ACE_ACENTE_ADRES ad ON a.ACENTE_ID = ad.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND ad.IL = 'Istanbul' GROUP BY a.ACENTE_ID, a.AD ORDER BY premium_production DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses the 'ek tanzim tarihi' via TANZIM_TARIH_ID join to GNL_TARIH for 2025 year filter. Aggregates BRUT_PRIM_TL per agency in Istanbul.",
+    "risk_notes": "Assumes ACE_ACENTE and ACE_ACENTE_ADRES tables exist and are correctly joined via Acente ID.",
+    "description": "Question answered: What is the total premium production by agency in Istanbul for the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, ACE_ACENTE, ACE_ACENTE_ADRES\nFilters: Year is 2025 and city is Istanbul\nGrouping/measures: Group by agency ID and name, summing the total premium\nExpected output columns: Agency ID, agency name, total premium production\nAssumptions: The address table is used to filter agencies located in Istanbul.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT a.ACENTE_ID, a.AD AS agency_name, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID JOIN ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND a.IL = 'Istanbul' GROUP BY a.ACENTE_ID, a.AD ORDER BY premium_production DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Filters Istanbul agencies directly from ACE_ACENTE table using IL column. Aggregates BRUT_PRIM_TL per agency.",
+    "risk_notes": "Relies on ACE_ACENTE.IL column being populated correctly with city names.",
+    "description": "Question answered: What is the total premium production by agency in Istanbul for the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, ACE_ACENTE\nFilters: Year is 2025 and city is Istanbul\nGrouping/measures: Group by agency ID and name, summing the total premium\nExpected output columns: Agency ID, agency name, total premium production\nAssumptions: The agency table itself contains the city information used to filter Istanbul.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT a.ACENTE_ID, a.AD AS agency_name, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID JOIN ACE_ACENTE_ADRES ad ON p.ACENTE_ID = ad.ACENTE_ID JOIN ACE_ACENTE a ON ad.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND ad.IL = 'Istanbul' GROUP BY a.ACENTE_ID, a.AD ORDER BY premium_production DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Includes ACE_ACENTE_ADRES join to ensure address-based filtering for Istanbul. Aggregates BRUT_PRIM_TL per agency.",
+    "risk_notes": "Requires ACE_ACENTE_ADRES.IL column to be populated correctly with city names.",
+    "description": "Question answered: What is the total premium production by agency in Istanbul for the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, ACE_ACENTE_ADRES, ACE_ACENTE\nFilters: Year is 2025 and city is Istanbul\nGrouping/measures: Group by agency ID and name, summing the total premium\nExpected output columns: Agency ID, agency name, total premium production\nAssumptions: The address table is used to filter agencies located in Istanbul.",
+    "recommended": false
+  }
+]

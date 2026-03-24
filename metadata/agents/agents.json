@@ -6,6 +6,8 @@
       "label": "Hasar",
       "metadata_path": "metadata_vectored_hasar.json",
       "table_metadata_path": "table_metadata_hasar.json",
+      "column_metadata_path": "column_metadata_hasar.json",
+      "general_metadata_path": "general_metadata_hasar.json",
       "rules_path": "rules/hasar.json",
       "description": "Hasar verisi agenti"
     },
@@ -14,6 +16,8 @@
       "label": "Uretim",
       "metadata_path": "metadata_vectored_uretim.json",
       "table_metadata_path": "table_metadata_uretim.json",
+      "column_metadata_path": "column_metadata_uretim.json",
+      "general_metadata_path": "general_metadata_uretim.json",
       "rules_path": "rules/uretim.json",
       "description": "Uretim verisi agenti"
     },
@@ -22,6 +26,8 @@
       "label": "Satis",
       "metadata_path": "metadata_vectored_satis.json",
       "table_metadata_path": "table_metadata_satis.json",
+      "column_metadata_path": "column_metadata_satis.json",
+      "general_metadata_path": "general_metadata_satis.json",
       "rules_path": "rules/satis.json",
       "description": "Satis verisi agenti"
     }

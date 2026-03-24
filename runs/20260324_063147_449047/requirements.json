@@ -1,0 +1,31 @@
+{
+  "intent": "Get total production premium grouped by product name for December 2025, using the effective adjustment date.",
+  "required_filters": [
+    "{'ek_tanzim_tarihi': '2025-12'}"
+  ],
+  "measures": [
+    "{'total_prime': 'SUM(prime)'}"
+  ],
+  "dimensions": [
+    "{'urun_adı': 'AGGR.AS400_YENI_URUN.urun_adı'}"
+  ],
+  "grain": [
+    "urun_adı"
+  ],
+  "join_needs": [
+    "{'AGGR.AS400_YENI_URUN': {'join_to': 'AS_DWH.POL_URUN', 'on': 'AGGR.AS400_YENI_URUN.urun_kodu = AS_DWH.POL_URUN.urun_kodu'}, 'AS_DWH.POL_URUN': {'join_to': 'AS_DWH.FACT_POL_POLICE_EK', 'on': 'AS_DWH.POL_URUN.police_id = AS_DWH.FACT_POL_POLICE_EK.police_id'}}"
+  ],
+  "security_constraints": [
+    "{'user_access': \"user's assigned acentes or regions\", 'filter': \"AS_DWH.ACE_ACENTE.acente_kodu IN (user's accessible acentes)\"}"
+  ],
+  "invalid_request": false,
+  "notes": "Query should use effective adjustment date (ek_tanzim_tarihi) for December 2025. Grouping is required by product name.",
+  "row_limit": 100,
+  "report_period": "ek_tanzim_tarihi",
+  "time_granularity": "month",
+  "time_value": "2025-12",
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

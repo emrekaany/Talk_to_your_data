@@ -1,0 +1,12 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-19T14:19:42.729228+00:00",
+  "finished_at_utc": "2026-03-19T14:20:15.111594+00:00",
+  "total_calls": 4,
+  "by_source": {
+    "talk_to_data.llm_client": 4
+  },
+  "request": "2025 tanzim tarihli total üretim",
+  "attempt_count": 1,
+  "retry_attempted": false
+}

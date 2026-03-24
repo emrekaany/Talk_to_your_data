@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(fpe.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK fpe JOIN AS_DWH.GNL_TARIH gt ON fpe.POLICE_ID = gt.POLICE_ID WHERE TO_CHAR(gt.TARIH) LIKE '2025%' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with GNL_TARIH filtered by 2025 tanzim tarihi.",
+    "risk_notes": "Assumes POLICE_ID is the correct join key between tables.",
+    "description": "Question answered: What is the total production (in TL) from policies linked to the date table for the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.GNL_TARIH\nFilters: Records where the date in GNL_TARIH table starts with '2025'\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: The join is based on POLICE_ID, which may not be the correct key for linking these tables.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(fpe.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK fpe JOIN AS_DWH.GNL_TARIH gt ON fpe.POLICE_EK_ID = gt.POLICE_EK_ID WHERE TO_CHAR(gt.TARIH) LIKE '2025%' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with GNL_TARIH via POLICE_EK_ID filtered by 2025.",
+    "risk_notes": "POLICE_EK_ID join may not be valid if not defined in metadata.",
+    "description": "Question answered: What is the total production (in TL) from policies linked to the date table for the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.GNL_TARIH\nFilters: Records where the date in GNL_TARIH table starts with '2025'\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: The join is based on POLICE_EK_ID, which is likely the correct key for linking these tables.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(fpe.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK fpe JOIN AS_DWH.GNL_TARIH gt ON fpe.POLICE_YENILEME_NO = gt.POLICE_YENILEME_NO WHERE TO_CHAR(gt.TARIH) LIKE '2025%' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with GNL_TARIH via POLICE_YENILEME_NO filtered by 2025.",
+    "risk_notes": "POLICE_YENILEME_NO join may not be valid if not defined in metadata.",
+    "description": "Question answered: What is the total production (in TL) from policies linked to the date table for the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.GNL_TARIH\nFilters: Records where the date in GNL_TARIH table starts with '2025'\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: The join is based on POLICE_YENILEME_NO, which may not be the correct key for linking these tables.",
+    "recommended": false
+  }
+]

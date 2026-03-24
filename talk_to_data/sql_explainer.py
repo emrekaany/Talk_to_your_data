@@ -99,7 +99,7 @@ def _describe_with_llm(
             "You are a senior analytics engineer who explains SQL clearly.",
             prompt,
             temperature=0.0,
-            max_tokens=500,
+            max_tokens=600,
         )
     except LLMError:
         return None
@@ -148,7 +148,7 @@ def _describe_batch_with_llm(
             "You are a senior analytics engineer who explains SQL clearly.",
             prompt,
             temperature=0.0,
-            max_tokens=1400,
+            max_tokens=2000,
         )
     except LLMError:
         return None

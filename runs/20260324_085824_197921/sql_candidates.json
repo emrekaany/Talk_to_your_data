@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYYMM') AS month, SUM(f.BRUT_PRIM_TL) AS prim FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID AND f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') IN ('202511', '202512') GROUP BY TO_CHAR(t.TARIH, 'YYYYMM') ORDER BY month FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses the ek_tanzim_tarihi via join to GNL_TARIH and groups by month as requested.",
+    "risk_notes": "Relies on correct join paths and assumes TANZIM_TARIH_ID is the correct date column for ek_tanzim_tarihi.",
+    "description": "Question answered: What is the total gross premium (BRUT_PRIM_TL) per month for the months November and December 2025, based on police data?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the date falls in November or December 2025.\nGrouping/measures: Summing BRUT_PRIM_TL grouped by month.\nExpected output columns: month (as YYYYMM format), prim (sum of BRUT_PRIM_TL)\nAssumptions: The join between police summary and fact table is based on KAYNAK_SISTEM_ID and POLICE_ID.",
+    "recommended": false
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYYMM') AS month, SUM(f.BRUT_PRIM_TL) AS prim FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.GNL_TARIH t ON f.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') IN ('202511', '202512') GROUP BY TO_CHAR(t.TARIH, 'YYYYMM') ORDER BY month FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Directly joins on TANZIM_TARIH_ID from FACT_POL_POLICE_EK to GNL_TARIH and groups by month.",
+    "risk_notes": "Assumes TANZIM_TARIH_ID exists in FACT_POL_POLICE_EK and is correctly mapped.",
+    "description": "Question answered: What is the total gross premium (BRUT_PRIM_TL) per month for the months November and December 2025, based on police data?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.GNL_TARIH\nFilters: Only records where the date falls in November or December 2025.\nGrouping/measures: Summing BRUT_PRIM_TL grouped by month.\nExpected output columns: month (as YYYYMM format), prim (sum of BRUT_PRIM_TL)\nAssumptions: The join is directly between the fact table and the date table using TANZIM_TARIH_ID.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYYMM') AS month, SUM(f.BRUT_PRIM_TL) AS prim FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') IN ('202511', '202512') GROUP BY TO_CHAR(t.TARIH, 'YYYYMM') ORDER BY month FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Includes POL_POLICE_OZET for additional join integrity while grouping by month.",
+    "risk_notes": "Adds POL_POLICE_OZET join which may increase query complexity.",
+    "description": "Question answered: What is the total gross premium (BRUT_PRIM_TL) per month for the months November and December 2025, based on police data?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the date falls in November or December 2025.\nGrouping/measures: Summing BRUT_PRIM_TL grouped by month.\nExpected output columns: month (as YYYYMM format), prim (sum of BRUT_PRIM_TL)\nAssumptions: The join between police summary and fact table is based on POLICE_ID.",
+    "recommended": true
+  }
+]

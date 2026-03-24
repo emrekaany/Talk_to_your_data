@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS total_kpk FROM AS_DWH.FACT_POL_POLICE_EK JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.TANZIM_TARIHI, 'YYYY') = '2025' AND AS_DWH.POL_POLICE_OZET.ORGANIZATION = 'tanzimli' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Calculates total KPK (Brüt Prim TL) for 'tanzimli' organization in 2025 using the Tanzim Tarihi year filter.",
+    "risk_notes": "Assumes TANZIM_TARIHI exists and is valid for filtering by year.",
+    "description": "Question answered: What is the total BRUT_PRIM_TL for police records in the year 2025 where the organization is 'tanzimli'?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET\nFilters: Records where the year of TANZIM_TARIHI is 2025 and ORGANIZATION is 'tanzimli'.\nGrouping/measures: Summing the BRUT_PRIM_TL column.\nExpected output columns: total_kpk\nAssumptions: BRUT_PRIM_TL represents a monetary value related to police records.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(AS_DWH.FACT_POL_POLICE_TEM_ASSET.VOP_TL) AS total_kpk FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.TANZIM_TARIHI, 'YYYY') = '2025' AND AS_DWH.POL_POLICE_OZET.ORGANIZATION = 'tanzimli' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Calculates total KPK using Vergi Öncesi Prim TL for 'tanzimli' organization in 2025.",
+    "risk_notes": "Assumes TANZIM_TARIHI exists and is valid for filtering by year.",
+    "description": "Question answered: What is the total VOP_TL for police records in the year 2025 where the organization is 'tanzimli'?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET\nFilters: Records where the year of TANZIM_TARIHI is 2025 and ORGANIZATION is 'tanzimli'.\nGrouping/measures: Summing the VOP_TL column.\nExpected output columns: total_kpk\nAssumptions: VOP_TL represents a monetary value related to police records.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS total_kpk FROM AS_DWH.FACT_POL_POLICE_EK JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID JOIN AS_DWH.ACE_ACENTE ON AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.TANZIM_TARIHI, 'YYYY') = '2025' AND AS_DWH.POL_POLICE_OZET.ORGANIZATION = 'tanzimli' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Includes acenta join to ensure data integrity while calculating total KPK for 'tanzimli' organization in 2025.",
+    "risk_notes": "Adds join complexity but ensures data alignment with acenta information.",
+    "description": "Question answered: What is the total BRUT_PRIM_TL for police records in the year 2025 where the organization is 'tanzimli', including data from the ACE_ACENTE table?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE\nFilters: Records where the year of TANZIM_TARIHI is 2025 and ORGANIZATION is 'tanzimli'.\nGrouping/measures: Summing the BRUT_PRIM_TL column.\nExpected output columns: total_kpk\nAssumptions: BRUT_PRIM_TL represents a monetary value related to police records, and ACE_ACENTE provides additional context like agent information.",
+    "recommended": false
+  }
+]

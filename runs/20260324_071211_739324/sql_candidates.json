@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYY') AS year, SUM(f.BRUT_PRIM_TL) AS prim FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.EK_TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') IN ('2024', '2025') GROUP BY TO_CHAR(t.TARIH, 'YYYY') ORDER BY year FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined via POLICE_ID to POL_POLICE_OZET and GNL_TARIH on EK_TANZIM_TARIH_ID. Filters for 2024 and 2025 using TARIH column with year mask.",
+    "risk_notes": "Relies on correct join path and metadata validation of EK_TANZIM_TARIH_ID in POL_POLICE_OZET.",
+    "description": "Question answered: What is the total gross premium (BRUT_PRIM_TL) by year for the years 2024 and 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the year is either 2024 or 2025\nGrouping/measures: Summing BRUT_PRIM_TL grouped by year\nExpected output columns: year, prim\nAssumptions: BRUT_PRIM_TL represents the gross premium amount, and the data is filtered based on the policy effective date.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYY') AS year, SUM(f.VOP_TL) AS prim FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.EK_TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') IN ('2024', '2025') GROUP BY TO_CHAR(t.TARIH, 'YYYY') ORDER BY year FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL from FACT_POL_POLICE_TEM_ASSET joined via POLICE_ID to POL_POLICE_OZET and GNL_TARIH on EK_TANZIM_TARIH_ID. Filters for 2024 and 2025 using TARIH column with year mask.",
+    "risk_notes": "Relies on correct join path and metadata validation of EK_TANZIM_TARIH_ID in POL_POLICE_OZET.",
+    "description": "Question answered: What is the total VOP_TL (possibly a type of premium or value) by year for the years 2024 and 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the year is either 2024 or 2025\nGrouping/measures: Summing VOP_TL grouped by year\nExpected output columns: year, prim\nAssumptions: VOP_TL represents a specific type of premium or value, and the data is filtered based on the policy effective date.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYY') AS year, SUM(p.POLICE_SAYISI) AS prim FROM AS_DWH.POLICE_SAYISI p JOIN AS_DWH.POL_POLICE_OZET o ON p.POLICE_ID = o.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON o.EK_TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') IN ('2024', '2025') GROUP BY TO_CHAR(t.TARIH, 'YYYY') ORDER BY year FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses POLICE_SAYISI from POLICE_SAYISI joined via POLICE_ID to POL_POLICE_OZET and GNL_TARIH on EK_TANZIM_TARIH_ID. Filters for 2024 and 2025 using TARIH column with year mask.",
+    "risk_notes": "Relies on correct join path and metadata validation of EK_TANZIM_TARIH_ID in POL_POLICE_OZET.",
+    "description": "Question answered: What is the total number of policies (POLICE_SAYISI) by year for the years 2024 and 2025?\nTables used: AS_DWH.POLICE_SAYISI, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the year is either 2024 or 2025\nGrouping/measures: Summing POLICE_SAYISI grouped by year\nExpected output columns: year, prim\nAssumptions: POLICE_SAYISI represents the count of policies, and the data is filtered based on the policy effective date.",
+    "recommended": false
+  }
+]

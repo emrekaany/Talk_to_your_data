@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT TO_CHAR('202512', 'YYYYMM') AS month, 'Branş' AS production_type, COUNT(*) AS production_quantity FROM AS_DWH.POL_BRANS WHERE TO_CHAR(SYSDATE, 'YYYYMM') = '202512' GROUP BY TO_CHAR('202512', 'YYYYMM'), 'Branş' ORDER BY production_quantity DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Counts the number of records in POL_BRANS table for December 2025, grouped by production type 'Branş'.",
+    "risk_notes": "Assumes 'Branş' is a valid production type and does not validate against actual production data.",
+    "description": "Question answered: How many branch-related records are there in December 2025?\nTables used: AS_DWH.POL_BRANS\nFilters: None, but the query is set up to filter by December 2025 using a fixed date.\nGrouping/measures: Grouped by the fixed month '202512' and the fixed production type 'Branş', counting the number of records.\nExpected output columns: month, production_type, production_quantity\nAssumptions: The query assumes that the month filter is fixed to December 2025 and that the count represents production quantity.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT TO_CHAR('202512', 'YYYYMM') AS month, 'Poliçe' AS production_type, COUNT(*) AS production_quantity FROM AS_DWH.POL_POLICE_REF_TANIM WHERE TO_CHAR(SYSDATE, 'YYYYMM') = '202512' GROUP BY TO_CHAR('202512', 'YYYYMM'), 'Poliçe' ORDER BY production_quantity DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Counts the number of records in POL_POLICE_REF_TANIM table for December 2025, grouped by production type 'Poliçe'.",
+    "risk_notes": "Assumes 'Poliçe' is a valid production type and does not validate against actual production data.",
+    "description": "Question answered: How many policy-related records are there in December 2025?\nTables used: AS_DWH.POL_POLICE_REF_TANIM\nFilters: None, but the query is set up to filter by December 2025 using a fixed date.\nGrouping/measures: Grouped by the fixed month '202512' and the fixed production type 'Poliçe', counting the number of records.\nExpected output columns: month, production_type, production_quantity\nAssumptions: The query assumes that the month filter is fixed to December 2025 and that the count represents production quantity.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT TO_CHAR('202512', 'YYYYMM') AS month, 'Kaynak Sistem' AS production_type, COUNT(*) AS production_quantity FROM AS_DWH.GNL_KAYNAK_SISTEM WHERE TO_CHAR(SYSDATE, 'YYYYMM') = '202512' GROUP BY TO_CHAR('202512', 'YYYYMM'), 'Kaynak Sistem' ORDER BY production_quantity DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Counts the number of records in GNL_KAYNAK_SISTEM table for December 2025, grouped by production type 'Kaynak Sistem'.",
+    "risk_notes": "Assumes 'Kaynak Sistem' is a valid production type and does not validate against actual production data.",
+    "description": "Question answered: How many source system records are there in December 2025?\nTables used: AS_DWH.GNL_KAYNAK_SISTEM\nFilters: None, but the query is set up to filter by December 2025 using a fixed date.\nGrouping/measures: Grouped by the fixed month '202512' and the fixed production type 'Kaynak Sistem', counting the number of records.\nExpected output columns: month, production_type, production_quantity\nAssumptions: The query assumes that the month filter is fixed to December 2025 and that the count represents production quantity.",
+    "recommended": false
+  }
+]

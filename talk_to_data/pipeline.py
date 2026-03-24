@@ -23,7 +23,10 @@ from .llm_logging import capture_llm_calls
 from .metadata_retriever import (
     MetadataFileError,
     build_metadata_overview,
+    load_column_metadata,
+    load_general_metadata,
     load_metadata_documents,
+    retrieve_column_based_metadata,
     retrieve_relevant_metadata,
 )
 from .requirements_extractor import RequirementsExtractionError, extract_requirements
@@ -37,13 +40,19 @@ from .runs import (
     save_run_artifacts,
 )
 from .sql_explainer import describe_sql_candidates
-from .sql_generator import SQLGenerationError, generate_sql_candidates
+from .sql_generator import (
+    SQLCannotAnswerSuggestion,
+    SQLGenerationError,
+    generate_clarification_suggestions,
+    generate_sql_candidates,
+)
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
 from .sql_judge import choose_best_sql_candidate
 from .sql_validation import build_validation_catalog
 from .summarizer import summarize_result
 from .table_metadata import (
     TableMetadataFileError,
+    build_table_metadata_index,
     load_table_metadata_documents,
     merge_table_metadata_into_documents,
 )
@@ -89,6 +98,7 @@ class TalkToDataService:
         self,
         user_request: str,
         agent_id: str | None = None,
+        use_all_metadata: bool = False,
     ) -> dict[str, Any]:
         """End-to-end generation before execution step."""
         request = user_request.strip()
@@ -155,15 +165,26 @@ class TalkToDataService:
                     else f"{reason} Proceeding with conservative SQL generation."
                 )
 
-            metadata_used = retrieve_relevant_metadata(
-                requirements=requirements,
-                user_request=request,
-                documents=metadata_docs,
-                metadata_path=agent.metadata_path,
-                table_metadata_path=agent.table_metadata_path,
-                top_k=500,
-            )
+            if use_all_metadata:
+                metadata_used = self._build_all_metadata(agent, metadata_docs, table_metadata_docs)
+            else:
+                metadata_used = retrieve_relevant_metadata(
+                    requirements=requirements,
+                    user_request=request,
+                    documents=metadata_docs,
+                    metadata_path=agent.metadata_path,
+                    table_metadata_path=agent.table_metadata_path,
+                    top_k=500,
+                )
             run_dir = create_run_dir(self.config.runs_dir)
+            agent_info_dict = {
+                "id": agent.id,
+                "label": agent.label,
+                "description": agent.description,
+                "metadata_path": str(agent.metadata_path),
+                "table_metadata_path": str(agent.table_metadata_path),
+                "rules_path": str(agent.rules_path),
+            }
             attempt_one_candidates: list[dict[str, Any]] | None = None
             attempt_one_judge_result: dict[str, Any] | None = None
             retry_decision: dict[str, Any] | None = None
@@ -172,6 +193,7 @@ class TalkToDataService:
             final_judge_result: dict[str, Any] | None = None
             final_attempt = 0
             retry_context: dict[str, Any] | None = None
+            cannot_answer_suggestion: dict[str, Any] | None = None
 
             for attempt in (1, 2):
                 try:
@@ -183,7 +205,59 @@ class TalkToDataService:
                         retry_context=retry_context,
                         agent_rules=agent_rules,
                     )
+                except SQLCannotAnswerSuggestion as exc:
+                    if attempt == 1:
+                        cannot_answer_suggestion = {
+                            "reason": exc.reason,
+                            "suggested_questions": exc.suggested_questions,
+                        }
+                        if not use_all_metadata:
+                            metadata_used = self._build_all_metadata(
+                                agent, metadata_docs, table_metadata_docs,
+                            )
+                        retry_context = retry_context or {}
+                        continue
+                    cannot_answer_suggestion = {
+                        "reason": exc.reason,
+                        "suggested_questions": exc.suggested_questions,
+                    }
+                    save_run_artifacts(
+                        run_dir,
+                        user_request=request,
+                        requirements=requirements,
+                        metadata_used=metadata_used,
+                        sql_candidates=[],
+                        agent_info=agent_info_dict,
+                    )
+                    save_llm_usage(run_dir, llm_capture.to_dict())
+                    save_json_artifact(run_dir, "suggestion.json", cannot_answer_suggestion)
+                    return {
+                        "run_dir": str(run_dir),
+                        "request": request,
+                        "agent_id": agent.id,
+                        "agent_label": agent.label,
+                        "candidates": [],
+                        "recommended_candidate_id": "",
+                        "has_suggestion": True,
+                        "suggestion_text": cannot_answer_suggestion["reason"],
+                        "suggested_questions": cannot_answer_suggestion["suggested_questions"],
+                        "all_candidates_disqualified": True,
+                        "warning": cannot_answer_suggestion["reason"],
+                        "llm_mode": (
+                            "enabled" if self.llm_client is not None else "heuristic_fallback"
+                        ),
+                        "llm_usage": llm_capture.to_dict(),
+                    }
                 except SQLGenerationError as exc:
+                    save_run_artifacts(
+                        run_dir,
+                        user_request=request,
+                        requirements=requirements,
+                        metadata_used=metadata_used,
+                        sql_candidates=[],
+                        agent_info=agent_info_dict,
+                    )
+                    save_llm_usage(run_dir, llm_capture.to_dict())
                     raise PipelineError(f"SQL generation failed: {exc}") from exc
 
                 descriptions = describe_sql_candidates(
@@ -234,6 +308,11 @@ class TalkToDataService:
                             judge_result.get("disqualified_count", 0)
                         ),
                     }
+                    if not use_all_metadata:
+                        metadata_used = self._build_all_metadata(
+                            agent, metadata_docs, table_metadata_docs,
+                        )
+                        retry_decision["metadata_escalated"] = True
                     continue
 
                 final_candidates = candidates
@@ -263,42 +342,28 @@ class TalkToDataService:
             llm_usage["attempt_count"] = final_attempt
             llm_usage["retry_attempted"] = final_attempt > 1
 
-            if (
-                final_attempt == 2
-                and bool(final_judge_result.get("all_candidates_disqualified", False))
-            ):
-                save_run_artifacts(
-                    run_dir,
+            all_disqualified = bool(
+                final_judge_result.get("all_candidates_disqualified", False)
+            )
+            warning = ""
+            suggestion_text = ""
+            suggested_questions: list[str] = []
+            has_suggestion = False
+            if all_disqualified:
+                suggestion_result = generate_clarification_suggestions(
                     user_request=request,
-                    requirements=requirements,
                     metadata_used=metadata_used,
-                    sql_candidates=final_candidates,
-                    agent_info={
-                        "id": agent.id,
-                        "label": agent.label,
-                        "description": agent.description,
-                        "metadata_path": str(agent.metadata_path),
-                        "table_metadata_path": str(agent.table_metadata_path),
-                        "rules_path": str(agent.rules_path),
-                    },
-                    judge_result=final_judge_result,
+                    validation_errors=_collect_validation_errors(final_judge_result),
+                    llm_client=self.llm_client,
                 )
-                save_llm_usage(run_dir, llm_usage)
-                if attempt_one_candidates is not None and attempt_one_judge_result is not None:
-                    save_json_artifact(
-                        run_dir,
-                        "sql_candidates_attempt_1.json",
-                        attempt_one_candidates,
-                    )
-                    save_json_artifact(
-                        run_dir,
-                        "judge_result_attempt_1.json",
-                        attempt_one_judge_result,
-                    )
-                if retry_decision is not None:
-                    save_json_artifact(run_dir, "retry_decision.json", retry_decision)
-                raise PipelineError(
-                    "Auto-selection failed after one retry: all SQL candidates were disqualified."
+                suggestion_text = suggestion_result.get("reason", "")
+                suggested_questions = suggestion_result.get("suggested_questions", [])
+                has_suggestion = True
+                save_json_artifact(run_dir, "suggestion.json", suggestion_result)
+                warning = (
+                    "Tum SQL adaylarinda dogrulama sorunlari tespit edildi. "
+                    "En az sorunlu secenek otomatik secildi. "
+                    "Calistirmadan once gozden gecirin."
                 )
 
             save_run_artifacts(
@@ -307,14 +372,7 @@ class TalkToDataService:
                 requirements=requirements,
                 metadata_used=metadata_used,
                 sql_candidates=final_candidates,
-                agent_info={
-                    "id": agent.id,
-                    "label": agent.label,
-                    "description": agent.description,
-                    "metadata_path": str(agent.metadata_path),
-                    "table_metadata_path": str(agent.table_metadata_path),
-                    "rules_path": str(agent.rules_path),
-                },
+                agent_info=agent_info_dict,
                 judge_result=final_judge_result,
             )
             save_llm_usage(run_dir, llm_usage)
@@ -351,6 +409,11 @@ class TalkToDataService:
                 "judge_result": final_judge_result,
                 "attempt_count": final_attempt,
                 "retry_attempted": final_attempt > 1,
+                "all_candidates_disqualified": all_disqualified,
+                "has_suggestion": has_suggestion,
+                "suggestion_text": suggestion_text,
+                "suggested_questions": suggested_questions,
+                "warning": warning,
                 "llm_mode": (
                     "enabled" if self.llm_client is not None else "heuristic_fallback"
                 ),
@@ -516,6 +579,40 @@ class TalkToDataService:
         self._agent_rules_by_path[key] = rules
         return rules
 
+    def _build_all_metadata(
+        self,
+        agent: AgentConfig,
+        metadata_docs: list[dict[str, Any]],
+        table_metadata_docs: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Bypass retrieval and return ALL agent metadata for the SQL prompt."""
+        general_metadata: dict[str, Any] = {}
+        if agent.general_metadata_path is not None:
+            general_metadata = load_general_metadata(agent.general_metadata_path)
+
+        if agent.column_metadata_path is not None:
+            column_metadata = load_column_metadata(agent.column_metadata_path)
+            table_metadata_index = build_table_metadata_index(table_metadata_docs)
+            return retrieve_column_based_metadata(
+                requirements={},
+                user_request="",
+                column_metadata=column_metadata,
+                table_metadata_index=table_metadata_index,
+                top_k=60,
+                column_metadata_path=agent.column_metadata_path,
+                table_metadata_path=agent.table_metadata_path,
+                general_metadata=general_metadata,
+            )
+
+        return retrieve_relevant_metadata(
+            requirements={},
+            user_request="",
+            documents=metadata_docs,
+            metadata_path=agent.metadata_path,
+            table_metadata_path=agent.table_metadata_path,
+            top_k=500,
+        )
+
     def _apply_connection_override(
         self,
         connection: dict[str, str] | None,
@@ -563,6 +660,8 @@ def _build_retry_context(
 ) -> dict[str, Any]:
     disqualify_reasons: list[str] = []
     blocked_sql_patterns: list[str] = []
+    rejected_columns: list[str] = []
+    valid_columns_hint: list[str] = []
 
     candidate_evaluations = judge_result.get("candidate_evaluations")
     if isinstance(candidate_evaluations, list):
@@ -573,6 +672,7 @@ def _build_retry_context(
                 text = str(reason).strip()
                 if text and text not in disqualify_reasons:
                     disqualify_reasons.append(text)
+                    _extract_rejected_columns(text, rejected_columns)
 
     for candidate in candidates:
         if not isinstance(candidate, dict):
@@ -593,4 +693,30 @@ def _build_retry_context(
     return {
         "disqualify_reasons": disqualify_reasons[:20],
         "blocked_sql_patterns": blocked_sql_patterns[:12],
+        "rejected_columns": rejected_columns[:20],
+        "valid_columns_hint": valid_columns_hint[:30],
     }
+
+
+def _extract_rejected_columns(reason: str, rejected: list[str]) -> None:
+    """Extract alias.column references from validation error text."""
+    import re
+    for match in re.finditer(r"(\w+\.\w+)", reason):
+        col_ref = match.group(1)
+        if col_ref not in rejected:
+            rejected.append(col_ref)
+
+
+def _collect_validation_errors(judge_result: dict[str, Any]) -> list[str]:
+    """Collect all disqualify reasons from judge result for suggestion generation."""
+    errors: list[str] = []
+    candidate_evaluations = judge_result.get("candidate_evaluations")
+    if isinstance(candidate_evaluations, list):
+        for item in candidate_evaluations:
+            if not isinstance(item, dict):
+                continue
+            for reason in item.get("disqualify_reasons", []):
+                text = str(reason).strip()
+                if text and text not in errors:
+                    errors.append(text)
+    return errors

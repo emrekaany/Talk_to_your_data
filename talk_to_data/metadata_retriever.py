@@ -85,6 +85,7 @@ def build_metadata_overview(
     documents: list[dict[str, Any]],
     *,
     metadata_path: Path | None = None,
+    general_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Small overview used for requirement extraction prompts."""
     tables: list[str] = []
@@ -111,6 +112,12 @@ def build_metadata_overview(
         overview["metadata_source"] = metadata_source
     if performance_rules:
         overview["performance_rules"] = performance_rules[:12]
+
+    if general_metadata and isinstance(general_metadata, dict):
+        raw_measures = general_metadata.get("measure_columns")
+        if isinstance(raw_measures, list) and raw_measures:
+            overview["measure_columns"] = raw_measures
+
     return overview
 
 
@@ -361,7 +368,11 @@ def _normalize_column_name(value: Any) -> str:
     return text.upper() if text else ""
 
 
-def _query_tokens(requirements: dict[str, Any], user_request: str) -> Counter[str]:
+def _query_tokens(
+    requirements: dict[str, Any],
+    user_request: str,
+    general_metadata: dict[str, Any] | None = None,
+) -> Counter[str]:
     texts: list[str] = [user_request]
     for key in ("intent", "notes"):
         value = requirements.get(key)
@@ -370,7 +381,24 @@ def _query_tokens(requirements: dict[str, Any], user_request: str) -> Counter[st
     for key in ("required_filters", "measures", "dimensions", "grain", "join_needs"):
         for item in _as_string_list(requirements.get(key)):
             texts.append(item)
-    return _tokenize(" ".join(texts))
+    base_tokens = _tokenize(" ".join(texts))
+
+    # Expand with domain vocabulary from general_metadata
+    if general_metadata and isinstance(general_metadata, dict):
+        vocab = general_metadata.get("domain_vocabulary")
+        if isinstance(vocab, dict):
+            expansion_tokens: Counter[str] = Counter()
+            for term, identifiers in vocab.items():
+                normalized_term = unicodedata.normalize("NFKC", term).lower()
+                if normalized_term in base_tokens:
+                    for ident in _as_string_list(identifiers):
+                        for tok in _tokenize(ident):
+                            expansion_tokens[tok] += 1
+            # Add expansion tokens at half-weight to avoid over-boosting
+            for tok, count in expansion_tokens.items():
+                base_tokens[tok] += max(1, count // 2)
+
+    return base_tokens
 
 
 def _doc_to_search_text(doc: dict[str, Any]) -> str:
@@ -500,7 +528,7 @@ def _select_columns(doc: dict[str, Any], query_tokens: Counter[str]) -> list[dic
         selected = [column for _, column in scored_columns]
     if len(selected) < 40:
         selected = [column for _, column in scored_columns]
-    return selected[:60]
+    return selected
 
 
 def _compact_column(raw_column: dict[str, Any]) -> dict[str, Any]:
@@ -515,11 +543,15 @@ def _compact_column(raw_column: dict[str, Any]) -> dict[str, Any]:
 
     keywords = _as_string_list(raw_column.get("keywords"))
     if keywords:
-        column["keywords"] = keywords[:8]
+        column["keywords"] = keywords[:15]
 
     properties = _column_properties(raw_column)
     if properties:
         column["properties"] = properties
+
+    select_expressions = _as_string_list(raw_column.get("select_expressions"))
+    if select_expressions:
+        column["select_expressions"] = select_expressions[:5]
     return column
 
 
@@ -581,7 +613,14 @@ def _extract_joins(doc: dict[str, Any]) -> list[str]:
         for rel in relationships:
             if isinstance(rel, str):
                 joins.append(rel)
-    return joins[:20]
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for j in joins:
+        key = j.strip().lower()
+        if key not in seen:
+            seen.add(key)
+            deduped.append(j)
+    return deduped[:20]
 
 
 def _extract_indexes(doc: dict[str, Any]) -> list[str]:
@@ -698,3 +737,319 @@ def _normalize_filter_expression(filter_text: str) -> str:
 
 def _normalize_space(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
+
+
+# ---------------------------------------------------------------------------
+# Column-based retrieval (v2)
+# ---------------------------------------------------------------------------
+
+
+def load_column_metadata(column_metadata_path: Path) -> dict[str, Any]:
+    """Load column_metadata_{agent}.json and return the parsed payload."""
+    if not column_metadata_path.exists():
+        raise MetadataFileError(
+            f"Missing column metadata file at '{column_metadata_path}'."
+        )
+    try:
+        payload = json.loads(column_metadata_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise MetadataFileError(
+            f"Column metadata file is not valid JSON: '{column_metadata_path}'."
+        ) from exc
+    if not isinstance(payload, dict):
+        raise MetadataFileError(
+            f"Column metadata root must be an object: '{column_metadata_path}'."
+        )
+    columns = payload.get("columns")
+    if not isinstance(columns, list) or not columns:
+        raise MetadataFileError(
+            f"Column metadata must contain a non-empty 'columns' list: '{column_metadata_path}'."
+        )
+    return payload
+
+
+def retrieve_column_based_metadata(
+    requirements: dict[str, Any],
+    user_request: str,
+    column_metadata: dict[str, Any],
+    table_metadata_index: dict[str, dict[str, Any]],
+    *,
+    top_k: int = 15,
+    column_metadata_path: Path | None = None,
+    table_metadata_path: Path | None = None,
+    general_metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Column-level retrieval: score individual columns, group by table, enrich with table metadata.
+
+    Returns a prompt-ready metadata dict compatible with _metadata_prompt_text().
+    """
+    columns = column_metadata.get("columns", [])
+    global_notes = _as_string_list(
+        (general_metadata or {}).get("global_reporting_notes")
+        or column_metadata.get("global_reporting_notes")
+    )
+    effective_top_k = max(1, min(_safe_int(top_k, fallback=15), 60))
+    min_score = 0.01
+
+    query_tokens = _query_tokens(requirements, user_request, general_metadata)
+
+    # Score each column
+    scored: list[tuple[float, dict[str, Any]]] = []
+    for col in columns:
+        if not isinstance(col, dict):
+            continue
+        search_text = " ".join([
+            str(col.get("table", "")),
+            str(col.get("name", "")),
+            str(col.get("description", "")),
+            str(col.get("semantic_type", "")),
+            " ".join(_as_string_list(col.get("keywords"))),
+        ])
+        score = _cosine_similarity(query_tokens, _tokenize(search_text))
+        scored.append((score, col))
+
+    scored.sort(key=lambda pair: pair[0], reverse=True)
+
+    # Select top-k columns above threshold
+    selected = [(s, c) for s, c in scored if s >= min_score][:effective_top_k]
+    if not selected and scored:
+        selected = scored[:effective_top_k]
+
+    # Group selected columns by table
+    table_columns: dict[str, list[dict[str, Any]]] = {}
+    table_max_score: dict[str, float] = {}
+    for score, col in selected:
+        table_id = str(col.get("table", "")).strip()
+        if not table_id:
+            continue
+        table_columns.setdefault(table_id, []).append(col)
+        table_max_score[table_id] = max(table_max_score.get(table_id, 0.0), score)
+
+    # Backfill: include ALL columns from each matched table for complete allowlist
+    all_columns_by_table_lower: dict[str, list[dict[str, Any]]] = {}
+    for col in columns:
+        if isinstance(col, dict):
+            t = str(col.get("table", "")).strip()
+            if t:
+                all_columns_by_table_lower.setdefault(t.lower(), []).append(col)
+
+    for table_id in list(table_columns.keys()):
+        existing_names = {
+            str(c.get("name", "")).strip().upper()
+            for c in table_columns[table_id]
+            if isinstance(c, dict)
+        }
+        all_cols = all_columns_by_table_lower.get(table_id.lower(), [])
+        for col in all_cols:
+            col_name = str(col.get("name", "")).strip().upper()
+            if col_name and col_name not in existing_names:
+                table_columns[table_id].append(col)
+                existing_names.add(col_name)
+
+    # Build matched table set for join filtering
+    matched_tables = set(table_columns.keys())
+    matched_tables_lower = {t.lower() for t in matched_tables}
+
+    # Auto-include bridge tables that connect two or more matched tables
+    bridge_tables_lower = _find_bridge_tables(matched_tables_lower, table_metadata_index)
+    if bridge_tables_lower:
+        known_tables = _as_string_list(
+            (general_metadata or {}).get("known_tables")
+            or column_metadata.get("known_tables")
+        )
+        lower_to_original = {
+            t.strip().lower(): t.strip() for t in known_tables if t.strip()
+        }
+        all_columns_by_table: dict[str, list[dict[str, Any]]] = {}
+        for col in columns:
+            if isinstance(col, dict):
+                t = str(col.get("table", "")).strip()
+                if t:
+                    all_columns_by_table.setdefault(t.lower(), []).append(col)
+        for bridge_lower in bridge_tables_lower:
+            bridge_original = lower_to_original.get(bridge_lower, bridge_lower)
+            if bridge_original not in table_columns:
+                table_columns[bridge_original] = all_columns_by_table.get(
+                    bridge_lower, []
+                )
+                table_max_score[bridge_original] = 0.0
+                matched_tables.add(bridge_original)
+                matched_tables_lower.add(bridge_lower)
+
+    # Inject core tables for aggregation queries if missing
+    if general_metadata and isinstance(general_metadata, dict):
+        core_tables = _as_string_list(general_metadata.get("core_tables"))
+        if core_tables:
+            _inject_core_tables_if_needed(
+                requirements, core_tables, columns,
+                table_columns, table_max_score,
+                matched_tables, matched_tables_lower,
+            )
+
+    # Build relevant_items (compatible with existing prompt renderer)
+    relevant_items: list[dict[str, Any]] = []
+    for table_id in sorted(table_columns, key=lambda t: table_max_score.get(t, 0), reverse=True):
+        cols = table_columns[table_id]
+        tm_key = table_id.lower()
+        tm = table_metadata_index.get(tm_key, {})
+
+        # Filter joins to only include matched tables
+        all_joins = _as_string_list(tm.get("relationships"))
+        filtered_joins = _filter_joins_to_matched(all_joins, matched_tables_lower)
+
+        item: dict[str, Any] = {
+            "score": round(table_max_score.get(table_id, 0.0), 4),
+            "table": table_id,
+            "columns": cols,
+            "joins": filtered_joins,
+            "indexes": _as_string_list(tm.get("indexes")),
+            "table_metadata": {
+                k: v for k, v in tm.items()
+                if k in ("description", "grain", "keywords", "business_notes",
+                         "performance_rules", "mandatory_filters")
+                and v not in (None, "", [], {})
+            },
+            "mandatory_filters": _as_string_list(tm.get("mandatory_filters")),
+            "performance_rules": _as_string_list(tm.get("performance_rules")),
+        }
+        relevant_items.append(item)
+
+    guardrails = _collect_guardrails(relevant_items)
+    mandatory_rules = _collect_mandatory_rules(requirements, relevant_items)
+
+    return {
+        "dialect": "oracle sql",
+        "relevant_items": relevant_items,
+        "guardrails": guardrails,
+        "mandatory_rules": mandatory_rules,
+        "runtime_mandatory_rules": [],
+        "global_reporting_notes": global_notes,
+        "core_tables": _as_string_list((general_metadata or {}).get("core_tables")),
+        "retrieval_debug": {
+            "retrieval_mode": "column_based",
+            "selected_column_count": len(selected),
+            "matched_table_count": len(table_columns),
+            "total_columns": len(columns),
+            "effective_top_k": effective_top_k,
+            "min_score": min_score,
+            "column_metadata_source": str(column_metadata_path or ""),
+            "table_metadata_source": str(table_metadata_path or ""),
+        },
+    }
+
+
+def _find_bridge_tables(
+    matched_tables_lower: set[str],
+    table_metadata_index: dict[str, dict[str, Any]],
+) -> set[str]:
+    """Find non-matched tables that bridge two or more matched tables (single hop)."""
+    bridge_candidates: dict[str, set[str]] = {}
+    for matched_table in matched_tables_lower:
+        tm = table_metadata_index.get(matched_table, {})
+        for rel in _as_string_list(tm.get("relationships")):
+            parts = rel.strip().split("=")
+            if len(parts) != 2:
+                continue
+            left_table = _extract_table_from_qualified(parts[0].strip()).lower()
+            right_table = _extract_table_from_qualified(parts[1].strip()).lower()
+            for ref_table in (left_table, right_table):
+                if ref_table and ref_table not in matched_tables_lower:
+                    bridge_candidates.setdefault(ref_table, set()).add(matched_table)
+    return {t for t, connected in bridge_candidates.items() if len(connected) >= 2}
+
+
+def _filter_joins_to_matched(
+    joins: list[str],
+    matched_tables_lower: set[str],
+) -> list[str]:
+    """Keep only join conditions where both sides reference a matched table."""
+    filtered: list[str] = []
+    seen: set[str] = set()
+    for join_str in joins:
+        key = join_str.strip().lower()
+        if key in seen:
+            continue
+        # Parse "SCHEMA.TABLE.COL = SCHEMA.TABLE.COL" pattern
+        parts = key.split("=")
+        if len(parts) != 2:
+            continue
+        left = parts[0].strip()
+        right = parts[1].strip()
+        left_table = _extract_table_from_qualified(left)
+        right_table = _extract_table_from_qualified(right)
+        if left_table in matched_tables_lower and right_table in matched_tables_lower:
+            seen.add(key)
+            filtered.append(join_str)
+    return filtered
+
+
+def _extract_table_from_qualified(qualified_col: str) -> str:
+    """Extract schema.table from schema.table.column or table.column."""
+    parts = qualified_col.strip().split(".")
+    if len(parts) >= 3:
+        return f"{parts[-3]}.{parts[-2]}"
+    if len(parts) == 2:
+        return parts[0]
+    return qualified_col.strip()
+
+
+# ---------------------------------------------------------------------------
+# Core-table safety net
+# ---------------------------------------------------------------------------
+
+_AGGREGATION_INTENTS = frozenset({
+    "metric", "retrieve_data", "total_kpk", "comparison",
+    "sum", "average", "count", "aggregation",
+})
+
+
+def _inject_core_tables_if_needed(
+    requirements: dict[str, Any],
+    core_tables: list[str],
+    all_columns: list[dict[str, Any]],
+    table_columns: dict[str, list[dict[str, Any]]],
+    table_max_score: dict[str, float],
+    matched_tables: set[str],
+    matched_tables_lower: set[str],
+) -> None:
+    """Ensure at least one core (fact) table is present for aggregation intents."""
+    intent = str(requirements.get("intent", "")).lower().strip()
+    measures = _as_string_list(requirements.get("measures"))
+    if intent not in _AGGREGATION_INTENTS and not measures:
+        return
+
+    # Check if any core table already matched
+    core_lower = {t.lower() for t in core_tables}
+    if core_lower & matched_tables_lower:
+        return
+
+    # No core table found — inject all core tables with minimal score
+    all_columns_by_table: dict[str, list[dict[str, Any]]] = {}
+    for col in all_columns:
+        if isinstance(col, dict):
+            t = str(col.get("table", "")).strip()
+            if t:
+                all_columns_by_table.setdefault(t.lower(), []).append(col)
+
+    for core_table in core_tables:
+        core_key = core_table.lower()
+        if core_key not in matched_tables_lower:
+            cols = all_columns_by_table.get(core_key, [])
+            if cols:
+                table_columns[core_table] = cols
+                table_max_score[core_table] = 0.001
+                matched_tables.add(core_table)
+                matched_tables_lower.add(core_key)
+
+
+def load_general_metadata(general_metadata_path: Path) -> dict[str, Any]:
+    """Load general_metadata_{agent}.json and return the parsed payload."""
+    if not general_metadata_path.exists():
+        return {}
+    try:
+        payload = json.loads(general_metadata_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    return payload

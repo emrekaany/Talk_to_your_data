@@ -1,0 +1,8 @@
+{
+  "retry_triggered": true,
+  "trigger_attempt": 1,
+  "trigger_reason": "parse_error",
+  "judge_error_kind": "parse_error",
+  "all_candidates_disqualified": false,
+  "disqualified_count": 1
+}

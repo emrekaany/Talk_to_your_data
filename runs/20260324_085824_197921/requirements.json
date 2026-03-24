@@ -1,0 +1,31 @@
+{
+  "intent": "Retrieve and group production (prim) data by month for the specified months.",
+  "required_filters": [
+    "{'month': ['202512', '202511']}"
+  ],
+  "measures": [
+    "prim"
+  ],
+  "dimensions": [
+    "month"
+  ],
+  "grain": [
+    "month"
+  ],
+  "join_needs": [
+    "{'tables': ['AS_DWH.FACT_POL_POLICE_EK', 'AS_DWH.GNL_TARIH'], 'joins': [{'from': 'AS_DWH.FACT_POL_POLICE_EK', 'to': 'AS_DWH.GNL_TARIH', 'on': 'ek_tanzim_tarihi = tarih_key'}]}"
+  ],
+  "security_constraints": [
+    "{'user_access': 'standard', 'data_masking': False}"
+  ],
+  "invalid_request": false,
+  "notes": "The request refers to production (prim) values grouped by month for December and November 2025. Based on performance rules, the production report should use the ek_tanzim_tarihi (additional adjustment date) as the basis for calculation.",
+  "row_limit": 200,
+  "report_period": "monthly",
+  "time_granularity": "month",
+  "time_value": "['202511', '202512']",
+  "time_range": {
+    "start": "202511",
+    "end": "202512"
+  }
+}

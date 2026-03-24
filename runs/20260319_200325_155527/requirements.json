@@ -1,0 +1,25 @@
+{
+  "intent": "total_kpk",
+  "required_filters": [
+    "{'year': '2025', 'organization': 'tanzimli'}"
+  ],
+  "measures": [
+    "total_kpk"
+  ],
+  "dimensions": [],
+  "grain": [
+    "organization_year"
+  ],
+  "join_needs": [],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "The user is asking for the total KPK (likely a performance or budget-related metric) for the organization 'tanzimli' in the year 2025.",
+  "row_limit": 1,
+  "report_period": null,
+  "time_granularity": null,
+  "time_value": null,
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

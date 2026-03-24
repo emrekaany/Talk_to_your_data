@@ -1,0 +1,32 @@
+{
+  "intent": "Find the agency in Istanbul with the highest premium production in 2025",
+  "required_filters": [
+    "{'city': 'Istanbul', 'year': '2025'}"
+  ],
+  "measures": [
+    "{'premium_production': 'SUM(prim_miktarı)'}"
+  ],
+  "dimensions": [
+    "{'agency_name': 'ACENTE.AD', 'agency_id': 'ACENTE.ACENTE_ID'}"
+  ],
+  "grain": [
+    "agency_id",
+    "agency_name"
+  ],
+  "join_needs": [
+    "{'ACE_ACENTE': 'ACENTE', 'ACE_ACENTE_ADRES': 'ACENTE_ADRES', 'FACT_POL_POLICE_EK': 'POLICE_EK'}"
+  ],
+  "security_constraints": [
+    "{'city_filter': 'Istanbul', 'year_filter': '2025'}"
+  ],
+  "invalid_request": false,
+  "notes": "The query should use the 'ek tanzim tarihi' for premium calculation in production reports. The agency with the highest premium production in Istanbul for the year 2025 will be returned.",
+  "row_limit": 1,
+  "report_period": "2025",
+  "time_granularity": "year",
+  "time_value": "2025",
+  "time_range": {
+    "start": "2025-01-01",
+    "end": "2025-12-31"
+  }
+}

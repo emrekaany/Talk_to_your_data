@@ -57,13 +57,14 @@ def extract_requirements(
     if llm_client is None:
         return _heuristic_requirements(request, metadata_overview)
 
+    enriched_prompt = _build_enriched_extraction_prompt(user_request, metadata_overview)
     try:
         raw = _run_extraction_prompt(
             system_prompt=PART_25_SYSTEM_PROMPT,
-            prompt=user_request,
+            prompt=enriched_prompt,
             llm_client=llm_client,
             temperature=0.0,
-            max_tokens=1200,
+            max_tokens=1500,
         )
     except (LLMError, RuntimeError) as exc:
         return _heuristic_requirements(
@@ -84,6 +85,49 @@ def extract_requirements(
         )
 
     return _normalize_requirements(parsed)
+
+
+def _build_enriched_extraction_prompt(
+    user_request: str,
+    metadata_overview: dict[str, Any] | None,
+) -> str:
+    """Build a metadata-enriched user prompt for requirements extraction."""
+    sections: list[str] = []
+    sections.append(f"User Request:\n{user_request}")
+
+    if isinstance(metadata_overview, dict):
+        tables = metadata_overview.get("tables")
+        if isinstance(tables, list) and tables:
+            sections.append(
+                f"Available Tables:\n{', '.join(str(t) for t in tables[:30])}"
+            )
+
+        mandatory_filters = metadata_overview.get("mandatory_filters")
+        if isinstance(mandatory_filters, list) and mandatory_filters:
+            filter_lines = "\n".join(f"- {f}" for f in mandatory_filters[:20])
+            sections.append(f"Mandatory Filters:\n{filter_lines}")
+
+        performance_rules = metadata_overview.get("performance_rules")
+        if isinstance(performance_rules, list) and performance_rules:
+            rule_lines = "\n".join(f"- {r}" for r in performance_rules[:12])
+            sections.append(f"Performance Rules:\n{rule_lines}")
+
+        measure_cols = metadata_overview.get("measure_columns")
+        if isinstance(measure_cols, list) and measure_cols:
+            parts: list[str] = []
+            for m in measure_cols:
+                if isinstance(m, dict):
+                    col = m.get("column", "")
+                    label = m.get("label", "")
+                    parts.append(f"{col}: {label}" if label else col)
+                elif m:
+                    parts.append(str(m))
+            if parts:
+                sections.append(
+                    f"Available Measure Columns:\n{', '.join(parts)}"
+                )
+
+    return "\n\n".join(sections)
 
 
 def _run_extraction_prompt(

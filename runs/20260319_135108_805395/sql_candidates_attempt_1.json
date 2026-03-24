@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK JOIN AS_DWH.GNL_TARIH ON AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.GNL_TARIH.POLICE_ID WHERE TO_CHAR(AS_DWH.GNL_TARIH.TARIH) LIKE '2025%' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with GNL_TARIH filtered by 2025 tanzim tarihi.",
+    "risk_notes": "Assumes POLICE_ID is the correct join key between tables.",
+    "description": "Question answered: What is the total production (in TL) for policies where the date starts with '2025'?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.GNL_TARIH\nFilters: TARIH column starts with '2025' (using LIKE '2025%')\nGrouping/measures: Summing BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: TARIH is stored as a string, and the first four characters represent the year.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK JOIN AS_DWH.GNL_TARIH ON AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.GNL_TARIH.POLICE_ID WHERE AS_DWH.GNL_TARIH.TARIH BETWEEN 20250101 AND 20251231 FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Filters GNL_TARIH.TARIH numerically between 2025-01-01 and 2025-12-31.",
+    "risk_notes": "Requires TARIH column to be numeric and formatted as YYYYMMDD.",
+    "description": "Question answered: What is the total production (in TL) for policies between January 1, 2025, and December 31, 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.GNL_TARIH\nFilters: TARIH is between 20250101 and 20251231\nGrouping/measures: Summing BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: TARIH is stored as a numeric value representing YYYYMMDD format.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK JOIN AS_DWH.GNL_TARIH ON AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.GNL_TARIH.POLICE_ID WHERE EXTRACT(YEAR FROM TO_DATE(TO_CHAR(AS_DWH.GNL_TARIH.TARIH), 'YYYYMMDD')) = 2025 FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses EXTRACT to filter by year from TARIH column.",
+    "risk_notes": "Relies on implicit conversion of TARIH to date format.",
+    "description": "Question answered: What is the total production (in TL) for policies in the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.GNL_TARIH\nFilters: Extracting the year from TARIH and checking if it equals 2025\nGrouping/measures: Summing BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: TARIH is stored as a numeric value representing YYYYMMDD format, and it needs to be converted to a date.",
+    "recommended": false
+  }
+]

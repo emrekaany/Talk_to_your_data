@@ -215,6 +215,9 @@
           ],
           "select_expressions": [
             "AS_DWH.ACE_ACENTE.ACENTE_KODU_NUMERIC"
+          ],
+          "sample_questions": [
+            "320020 no'lu acentenin cari yıl üretimini gösterebilir misin ?"
           ]
         },
         {
@@ -258,7 +261,10 @@
           "source_assets": [
             "Dağıtım Kanalı"
           ],
-          "select_expressions": []
+          "select_expressions": [],
+          "sample_questions": [
+            "Dağıtım kanalı bazında üretimi gösterebilir misin?"
+          ]
         },
         {
           "name": "SATIS_MUDURLUGU",
@@ -283,6 +289,9 @@
           ],
           "select_expressions": [
             "AS_DWH.ACE_ACENTE.SATIS_MUDURLUGU"
+          ],
+          "sample_questions": [
+            "Bölge müdürlüğü bazında üretim en fazla olduğu 5 acente nedir?"
           ]
         }
       ],
@@ -447,6 +456,9 @@
           ],
           "select_expressions": [
             "SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL)"
+          ],
+          "sample_questions": [
+            "Bana Son 5 Yılı Tanzim Yılı Bazında Brüt Prim Tutarlarını Yazar mısın?"
           ]
         }
       ],
@@ -556,6 +568,9 @@
           ],
           "select_expressions": [
             "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID"
+          ],
+          "sample_questions": [
+            "AS400 Poliçe Sayım ve Geçen Yılki Üretimim Nedir? (Üretim Denilince aksi belirtilmedikçe Vergi Öncesi Prim TL kolonu kullanılır)"
           ]
         }
       ],
@@ -658,7 +673,22 @@
             "Ek Teminat Başlangıç Tarihi",
             "Zeyil Yürürlük Tarihi",
             "Ek Geçerlilik Başlangıç Tarihi",
-            "Ek Teminat Yürürlük Tarihi"
+            "Ek Teminat Yürürlük Tarihi",
+            "Ana Pol BTS TRH",
+            "Ana Pol Btis Tarihi",
+            "Ana Poliçe Btitiş Tarihi",
+            "Bitiş Tarihi",
+            "Ek Geçerlilik Bitiş Tarihi",
+            "Ek Süre Bitiş Tarihi",
+            "Ek Teminat Bitiş Tarihi",
+            "Poliçe Ana Bitiş Tarihi",
+            "Poliçe Bitiş Tarihi",
+            "Poliçe Sonlanma Tarihi",
+            "Sigorta Bitiş Tarihi",
+            "Teminat Bitiş Tarihi",
+            "Teminat Sonu Tarihi",
+            "Zeyil Bitiş Tarihi",
+            "Zeyil Geçerlilik Sonu"
           ],
           "properties": [
             "change_level=Poliçe",
@@ -676,6 +706,13 @@
           ],
           "select_expressions": [
             "MAX(AS_DWH.GNL_TARIH.TARIH)"
+          ],
+          "sample_questions": [
+            "2025 Yılı Tanzimli Üretimi Verebilir Misin?",
+            "Aksi belirtilmediği sürece üretim raporları ek tanzim tarihi esasıyla hazırlanır.Örneğin kullanıcı 2026 yılındaki üretimini getir dediğinde bu tarihe göre çalışmalıdır.Opr 54 ve Prim adet yasal raporu örnek verilebilir.",
+            "2025 Yılı başlangıçlı poliçelerin listesini verebilir misin?",
+            "2. Ekin Başlangıç Tarihini Verebilir Misin?",
+            "2026 İçerisinde Bitecek Poliçelerin Sayısı Nedir?"
           ]
         }
       ],
@@ -758,6 +795,9 @@
           "select_expressions": [
             "AS_DWH.MUS_MUSTERI.MUSTERI_NUMARASI",
             "COUNT (DISTINCT AS_DWH.MUS_MUSTERI.MUSTERI_NUMARASI)"
+          ],
+          "sample_questions": [
+            "Müşteri Bazında top 10/20 üretimi olan müşterileri gösterebilir misin?"
           ]
         },
         {
@@ -826,6 +866,9 @@
           ],
           "select_expressions": [
             "AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ADI"
+          ],
+          "sample_questions": [
+            "952 kodlu ürünün müşteri cinsiyet bazında üretim dağılımını getirebilir misin ?"
           ]
         }
       ],
@@ -871,6 +914,9 @@
           ],
           "select_expressions": [
             "SUM(AS_DWH.POLICE_SAYISI.POLICE_SAYISI)"
+          ],
+          "sample_questions": [
+            "Cari yılda ürettiğim poliçe"
           ]
         }
       ],
@@ -981,6 +1027,9 @@
           ],
           "select_expressions": [
             "AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_ADI"
+          ],
+          "sample_questions": [
+            "Yürürlükteki Poliçe Adedim Kaçtır?"
           ]
         }
       ],
@@ -1068,6 +1117,9 @@
           ],
           "select_expressions": [
             "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, AS_DWH.POL_POLICE_KOD.POLICE_KOD_ADI"
+          ],
+          "sample_questions": [
+            "Bu Poliçe Hangi Ürüne Aittir?, Ürün bazında üretimimiz nedir ?"
           ]
         },
         {
@@ -1090,6 +1142,9 @@
           ],
           "select_expressions": [
             "AS_DWH.POL_POLICE_KOD.POLICE_KOD_KODU"
+          ],
+          "sample_questions": [
+            "Poliçe Koduna göre üretimleri gösterebilir misin?"
           ]
         }
       ],
@@ -1276,6 +1331,9 @@
           ],
           "select_expressions": [
             "AS_DWH.POL_POLICE_OZET.POLICE_DOVIZ_CINSI"
+          ],
+          "sample_questions": [
+            "Yabancı para cinsinden üretimim bu sene ne kadardır ? -Poliçe döviz cinsi hariç bırakılıp diğer para birimleri tablo haline getirilip sunulmalıdır."
           ]
         },
         {
@@ -1353,6 +1411,9 @@
           ],
           "select_expressions": [
             "AS_DWH.POL_POLICE_OZET.POLICE_YENILEME_NO"
+          ],
+          "sample_questions": [
+            "Bu Poliçenin Kaç Adet Yenilemesi Vardır?  Bu yıl poliçesini yenileyenlerin Üretimi Nedir? ( Ana Poliçe Başlangıç Tarihi daha çok sorgulanmak istenir.). Poliçe Yenileme Tarihini Söyler Misin? (Sıfırıncı Ekteki Tanzim Tarihini Sorguluyor)"
           ]
         }
       ],
@@ -1502,6 +1563,9 @@
           "select_expressions": [
             "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, AS_DWH.POL_POLICE_KOD.POLICE_KOD_ADI",
             "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, CASE WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 741 THEN 71602 WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 742 THEN 71603 ELSE AGGR.AS400_YENI_URUN.NEW_FPOLK END"
+          ],
+          "sample_questions": [
+            "Bu Poliçe Hangi Ürüne Aittir?, Ürün bazında üretimimiz nedir ?"
           ]
         },
         {
@@ -1550,6 +1614,9 @@
           ],
           "select_expressions": [
             "AS_DWH.POL_TKZ.TKZ_KODU, AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU"
+          ],
+          "sample_questions": [
+            "TKZ kodu bazında üretimimi gösterebilir misin ?"
           ]
         }
       ],
@@ -1595,6 +1662,9 @@
           ],
           "select_expressions": [
             "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI"
+          ],
+          "sample_questions": [
+            "Satış Kanalına göre üretimleri gösterebilir misin?"
           ]
         }
       ],
@@ -1663,6 +1733,9 @@
           ],
           "select_expressions": [
             "AS_DWH.POL_TKZ.TKZ_KODU, AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU"
+          ],
+          "sample_questions": [
+            "TKZ kodu bazında üretimimi gösterebilir misin ?"
           ]
         }
       ],

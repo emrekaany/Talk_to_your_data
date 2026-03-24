@@ -9,6 +9,7 @@
     "If request contains YYYY (year), use a year predicate with :year_value and YYYY mask logic.",
     "If request contains YYYYMM or asks for month scope, use a month predicate with :report_period and YYYYMM mask logic.",
     "If request contains YYYYMMDD or day scope, use a day predicate with :date_value and YYYYMMDD mask logic.",
-    "Select metadata-valid date columns for these predicates; do not invent columns."
+    "Select metadata-valid date columns for these predicates; do not invent columns.",
+    "Date columns in production tables are surrogate keys (*_TARIH_ID). Always JOIN to AS_DWH.GNL_TARIH on TARIH_ID to access date values. Never fabricate direct date columns like EK_TANZIM_TARIHI or TANZIM_TARIHI. Pattern: JOIN AS_DWH.GNL_TARIH t ON <table>.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = :report_period"
   ]
 }

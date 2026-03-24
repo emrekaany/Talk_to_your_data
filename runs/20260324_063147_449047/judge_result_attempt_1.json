@@ -1,0 +1,40 @@
+{
+  "recommended_candidate_id": "option_2",
+  "recommended_canonical_id": "option_2",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM selected a hard-disqualified option; fallback applied.",
+  "judge_error_kind": "parse_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3,
+  "retry_recommended": true,
+  "llm_raw_output": "option_3",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Table allowlist validation failed. Disallowed tables: as_dwh.gnl_tarih"
+      ],
+      "fallback_score": 6.6
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Table allowlist validation failed. Disallowed tables: as_dwh.gnl_tarih"
+      ],
+      "fallback_score": 7.5
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Table allowlist validation failed. Disallowed tables: as_dwh.gnl_tarih"
+      ],
+      "fallback_score": 7.5
+    }
+  ]
+}

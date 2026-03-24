@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND p.POLICE_EK_NO IS NOT NULL FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and GNL_TARIH to filter by 2025 ek tanzim date.",
+    "risk_notes": "Assumes POLICE_EK_NO indicates 'tanzimli' status.",
+    "description": "Question answered: What is the total premium amount for policies with a valid police number and a policy date in the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Policies with a valid police number (POLICE_EK_NO is not null) and policies dated in the year 2025\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_premium\nAssumptions: The query assumes that the BRUT_PRIM_TL column represents the premium amount and that the TANZIM_TARIH_ID field corresponds to the policy date.",
+    "recommended": false
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(f.VOP_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND p.POLICE_EK_NO IS NOT NULL FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL from FACT_POL_POLICE_TEM_ASSET joined with POL_POLICE_OZET and GNL_TARIH to filter by 2025 ek tanzim date.",
+    "risk_notes": "Assumes POLICE_EK_NO indicates 'tanzimli' status.",
+    "description": "Question answered: What is the total premium amount for policies with a valid police number and a policy date in the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Policies with a valid police number (POLICE_EK_NO is not null) and policies dated in the year 2025\nGrouping/measures: Summing the VOP_TL column\nExpected output columns: total_premium\nAssumptions: The query assumes that the VOP_TL column represents the premium amount and that the TANZIM_TARIH_ID field corresponds to the policy date.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.ANA_POLICE_TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND p.POLICE_EK_NO IS NOT NULL FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and GNL_TARIH via ANA_POLICE_TANZIM_TARIH_ID to filter by 2025 ek tanzim date.",
+    "risk_notes": "Uses ANA_POLICE_TANZIM_TARIH_ID instead of TANZIM_TARIH_ID.",
+    "description": "Question answered: What is the total premium amount for policies with a valid police number and an original policy date in the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Policies with a valid police number (POLICE_EK_NO is not null) and original policy dates in the year 2025\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_premium\nAssumptions: The query assumes that the BRUT_PRIM_TL column represents the premium amount and that the ANA_POLICE_TANZIM_TARIH_ID field corresponds to the original policy date.",
+    "recommended": true
+  }
+]

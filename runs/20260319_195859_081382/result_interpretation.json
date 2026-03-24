@@ -1,0 +1,21 @@
+{
+  "summary": "Sorgu sonucu 1 satir ve 1 kolon dondurdu. TOTAL_ÜRETIM alani icin toplam 95,308,712,771.52, ortalama 95,308,712,771.52. Bu ozet mevcut sonuc kumesi uzerinden uretilmistir.",
+  "chart_plan": {
+    "draw_chart": false,
+    "chart_type": "none",
+    "x": null,
+    "y": null,
+    "aggregation": "none",
+    "top_n": null,
+    "sort": "none",
+    "title_tr": "Grafik devre disi",
+    "reason_tr": "Grafik uretimi konfigrasyonda devre disi."
+  },
+  "llm_used": false,
+  "summary_mode": "heuristic",
+  "fallback_reason": "LLM summarizer disabled by configuration.",
+  "validation_errors": [],
+  "chart_render_enabled": false,
+  "selected_candidate_id": "option_1",
+  "executed_sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' FETCH FIRST 200 ROWS ONLY"
+}

@@ -85,7 +85,7 @@ py -c "from app import build_app; build_app(); print('ok')"
 
 ## Documentation Rules
 
-- Her değişiklik `AGENTS.md` backlog'una eklenmeli.
+- Her değişiklik `AGENTS.md` backlog tablosuna tek satır olarak eklenmeli: `| YYYY-MM-DD | agent | summary |`. Tarih başına agent başına max bir satır. Okunan dosyaları ve validation komutlarını listeleme — sadece ne değiştiğini yaz.
 - Mimari değişiklikler `architecture.md` change log'una da eklenmeli.
 - Yeni env var'lar ve artifact'lar `README.md`'de dokümante edilmeli.
 

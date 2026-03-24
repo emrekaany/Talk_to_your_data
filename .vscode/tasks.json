@@ -1,0 +1,35 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Split metadata + compile check",
+			"type": "shell",
+			"command": "py scripts/split_metadata.py ; py -m compileall app.py talk_to_data ; py -c \"from app import build_app; build_app(); print('ok')\"",
+			"isBackground": false
+		},
+		{
+			"label": "Run split_metadata.py",
+			"type": "shell",
+			"command": "py scripts/split_metadata.py",
+			"isBackground": false
+		},
+		{
+			"label": "Compile check",
+			"type": "shell",
+			"command": "py -m compileall app.py talk_to_data",
+			"isBackground": false
+		},
+		{
+			"label": "Smoke test",
+			"type": "shell",
+			"command": "py -c \"from app import build_app; build_app(); print('ok')\"",
+			"isBackground": false
+		},
+		{
+			"label": "Smoke test v2",
+			"type": "shell",
+			"command": "py -c 'from app import build_app; build_app(); print(chr(111)+chr(107))'",
+			"isBackground": false
+		}
+	]
+}

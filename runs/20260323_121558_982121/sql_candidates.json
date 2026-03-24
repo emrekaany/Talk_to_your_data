@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(fpe.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK fpe JOIN AS_DWH.POL_POLICE_OZET ppo ON fpe.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpe.POLICE_ID = ppo.POLICE_ID JOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID WHERE TO_CHAR(gt.TARIH, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Calculates total premium production for December 2025 using BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and GNL_TARIH filtered by Tanzim Tarihi.",
+    "risk_notes": "Relies on Tanzim Tarihi as the primary date filter, aligning with production reporting standards.",
+    "description": "Question answered: What is the total premium amount from the 'FACT_POL_POLICE_EK' table for December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Records where the date is December 2025\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_premium\nAssumptions: The join between tables is based on KAYNAK_SISTEM_ID and POLICE_ID fields.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(fpta.VOP_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET fpta JOIN AS_DWH.POL_POLICE_OZET ppo ON fpta.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpta.POLICE_ID = ppo.POLICE_ID JOIN AS_DWH.GNL_TARIH gt ON ppo.TANZIM_TARIH_ID = gt.TARIH_ID WHERE TO_CHAR(gt.TARIH, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Calculates total premium production for December 2025 using VOP_TL from FACT_POL_POLICE_TEM_ASSET joined with POL_POLICE_OZET and GNL_TARIH filtered by Tanzim Tarihi.",
+    "risk_notes": "Uses VOP_TL instead of BRUT_PRIM_TL; may require additional validation if the business logic expects gross premium.",
+    "description": "Question answered: What is the total premium amount from the 'FACT_POL_POLICE_TEM_ASSET' table for December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Records where the date is December 2025\nGrouping/measures: Summing the VOP_TL column\nExpected output columns: total_premium\nAssumptions: The join between tables is based on KAYNAK_SISTEM_ID and POLICE_ID fields.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(fpe.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK fpe JOIN AS_DWH.POL_POLICE_OZET ppo ON fpe.KAYNAK_SISTEM_ID = ppo.KAYNAK_SISTEM_ID AND fpe.POLICE_ID = ppo.POLICE_ID JOIN AS_DWH.GNL_TARIH gt ON ppo.ANA_POLICE_TANZIM_TARIH_ID = gt.TARIH_ID WHERE TO_CHAR(gt.TARIH, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Calculates total premium production for December 2025 using BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and GNL_TARIH filtered by Ana Poliçe Tanzim Tarihi.",
+    "risk_notes": "Uses Ana Poliçe Tanzim Tarihi instead of Ek Tanzim Tarihi; may not align with standard production reporting practices.",
+    "description": "Question answered: What is the total premium amount from the 'FACT_POL_POLICE_EK' table for December 2025 based on the main policy date?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Records where the main policy date is December 2025\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_premium\nAssumptions: The join between tables uses ANA_POLICE_TANZIM_TARIH_ID instead of the regular policy date.",
+    "recommended": false
+  }
+]

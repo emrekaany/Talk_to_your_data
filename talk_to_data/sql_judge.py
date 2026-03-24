@@ -12,7 +12,7 @@ from .sql_generator import sanity_check_sql
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
 
 
-MAX_JUDGE_TOKENS = 32
+MAX_JUDGE_TOKENS = 64
 _OPTION_PATTERN = re.compile(r"\boption_[123]\b", flags=re.IGNORECASE)
 _AGGREGATION_TOKENS = (
     "sum",

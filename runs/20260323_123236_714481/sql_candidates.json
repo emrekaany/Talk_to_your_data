@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU AS branch_code, SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK INNER JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID INNER JOIN AS_DWH.POL_POLICE_REF_TANIM ON AS_DWH.POL_POLICE_OZET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.EK_TANZIM_TARIHI, 'YYYYMM') = '202512' GROUP BY AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and POL_POLICE_REF_TANIM to group total premium by TKZ_KODU (branch code) for December 2025.",
+    "risk_notes": "Relies on EK_TANZIM_TARIHI column for filtering, which may not be the correct date column for production reporting.",
+    "description": "Question answered: What is the total premium amount per branch code for policies finalized in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_POLICE_REF_TANIM\nFilters: Policies finalized in December 2025\nGrouping/measures: Sum of BRUT_PRIM_TL grouped by branch code\nExpected output columns: branch_code, total_premium\nAssumptions: BRUT_PRIM_TL represents the premium amount, and TKZ_KODU represents the branch code.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU AS branch_code, SUM(AS_DWH.FACT_POL_POLICE_TEM_ASSET.VOP_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET INNER JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID INNER JOIN AS_DWH.POL_POLICE_REF_TANIM ON AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.EK_TANZIM_TARIHI, 'YYYYMM') = '202512' GROUP BY AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL from FACT_POL_POLICE_TEM_ASSET joined with POL_POLICE_OZET and POL_POLICE_REF_TANIM to group total premium by TKZ_KODU (branch code) for December 2025.",
+    "risk_notes": "Relies on EK_TANZIM_TARIHI column for filtering, which may not be the correct date column for production reporting.",
+    "description": "Question answered: What is the total premium amount per branch code for policies finalized in December 2025 using the VOP_TL metric?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_POLICE_REF_TANIM\nFilters: Policies finalized in December 2025\nGrouping/measures: Sum of VOP_TL grouped by branch code\nExpected output columns: branch_code, total_premium\nAssumptions: VOP_TL represents the premium amount, and TKZ_KODU represents the branch code.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU AS branch_code, SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK INNER JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID INNER JOIN AS_DWH.POL_POLICE_REF_TANIM ON AS_DWH.POL_POLICE_OZET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.POLICE_BASLANGIC_TARIHI, 'YYYYMM') = '202512' GROUP BY AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and POL_POLICE_REF_TANIM to group total premium by TKZ_KODU (branch code) for December 2025.",
+    "risk_notes": "Uses POLICE_BASLANGIC_TARIHI column for filtering, which may not align with production reporting conventions.",
+    "description": "Question answered: What is the total premium amount per branch code for policies starting in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_POLICE_REF_TANIM\nFilters: Policies starting in December 2025\nGrouping/measures: Sum of BRUT_PRIM_TL grouped by branch code\nExpected output columns: branch_code, total_premium\nAssumptions: BRUT_PRIM_TL represents the premium amount, and TKZ_KODU represents the branch code.",
+    "recommended": false
+  }
+]

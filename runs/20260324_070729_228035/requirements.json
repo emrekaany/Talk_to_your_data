@@ -1,0 +1,32 @@
+{
+  "intent": "Find the agency in Istanbul that produced the highest premium in 2025",
+  "required_filters": [
+    "{'city': 'Istanbul', 'year': 2025}"
+  ],
+  "measures": [
+    "{'premium_production': 'SUM(premium)'}"
+  ],
+  "dimensions": [
+    "{'agency_id': True, 'agency_name': True, 'city': True}"
+  ],
+  "grain": [
+    "agency_id",
+    "city"
+  ],
+  "join_needs": [
+    "{'agency': 'AS_DWH.ACE_ACENTE', 'address': 'AS_DWH.ACE_ACENTE_ADRES', 'premium_fact': 'AS_DWH.FACT_POL_POLICE_EK'}"
+  ],
+  "security_constraints": [
+    "{'agency_access': 'User must have access to agency data', 'premium_data': 'User must have access to premium production data'}"
+  ],
+  "invalid_request": false,
+  "notes": "The query should prioritize agencies located in Istanbul and calculate total premium production for the year 2025.",
+  "row_limit": 1,
+  "report_period": "2025",
+  "time_granularity": "year",
+  "time_value": "2025",
+  "time_range": {
+    "start": "2025-01-01",
+    "end": "2025-12-31"
+  }
+}

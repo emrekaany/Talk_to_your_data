@@ -1,0 +1,7 @@
+{
+  "reason": "Required filter column for city (e.g., IL_KODU) does not exist in metadata tables. Cannot construct valid SQL.",
+  "suggested_questions": [
+    "2025 yılında toplam üretim tutarı ne kadardır?",
+    "İstanbul ili için toplam poliçe sayısı nedir?"
+  ]
+}

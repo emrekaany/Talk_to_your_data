@@ -1,0 +1,31 @@
+{
+  "intent": "total production in Istanbul for 2025",
+  "required_filters": [
+    "{'city': 'Istanbul', 'year': '2025'}"
+  ],
+  "measures": [
+    "{'total_production': 'total üretim'}"
+  ],
+  "dimensions": [
+    "{'city': 'Istanbul', 'year': '2025'}"
+  ],
+  "grain": [
+    "city, year"
+  ],
+  "join_needs": [
+    "{'customer': True, 'policy': True, 'address': True}"
+  ],
+  "security_constraints": [
+    "{'city_access': 'Istanbul', 'year_access': '2025'}"
+  ],
+  "invalid_request": false,
+  "notes": "Üretim raporlarında ek tanzim tarihi esas alınır. İstanbul ili ve 2025 yılına ait toplam üretim istenmektedir.",
+  "row_limit": 1,
+  "report_period": "yearly",
+  "time_granularity": "year",
+  "time_value": "2025",
+  "time_range": {
+    "start": "2025-01-01",
+    "end": "2025-12-31"
+  }
+}

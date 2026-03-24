@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS prim_üretim FROM AS_DWH.FACT_POL_POLICE_EK JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID AND AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.POLICE_TANZIM_TARIHI, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses the BRUT_PRIM_TL measure from the FACT_POL_POLICE_EK table joined with POL_POLICE_OZET on the correct keys. Filters by the specified month using the POLICE_TANZIM_TARIHI column.",
+    "risk_notes": "Assumes POLICE_TANZIM_TARIHI is the correct column for Tanzim Tarihi. No additional dimensions or filters are applied.",
+    "description": "Question answered: What is the total production premium (BRUT_PRIM_TL) for policies issued in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK and AS_DWH.POL_POLICE_OZET\nFilters: Policies issued in December 2025\nGrouping/measures: Sum of BRUT_PRIM_TL\nExpected output columns: prim_üretim\nAssumptions: The join between the two tables is based on KAYNAK_SISTEM_ID and POLICE_ID.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(AS_DWH.FACT_POL_POLICE_TEM_ASSET.VOP_TL) AS prim_üretim FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID AND AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.POLICE_TANZIM_TARIHI, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses the VOP_TL measure from the FACT_POL_POLICE_TEM_ASSET table joined with POL_POLICE_OZET. Filters by the specified month using POLICE_TANZIM_TARIHI.",
+    "risk_notes": "Uses VOP_TL instead of BRUT_PRIM_TL, which may differ in meaning. Ensure this aligns with the user's definition of 'prim üretim'.",
+    "description": "Question answered: What is the total production premium (VOP_TL) for policies issued in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET and AS_DWH.POL_POLICE_OZET\nFilters: Policies issued in December 2025\nGrouping/measures: Sum of VOP_TL\nExpected output columns: prim_üretim\nAssumptions: The join between the two tables is based on KAYNAK_SISTEM_ID and POLICE_ID.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS prim_üretim FROM AS_DWH.FACT_POL_POLICE_EK JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID AND AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID JOIN AS_DWH.ACE_ACENTE ON AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.POLICE_TANZIM_TARIHI, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Includes a join to ACE_ACENTE to potentially support future filtering or grouping by acente. Still filters by the specified month.",
+    "risk_notes": "Includes an unnecessary join to ACE_ACENTE since no acente-based grouping or filtering is requested. May impact performance.",
+    "description": "Question answered: What is the total production premium (BRUT_PRIM_TL) for policies issued in December 2025, grouped by agency?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, and AS_DWH.ACE_ACENTE\nFilters: Policies issued in December 2025\nGrouping/measures: Sum of BRUT_PRIM_TL\nExpected output columns: prim_üretim\nAssumptions: The join between the tables is based on KAYNAK_SISTEM_ID, POLICE_ID, and Acente ID.",
+    "recommended": false
+  }
+]

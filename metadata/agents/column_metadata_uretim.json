@@ -1,0 +1,784 @@
+{
+  "metadata_version": 3,
+  "agent_id": "uretim",
+  "columns": [
+    {
+      "table": "AGGR.AS400_YENI_URUN",
+      "name": "NEW_FPOLK",
+      "type": "VARCHAR2",
+      "description": "Poliçe Kodu Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisinin kodu (410*,420-1 vb.) içerir. (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Kodu Detay"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, CASE WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 741 THEN 71602 WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 742 THEN 71603 ELSE AGGR.AS400_YENI_URUN.NEW_FPOLK END"
+      ]
+    },
+    {
+      "table": "AGGR.AS400_YENI_URUN",
+      "name": "YENI_FPOLAC",
+      "type": "VARCHAR2",
+      "description": "Poliçe Adı Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisini (Güvenli Gelecek, Sınırsız Trafik, VW Kasko vb.) içerir. (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Adı Detay"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_REF_TANIM.POLICE_ADI_DETAY, UPPER(AGGR.AS400_YENI_URUN.YENI_FPOLAC)"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE",
+      "name": "ACENTE_ADI",
+      "type": "VARCHAR2",
+      "description": "Acente Unvanı Acente Unvanı, sigorta acentesinin resmî ticari adını veya işletme unvanını ifade eder. Acente unvanı = Sigorta acentesinin resmî şirket adı (Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir.",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Acente Adı",
+        "Acente Unvanı",
+        "ACENTE_ADI"
+      ],
+      "select_expressions": [
+        "AS_DWH.ACE_ACENTE.ACENTE_ADI"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE",
+      "name": "ACENTE_ID",
+      "type": "NUMBER",
+      "description": "",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "ACENTE_ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE",
+      "name": "ACENTE_KODU",
+      "type": "VARCHAR2",
+      "description": "Acente İl Adı Kanalın faaliyet adresine ilişkin il adıdır. Acente İl Adı, sigorta acentesinin faaliyet gösterdiği veya kayıtlı olduğu ilin adını ifade eder. Acente İl Adı = Sigorta acentesinin bulunduğu şehrin adı Tablo baglami: Acentelere ait adres bilgilerini tutar. AS_DWH.ACE_ACENTE tablosuna ...",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Acente Şehri",
+        "Acente İl Bilgisi",
+        "Acente Konum İli",
+        "Acente İl Adı",
+        "ACENTE_KODU"
+      ],
+      "select_expressions": [
+        "CASE WHEN AS_DWH.ACE_ACENTE.ACENTE_KODU IS NOT NULL THEN AS_DWH.ACE_ACENTE_ADRES.IL_ADI END"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE",
+      "name": "ACENTE_KODU_NUMERIC",
+      "type": "VARCHAR2",
+      "description": "Acente Kodu Acente Kodu, sigorta şirketi sistemlerinde her acenteyi benzersiz şekilde tanımlamak için verilen özel numara veya koddur. Acente kodu = Sigorta acentesini sistemde tanıtan özel kimlik numarası (Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir.)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Acenta Tanımlama Kodu",
+        "Acenta Referans Kodu",
+        "Acenta Numarası",
+        "Satış Acentesi Kodu",
+        "Acente Kodu"
+      ],
+      "select_expressions": [
+        "AS_DWH.ACE_ACENTE.ACENTE_KODU_NUMERIC"
+      ],
+      "sample_questions": [
+        "320020 no'lu acentenin cari yıl üretimini gösterebilir misin ?"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE",
+      "name": "ACENTE_MODEL_KODU",
+      "type": "VARCHAR2",
+      "description": "Acente Tipi Acente tipi = Acentenin hangi tür acente olduğunu gösteren bilgi (Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir.",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Acente Türü",
+        "Acente Sınıfı",
+        "Acente Sınıflandırması",
+        "Acente Tipi",
+        "ACENTE_MODEL_KODU"
+      ],
+      "select_expressions": [
+        "AS_DWH.ACE_ACENTE.ACENTE_MODEL_KODU"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE",
+      "name": "DAGITIM_KANALI",
+      "type": "VARCHAR2",
+      "description": "Dağıtım Kanalı Acente, Banka , Broker vs. kırılımda dağıtım kanalı bilgisini getirir.",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Dağıtım Kanalı"
+      ],
+      "sample_questions": [
+        "Dağıtım kanalı bazında üretimi gösterebilir misin?"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE",
+      "name": "SATIS_MUDURLUGU",
+      "type": "VARCHAR2",
+      "description": "Satış Müdürlüğü Kanalın bağlı olduğu satış müdürlüğü bilgisidir. Satış Müdürlüğü, sigorta şirketi içinde satış faaliyetlerini yöneten ve belirli bir bölge, kanal veya acente grubundan sorumlu olan yönetim birimini ifade eder. Satış Müdürlüğü = Belirli bir bölgedeki veya kanal grubundaki satışları...",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Satış Bölge Müdürlüğü",
+        "Bölge Satış Birimi",
+        "Satış Müdürlüğü",
+        "SATIS_MUDURLUGU"
+      ],
+      "select_expressions": [
+        "AS_DWH.ACE_ACENTE.SATIS_MUDURLUGU"
+      ],
+      "sample_questions": [
+        "Bölge müdürlüğü bazında üretim en fazla olduğu 5 acente nedir?"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE_ADRES",
+      "name": "IL_ADI",
+      "type": "VARCHAR2",
+      "description": "Acente İl Adı Kanalın faaliyet adresine ilişkin il adıdır. Acente İl Adı, sigorta acentesinin faaliyet gösterdiği veya kayıtlı olduğu ilin adını ifade eder. Acente İl Adı = Sigorta acentesinin bulunduğu şehrin adı Tablo baglami: Acentelere ait adres bilgilerini tutar. AS_DWH.ACE_ACENTE tablosuna ...",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Acente Şehri",
+        "Acente İl Bilgisi",
+        "Acente Konum İli",
+        "Acente İl Adı"
+      ],
+      "select_expressions": [
+        "CASE WHEN AS_DWH.ACE_ACENTE.ACENTE_KODU IS NOT NULL THEN AS_DWH.ACE_ACENTE_ADRES.IL_ADI END"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_SATIS_MUDURLUGU",
+      "name": "SATIS_MUDURLUGU_ADI",
+      "type": "VARCHAR2",
+      "description": "Acente Bölge Adı Acente Bölge Adı = Acentenin bağlı olduğu bölgenin ismi (Acente bölgelerine ait bilgileri tutan tablo. SATIS_MUDURLUGU_ID üzerinden bağlanarak bilgilere erişilir.)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Acente Bölge İsmi",
+        "Acentenin Bağlı Olduğu Bölge",
+        "Satış Bölgesi Adı",
+        "Acente Bölge Bilgisi",
+        "Acente Bölge Adı"
+      ],
+      "select_expressions": [
+        "AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ADI"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_SATIS_MUDURLUGU",
+      "name": "SATIS_MUDURLUGU_KODU",
+      "type": "VARCHAR2",
+      "description": "Acente Bölge Kodu Acente Bölge Kodu = Acentenin hangi bölgeye bağlı olduğunu gösteren kod (Acente bölgelerine ait bilgileri tutan tablo. SATIS_MUDURLUGU_ID üzerinden bağlanarak bilgilere erişilir.)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Acente Bölge Kodu"
+      ],
+      "select_expressions": [
+        "AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_KODU"
+      ]
+    },
+    {
+      "table": "AS_DWH.FACT_POL_POLICE_EK",
+      "name": "BRUT_PRIM_TL",
+      "type": "NUMBER",
+      "description": "Brüt Prim TL Brüt Prim TL, bir sigorta poliçesi için müşteriden tahsil edilen toplam prim tutarının Türk Lirası (TL) cinsinden değerini ifade eder. Bu tutar, primin vergi ve yasal kesintiler dahil edilmiş halidir. Brüt Prim TL = Vergiler ve fonlar dahil müşterinin ödediği toplam prim. Net prim + ...",
+      "semantic_type": "Numerical",
+      "keywords": [
+        "Toplam Prim",
+        "Brüt Poliçe Primi",
+        "Toplam Prim Tutarı",
+        "Vergi Dahil Prim",
+        "Poliçe Brüt Primi",
+        "Brüt Prim TL",
+        "Üretim",
+        "Üretim Tutarı",
+        "Prim Üretimi"
+      ],
+      "select_expressions": [
+        "SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL)"
+      ],
+      "sample_questions": [
+        "Bana Son 5 Yılı Tanzim Yılı Bazında Brüt Prim Tutarlarını Yazar mısın?"
+      ]
+    },
+    {
+      "table": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+      "name": "VOP_TL",
+      "type": "NUMBER",
+      "description": "Vergi Öncesi Prim TL Vergi Öncesi Prim TL, bir sigorta poliçesi için hesaplanan prim tutarının vergiler ve yasal kesintiler eklenmeden önceki Türk Lirası (TL) cinsinden değerini ifade eder. Vergi Öncesi Prim TL = Poliçenin vergiler eklenmeden önceki prim tutarı Tablo baglami: Poliçe Teminat (TKZ)...",
+      "semantic_type": "Numerical",
+      "keywords": [
+        "Net Prim Tutarı",
+        "Vergisiz Prim",
+        "Prim Tutarı (Vergi Hariç)",
+        "Net Poliçe Primi",
+        "VOP TL",
+        "Vergi Öncesi Prim TL",
+        "Üretim",
+        "Üretim Tutarı",
+        "Tanzimli Üretim",
+        "Prim Üretimi",
+        "Varsayılan Üretim"
+      ],
+      "select_expressions": [
+        "SUM(AS_DWH.FACT_POL_POLICE_TEM_ASSET.VOP_TL)"
+      ]
+    },
+    {
+      "table": "AS_DWH.GNL_KAYNAK_SISTEM",
+      "name": "KAYNAK_SISTEM_ID",
+      "type": "VARCHAR2",
+      "description": "Kaynak Sistem Poliçe verisinin hangi kaynak sistemden (1-AS400/2-ASOS/15-ASTRA) geldiğini gösteren objedir. Kaynak Sistem, bir verinin ilk üretildiği veya alındığı sistemi ifade eder. Kaynak sistem = Verinin geldiği ana sistem",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Veri Kaynağı",
+        "Kaynak Uygulama",
+        "Kaynak Platform",
+        "Kaynak Sistem Adı",
+        "Veri Üretim Sistemi",
+        "Kaynak Sistem"
+      ],
+      "select_expressions": [
+        "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID"
+      ],
+      "sample_questions": [
+        "AS400 Poliçe Sayım ve Geçen Yılki Üretimim Nedir? (Üretim Denilince aksi belirtilmedikçe Vergi Öncesi Prim TL kolonu kullanılır)"
+      ]
+    },
+    {
+      "table": "AS_DWH.GNL_TARIH",
+      "name": "TARIH",
+      "type": "NUMBER",
+      "description": "Ana Poliçe Tanzim Tarihi Tanzim tarihi = Poliçe Belgesinin oluşturulduğu / yazıldığı tarih Poliçenin hazırlandığı ve düzenlendiği gün Belgenin düzenlendiği tarih Sistemde poliçenin oluşturulduğu tarih Tablo baglami: Genel Tarih Bilgileri Tutan Takvim Tablosu. Join üzerinden ilgili ID ile istenile...",
+      "semantic_type": "Numerical",
+      "keywords": [
+        "Poliçe Tanzim Tarihi",
+        "Tanzim Tarihi",
+        "Tan Tarih",
+        "Tanzim Trh",
+        "Tan Trh",
+        "Bas Tarih",
+        "Bas Trh",
+        "Poliçe Düzenleme Tarihi",
+        "Ek Tanzim Tarihi",
+        "Tanzimli",
+        "Üretim Tarihi",
+        "Ana Plc Baslangic Tarihi",
+        "Ana Pol BTS TRH",
+        "Ana Pol Btis Tarihi",
+        "Ana Poliçe Başlangıç Tarihi",
+        "Ana Poliçe Btitiş Tarihi",
+        "Bitiş Tarihi",
+        "Ek Baslangic Trh",
+        "Ek Başlangıç Tarihi",
+        "Ek Düzenleme Tarihi",
+        "Ek Geçerlilik Başlangıç Tarihi",
+        "Ek Geçerlilik Bitiş Tarihi",
+        "Ek Süre Bitiş Tarihi",
+        "Ek Tarihi",
+        "Ek Teminat Başlangıç Tarihi",
+        "Ek Teminat Bitiş Tarihi",
+        "Ek Teminat Yürürlük Tarihi",
+        "Ek Tnzm Tarihi",
+        "Ek Tnzm Trh",
+        "Ek Trh",
+        "Ek İşlem Tarihi",
+        "Police Baslangic Tarihi",
+        "Poliçe Ana Bitiş Tarihi",
+        "Poliçe Başlangıç Tarihi",
+        "Poliçe Bitiş Tarihi",
+        "Poliçe Kayıt Tarihi",
+        "Poliçe Oluşturma Tarihi",
+        "Poliçe Sonlanma Tarihi",
+        "Poliçe Yürürlük Tarihi",
+        "Sigorta Başlangıç Tarihi",
+        "Sigorta Bitiş Tarihi",
+        "Teminat Başlangıcı",
+        "Teminat Başlangıç Tarihi",
+        "Teminat Bitiş Tarihi",
+        "Teminat Sonu Tarihi",
+        "Zeyil Başlangıç Tarihi",
+        "Zeyil Bitiş Tarihi",
+        "Zeyil Düzenleme Tarihi",
+        "Zeyil Geçerlilik Sonu",
+        "Zeyil Kayıt Tarihi",
+        "Zeyil Yürürlük Tarihi"
+      ],
+      "select_expressions": [
+        "MAX(AS_DWH.GNL_TARIH.TARIH)"
+      ],
+      "sample_questions": [
+        "2025 Yılı Tanzimli Üretimi Verebilir Misin?",
+        "Aksi belirtilmediği sürece üretim raporları ek tanzim tarihi esasıyla hazırlanır.Örneğin kullanıcı 2026 yılındaki üretimini getir dediğinde bu tarihe göre çalışmalıdır.Opr 54 ve Prim adet yasal raporu örnek verilebilir.",
+        "2025 Yılı başlangıçlı poliçelerin listesini verebilir misin?",
+        "2. Ekin Başlangıç Tarihini Verebilir Misin?",
+        "2026 İçerisinde Bitecek Poliçelerin Sayısı Nedir?"
+      ]
+    },
+    {
+      "table": "AS_DWH.MUS_MUSTERI",
+      "name": "MUSTERI_ADI",
+      "type": "VARCHAR2",
+      "description": "Müşteri Adı Müşteri Adı, sigorta poliçesinin sahibi olan kişinin veya kurumun adı ya da ticari unvanını ifade eder. Müşteri adı = Sigorta poliçesinin ait olduğu kişi veya şirketin adı Tablo baglami: Müşteri Bilgilerini İçeren Tablo (Müşteri Bilgilerini İçeren Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Sigortalı Adı",
+        "Müşteri Unvanı",
+        "Müşteri İsmi",
+        "Müşteri Adı"
+      ],
+      "select_expressions": [
+        "AS_DWH.MUS_MUSTERI.MUSTERI_ADI"
+      ]
+    },
+    {
+      "table": "AS_DWH.MUS_MUSTERI",
+      "name": "MUSTERI_NUMARASI",
+      "type": "VARCHAR2",
+      "description": "Müşteri No Müşteri No, bir sigorta şirketinin sistemlerinde her müşteriyi benzersiz şekilde tanımlamak için verilen özel numaradır. Müşteri No = Müşteriyi sistemde tanıtan kimlik numarası Tablo baglami: Müşteri Bilgilerini İçeren Tablo Müşteri Sayısı Müşteri Sayısı, belirli bir sistemde, poliçede...",
+      "semantic_type": "Numerical",
+      "keywords": [
+        "Müşteri Numarası",
+        "Müşteri ID",
+        "Müşteri Tanımlama Numarası",
+        "Müşteri No",
+        "Toplam Müşteri Adedi",
+        "Müşteri Adedi",
+        "Müşteri Miktarı",
+        "Müşteri Sayısı"
+      ],
+      "select_expressions": [
+        "AS_DWH.MUS_MUSTERI.MUSTERI_NUMARASI",
+        "COUNT (DISTINCT AS_DWH.MUS_MUSTERI.MUSTERI_NUMARASI)"
+      ],
+      "sample_questions": [
+        "Müşteri Bazında top 10/20 üretimi olan müşterileri gösterebilir misin?"
+      ]
+    },
+    {
+      "table": "AS_DWH.MUS_MUSTERI",
+      "name": "MUSTERI_SOYADI",
+      "type": "VARCHAR2",
+      "description": "Müşteri Soyadı Müşteri Soyadı, sigorta poliçesine sahip olan bireysel müşterinin aile adını (soyadını) ifade eder. Müşteri Soyadı = Sigortalı kişinin soyadı Tablo baglami: Müşteri Bilgilerini İçeren Tablo (Müşteri Bilgilerini İçeren Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Soyadı",
+        "Sigortalı Soyadı",
+        "Müşteri Soyadı"
+      ],
+      "select_expressions": [
+        "AS_DWH.MUS_MUSTERI.MUSTERI_SOYADI"
+      ]
+    },
+    {
+      "table": "AS_DWH.MUS_MUSTERI_CINSIYET",
+      "name": "MUSTERI_CINSIYET_ADI",
+      "type": "VARCHAR2",
+      "description": "Müşteri Cinsiyet Müşteri Cinsiyet, sigorta müşterisinin biyolojik veya resmi kayıtlarına göre belirtilen cinsiyet bilgisini ifade eder. Müşteri cinsiyet = Müşterinin kadın mı erkek mi olduğunu gösteren bilgi (Müşteri Bilgilerini İçeren Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Cinsiyet",
+        "Müşteri Cinsiyet Bilgisi",
+        "Sigortalı Cinsiyeti",
+        "Müşteri Cinsiyet"
+      ],
+      "select_expressions": [
+        "AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ADI"
+      ],
+      "sample_questions": [
+        "952 kodlu ürünün müşteri cinsiyet bazında üretim dağılımını getirebilir misin ?"
+      ]
+    },
+    {
+      "table": "AS_DWH.POLICE_SAYISI",
+      "name": "POLICE_SAYISI",
+      "type": "NUMBER",
+      "description": "Poliçe Sayısı Poliçe Sayısı Bilgisini Verir. Poliçe Sayısı, belirli bir kapsam içinde bulunan toplam sigorta poliçesi adedini ifade eder. Poliçe Sayısı = Belirli bir dönemde veya grupta bulunan toplam poliçe adedi Tablo baglami: Poliçe Sayısı Bilgisini Tutar (Poliçe Sayısı Bilgisini Tutar)",
+      "semantic_type": "Numerical",
+      "keywords": [
+        "Toplam Poliçe Adedi",
+        "Poliçe Adedi",
+        "Poliçe Toplamı",
+        "Poliçe Miktarı",
+        "Policy Count",
+        "Poliçe Sayısı"
+      ],
+      "select_expressions": [
+        "SUM(AS_DWH.POLICE_SAYISI.POLICE_SAYISI)"
+      ],
+      "sample_questions": [
+        "Cari yılda ürettiğim poliçe"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_BRANS",
+      "name": "BRANS_ADI",
+      "type": "VARCHAR2",
+      "description": "Branş Açıklama Üretim branş açıklaması bilgisidir. Branş Açıklama, sigortacılıkta bir poliçenin ait olduğu sigorta branşının adını veya tanımını açıklayıcı şekilde gösteren bilgidir. Branş açıklama = Sigorta branşının adının veya detaylı tanımının yazıldığı alan",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Hayır",
+        "Branş Açıklama"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_BRANS.BRANS_ADI, AS_DWH.POL_POLICE_REF_TANIM.BRANS_ADI"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_BRANS",
+      "name": "BRANS_KODU",
+      "type": "VARCHAR2",
+      "description": "Branş Üretim branşı bilgisidir. Branş, sigortacılıkta bir poliçenin ait olduğu sigorta türünü veya faaliyet alanını ifade eder. Branş = Poliçenin hangi sigorta alanına ait olduğunu gösteren sınıflandırma (Branş Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Sigorta Branşı",
+        "Sigorta Türü",
+        "Poliçe Branşı",
+        "Branş"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_BRANS.BRANS_KODU, AS_DWH.POL_POLICE_REF_TANIM.BRANS_KODU"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_DURUMU",
+      "name": "POLICE_DURUMU_ADI",
+      "type": "VARCHAR2",
+      "description": "Poliçe Durumu Poliçenin güncel durum açıklamalarını içerir.(Yürürlükte, başlangıcından iptal vb.) (Poliçenin Yürürlükte mi ; İptal Mi Yoksa Süresini mi tamamladı gibi durum bilgisini veren tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Statüsü",
+        "Poliçe Geçerlilik Durumu",
+        "Poliçe Aktiflik Durumu",
+        "Poliçe Durumu"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_ADI"
+      ],
+      "sample_questions": [
+        "Yürürlükteki Poliçe Adedim Kaçtır?"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_KOD",
+      "name": "POLICE_KOD_ADI",
+      "type": "VARCHAR2",
+      "description": "Poliçe Adı Poliçe kodunun açıklamasını içerir. Ürünün Adını verin (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Açıklama",
+        "Poliçe Kodu Açıklama",
+        "Poliçe Adı",
+        "Ürün Adı"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, AS_DWH.POL_POLICE_KOD.POLICE_KOD_ADI"
+      ],
+      "sample_questions": [
+        "Bu Poliçe Hangi Ürüne Aittir?, Ürün bazında üretimimiz nedir ?"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_KOD",
+      "name": "POLICE_KOD_KODU",
+      "type": "VARCHAR2",
+      "description": "Poliçe Kodu Poliçe Kodu, bir sigorta poliçesini sistem içinde tanımlamak, sınıflandırmak veya ayırt etmek için kullanılan özel koddur. Poliçe kodu = Poliçeyi sistemde tanımlayan veya hangi ürün/poliçe tipine ait olduğunu gösteren kod (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Kodu",
+        "Pol Kod"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_KOD.POLICE_KOD_KODU"
+      ],
+      "sample_questions": [
+        "Poliçe Koduna göre üretimleri gösterebilir misin?"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "POLICE_DOVIZ_CINSI",
+      "type": "VARCHAR2",
+      "description": "Poliçe Döviz Cinsi Poliçe priminin döviz cinsini ifade eder. Poliçe Döviz Cinsi, bir sigorta poliçesinde yer alan prim, teminat ve diğer finansal tutarların hangi para birimi üzerinden ifade edildiğini gösteren bilgidir. (Poliçe Bilgilerini Tutan Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Para Birimi",
+        "Poliçe Kur Cinsi",
+        "Poliçe Döviz Türü",
+        "Poliçe Para Cinsi",
+        "Poliçe Currency Bilgisi",
+        "Poliçe Döviz Cinsi"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_DOVIZ_CINSI"
+      ],
+      "sample_questions": [
+        "Yabancı para cinsinden üretimim bu sene ne kadardır ? -Poliçe döviz cinsi hariç bırakılıp diğer para birimleri tablo haline getirilip sunulmalıdır."
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "POLICE_EK_NO",
+      "type": "VARCHAR2",
+      "description": "Ek No Ek No, bir sigorta poliçesine sonradan yapılan değişikliklerin sıra numarasını ifade eder. Ek No = Poliçeye yapılan ek işlemin (zeyilin) kaçıncı değişiklik olduğunu gösteren numara Tablo baglami: Poliçe Bilgilerini Tutan Tablo (Poliçe Bilgilerini Tutan Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Zeyil Numarası",
+        "Poliçe Ek Numarası",
+        "Zeyil Sıra Numarası",
+        "Ek İşlem Numarası",
+        "Ek No",
+        "Ek Numarası",
+        "Poliçe Ek No"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_EK_NO"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "POLICE_NO",
+      "type": "VARCHAR2",
+      "description": "Poliçe No Poliçe numarası bilgisini tutar Tablo baglami: Poliçe Bilgilerini Tutan Tablo (Poliçe Bilgilerini Tutan Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Numarası",
+        "Poliçe No",
+        "Pol No",
+        "Pol Numarası",
+        "Sigorta Poliçe Numarası"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_NO"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "POLICE_YENILEME_NO",
+      "type": "VARCHAR2",
+      "description": "Yenileme No Yenileme No, bir sigorta poliçesinin aynı teminat ve sözleşme yapısıyla kaçıncı kez yenilendiğini gösteren numaradır. Yenileme No = Poliçenin kaçıncı kez yenilendiğini gösteren sayı Tablo baglami: Poliçe Bilgilerini Tutan Tablo (Poliçe Bilgilerini Tutan Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Yenileme Numarası",
+        "Poliçe Yenileme Sayısı",
+        "Tecdit No",
+        "Tecdit Numarası",
+        "Yenileme No"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_YENILEME_NO"
+      ],
+      "sample_questions": [
+        "Bu Poliçenin Kaç Adet Yenilemesi Vardır?  Bu yıl poliçesini yenileyenlerin Üretimi Nedir? ( Ana Poliçe Başlangıç Tarihi daha çok sorgulanmak istenir.). Poliçe Yenileme Tarihini Söyler Misin? (Sıfırıncı Ekteki Tanzim Tarihini Sorguluyor)"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "BRANS_ADI",
+      "type": "VARCHAR2",
+      "description": "Branş Açıklama Üretim branş açıklaması bilgisidir. Branş Açıklama, sigortacılıkta bir poliçenin ait olduğu sigorta branşının adını veya tanımını açıklayıcı şekilde gösteren bilgidir. Branş açıklama = Sigorta branşının adının veya detaylı tanımının yazıldığı alan",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Hayır",
+        "Branş Açıklama"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_BRANS.BRANS_ADI, AS_DWH.POL_POLICE_REF_TANIM.BRANS_ADI"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "BRANS_KODU",
+      "type": "VARCHAR2",
+      "description": "Branş Üretim branşı bilgisidir. Branş, sigortacılıkta bir poliçenin ait olduğu sigorta türünü veya faaliyet alanını ifade eder. Branş = Poliçenin hangi sigorta alanına ait olduğunu gösteren sınıflandırma (Branş Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Sigorta Branşı",
+        "Sigorta Türü",
+        "Poliçe Branşı",
+        "Branş"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_BRANS.BRANS_KODU, AS_DWH.POL_POLICE_REF_TANIM.BRANS_KODU"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "POLICE_ADI_DETAY",
+      "type": "VARCHAR2",
+      "description": "Poliçe Adı Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisini (Güvenli Gelecek, Sınırsız Trafik, VW Kasko vb.) içerir. (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Adı Detay"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_REF_TANIM.POLICE_ADI_DETAY, UPPER(AGGR.AS400_YENI_URUN.YENI_FPOLAC)"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "POLICE_KODU_DETAY",
+      "type": "VARCHAR2",
+      "description": "Poliçe Kodu Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisinin kodu (410*,420-1 vb.) içerir. (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Kodu Detay"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, CASE WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 741 THEN 71602 WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 742 THEN 71603 ELSE AGGR.AS400_YENI_URUN.NEW_FPOLK END"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "POLICE_KOD_ADI",
+      "type": "VARCHAR2",
+      "description": "Poliçe Adı Poliçe kodunun açıklamasını içerir. Ürünün Adını verin",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Poliçe Açıklama",
+        "Poliçe Kodu Açıklama",
+        "Poliçe Adı",
+        "Ürün Adı",
+        "Poliçe Kodu Detay"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, AS_DWH.POL_POLICE_KOD.POLICE_KOD_ADI",
+        "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, CASE WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 741 THEN 71602 WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 742 THEN 71603 ELSE AGGR.AS400_YENI_URUN.NEW_FPOLK END"
+      ],
+      "sample_questions": [
+        "Bu Poliçe Hangi Ürüne Aittir?, Ürün bazında üretimimiz nedir ?"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "TKZ_ADI",
+      "type": "VARCHAR2",
+      "description": "TKZ Kodu Açıklaması TKZ Kodu Açıklaması, sigorta sistemlerinde kullanılan TKZ kodunun neyi ifade ettiğini açıklayan metinsel bilgidir. TKZ kodu açıklaması = TKZ kodunun hangi tarife, kapsam veya ürün tanımına karşılık geldiğini açıklayan bilgi (TKZ Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "TKZ Tanımı",
+        "Tarife Kodu Açıklaması",
+        "TKZ Kodu Açıklaması"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_TKZ.TKZ_ADI, AS_DWH.POL_POLICE_REF_TANIM.TKZ_ADI"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "TKZ_KODU",
+      "type": "VARCHAR2",
+      "description": "TKZ Kodu TKZ Kodu, sigortacılıkta bir poliçenin veya işlemin tarife, kapsam veya özel ürün sınıflandırmasını belirlemek için kullanılan tanımlayıcı koddur. TKZ Kodu = Poliçenin hangi tarife veya kapsam grubuna ait olduğunu gösteren kod. (TKZ Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Tarife Kodu",
+        "Teminat Kodu",
+        "Ürün Tarife Kodu",
+        "Tarife Tanımlama Kodu",
+        "TKZ Kodu"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_TKZ.TKZ_KODU, AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU"
+      ],
+      "sample_questions": [
+        "TKZ kodu bazında üretimimi gösterebilir misin ?"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_SATIS_KANALI",
+      "name": "SATIS_KANALI",
+      "type": "VARCHAR2",
+      "description": "Satış Kanalı Asos ürünlerine ait satış kanalı bilgisidir. Satış Kanalı, bir sigorta poliçesinin hangi dağıtım yolu veya aracılık yöntemi üzerinden satıldığını gösteren bilgidir. Satış kanalı = Poliçenin müşteriye hangi yol üzerinden ulaştırıldığını gösteren bilgi",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Satış Dağıtım Kanalı",
+        "Poliçe Satış Kanalı",
+        "Dağıtım Kanalı",
+        "Satış Platformu",
+        "Satış Kanalı"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI"
+      ],
+      "sample_questions": [
+        "Satış Kanalına göre üretimleri gösterebilir misin?"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_TKZ",
+      "name": "TKZ_ADI",
+      "type": "VARCHAR2",
+      "description": "TKZ Kodu Açıklaması TKZ Kodu Açıklaması, sigorta sistemlerinde kullanılan TKZ kodunun neyi ifade ettiğini açıklayan metinsel bilgidir. TKZ kodu açıklaması = TKZ kodunun hangi tarife, kapsam veya ürün tanımına karşılık geldiğini açıklayan bilgi (TKZ Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "TKZ Tanımı",
+        "Tarife Kodu Açıklaması",
+        "TKZ Kodu Açıklaması"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_TKZ.TKZ_ADI, AS_DWH.POL_POLICE_REF_TANIM.TKZ_ADI"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_TKZ",
+      "name": "TKZ_KODU",
+      "type": "VARCHAR2",
+      "description": "TKZ Kodu TKZ Kodu, sigortacılıkta bir poliçenin veya işlemin tarife, kapsam veya özel ürün sınıflandırmasını belirlemek için kullanılan tanımlayıcı koddur. TKZ Kodu = Poliçenin hangi tarife veya kapsam grubuna ait olduğunu gösteren kod. (TKZ Tanımlarını İçeren Look Up Tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Tarife Kodu",
+        "Teminat Kodu",
+        "Ürün Tarife Kodu",
+        "Tarife Tanımlama Kodu",
+        "TKZ Kodu"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_TKZ.TKZ_KODU, AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU"
+      ],
+      "sample_questions": [
+        "TKZ kodu bazında üretimimi gösterebilir misin ?"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_URUN",
+      "name": "URUN_ADI",
+      "type": "VARCHAR2",
+      "description": "Ürün Adı Ürün Adı, sigorta şirketinin müşterilere sunduğu sigorta ürününün veya teminat paketinin adını ifade eder. Ürün adı = Satılan sigorta ürününün ismi (Ürünlere ait bilgileri tutan tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Sigorta Ürün Adı",
+        "Poliçe Ürün Adı",
+        "Ürün Tanımı",
+        "Sigorta Ürün İsmi",
+        "Ürün Tanımlaması",
+        "Ürün Adı"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_URUN.URUN_ADI"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_URUN",
+      "name": "URUN_KODU",
+      "type": "VARCHAR2",
+      "description": "Ürün Kodu Ürün Kodu, sigorta şirketinin sunduğu her sigorta ürününü sistem içinde benzersiz şekilde tanımlamak için kullanılan koddur. Ürün kodu = Sigorta ürününü sistemde tanımlayan özel kod (Ürünlere ait bilgileri tutan tablo)",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Sigorta Ürün Kodu",
+        "Ürün Tanımlama Kodu",
+        "Ürün Kodu"
+      ],
+      "select_expressions": [
+        "AS_DWH.POL_URUN.URUN_KODU"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT p.urun_adi, SUM(f.BRUT_PRIM_TL) AS total_prime FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID JOIN AS_DWH.GNL_KAYNAK_SISTEM k ON o.KAYNAK_SISTEM_ID = k.KAYNAK_SISTEM_ID JOIN AS_DWH.POL_POLICE_KOD k2 ON o.POLICE_KOD_ID = k2.POLICE_KOD_ID JOIN AGGR.AS400_YENI_URUN u ON k2.POLICE_KOD_KODU = u.NEW_FPOLK JOIN AS_DWH.POL_URUN p ON u.NEW_FPOLK = p.URUN_KODU JOIN AS_DWH.GNL_TARIH t ON o.EK_TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY p.urun_adi ORDER BY total_prime DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups production premium by product name using the effective adjustment date in December 2025.",
+    "risk_notes": "Assumes correct join paths between POL_URUN and AS400_YENI_URUN via POLICE_KOD_KODU and NEW_FPOLK.",
+    "description": "Question answered: What is the total prime amount per product in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_KAYNAK_SISTEM, AS_DWH.POL_POLICE_KOD, AGGR.AS400_YENI_URUN, AS_DWH.POL_URUN, AS_DWH.GNL_TARIH\nFilters: Records where the date is December 2025\nGrouping/measures: Summing BRUT_PRIM_TL grouped by product name\nExpected output columns: urun_adi, total_prime\nAssumptions: The product name is correctly mapped through multiple joins.",
+    "recommended": false
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT u.POLICE_KOD_ADI AS urun_adi, SUM(f.BRUT_PRIM_TL) AS total_prime FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON o.EK_TANZIM_TARIH_ID = t.TARIH_ID JOIN AGGR.AS400_YENI_URUN u ON o.NEW_FPOLK = u.NEW_FPOLK WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY u.POLICE_KOD_ADI ORDER BY total_prime DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups production premium by product name using POLICE_KOD_ADI from AS400_YENI_URUN.",
+    "risk_notes": "Uses POLICE_KOD_ADI instead of URUN_ADI, which may not fully align with product name expectations.",
+    "description": "Question answered: What is the total prime amount per product code name in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AGGR.AS400_YENI_URUN\nFilters: Records where the date is December 2025\nGrouping/measures: Summing BRUT_PRIM_TL grouped by product code name\nExpected output columns: urun_adi, total_prime\nAssumptions: The product code name is directly available from the AGGR.AS400_YENI_URUN table.",
+    "recommended": true
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT p.URUN_ADI, SUM(f.BRUT_PRIM_TL) AS total_prime FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON o.EK_TANZIM_TARIH_ID = t.TARIH_ID JOIN AS_DWH.POL_URUN p ON o.URUN_KODU = p.URUN_KODU WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY p.URUN_ADI ORDER BY total_prime DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups production premium by product name using POL_URUN.URUN_ADI directly.",
+    "risk_notes": "Does not involve AGGR.AS400_YENI_URUN, which may be required for accurate product name mapping.",
+    "description": "Question answered: What is the total prime amount per product name in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN\nFilters: Records where the date is December 2025\nGrouping/measures: Summing BRUT_PRIM_TL grouped by product name\nExpected output columns: URUN_ADI, total_prime\nAssumptions: The product name is directly available from the AS_DWH.POL_URUN table.",
+    "recommended": false
+  }
+]

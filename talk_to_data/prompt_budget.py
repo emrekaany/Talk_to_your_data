@@ -23,20 +23,22 @@ class PromptBudgetProfile:
 
 JUDGE_PROMPT_PROFILE = PromptBudgetProfile(
     name="judge",
-    max_tables=24,
-    max_guardrails=10,
-    max_guardrail_chars=140,
+    max_tables=40,
+    max_guardrails=20,
+    max_guardrail_chars=300,
     include_candidate_tables=True,
+    include_columns=True,
+    max_columns_per_table=20,
 )
 
 EXPLAINER_PROMPT_PROFILE = PromptBudgetProfile(
     name="explainer",
-    max_tables=8,
-    max_guardrails=8,
-    max_guardrail_chars=160,
+    max_tables=24,
+    max_guardrails=15,
+    max_guardrail_chars=300,
     include_candidate_tables=False,
     include_columns=True,
-    max_columns_per_table=12,
+    max_columns_per_table=30,
 )
 
 _IDENTIFIER_PATTERN = r'(?:"(?:[^"]|"")+"|[A-Za-z_][A-Za-z0-9_$#]*)'

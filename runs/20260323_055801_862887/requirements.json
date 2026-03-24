@@ -1,0 +1,29 @@
+{
+  "intent": "retrieve_data",
+  "required_filters": [
+    "{'month': '202512'}"
+  ],
+  "measures": [
+    "production_quantity"
+  ],
+  "dimensions": [
+    "month",
+    "production_type"
+  ],
+  "grain": [
+    "month",
+    "production_type"
+  ],
+  "join_needs": [],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "The user is asking for the organized production quantity for December 2025.",
+  "row_limit": 1,
+  "report_period": "monthly",
+  "time_granularity": "month",
+  "time_value": "202512",
+  "time_range": {
+    "start": "2025-12-01",
+    "end": "2025-12-31"
+  }
+}

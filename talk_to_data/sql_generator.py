@@ -36,6 +36,15 @@ class SQLGenerationError(RuntimeError):
     """Raised when SQL candidate generation cannot produce valid options."""
 
 
+class SQLCannotAnswerSuggestion(RuntimeError):
+    """Raised when the LLM determines it cannot produce valid SQL for the request."""
+
+    def __init__(self, reason: str, suggested_questions: list[str]):
+        self.reason = reason
+        self.suggested_questions = suggested_questions
+        super().__init__(reason)
+
+
 def generate_sql_candidates(
     user_request: str,
     requirements: dict[str, Any],
@@ -142,11 +151,12 @@ def _generate_with_llm(
     )
     raw = _call_llm(
         llm_client=llm_client,
-        system_prompt="You are a senior Oracle SQL engineer. Return strict JSON only.",
+        system_prompt="You are a senior Oracle SQL engineer specializing in analytics queries. Return strict JSON only.",
         prompt=prompt,
         temperature=0.1,
         max_tokens=2200,
     )
+    _check_cannot_answer(raw)
     return _parse_candidates_json(raw)
 
 
@@ -158,7 +168,7 @@ def _build_sql_prompt(
     retry_context: dict[str, Any] | None,
     agent_rules: dict[str, Any] | None,
 ) -> str:
-    metadata_text = _metadata_prompt_text(metadata)
+    metadata_text = _metadata_prompt_text(metadata, max_tables=15)
     sql_rule_text = _sql_rule_prompt_text(requirements, agent_rules)
     retry_text = _retry_context_prompt_text(retry_context)
     agent_rules_text = _agent_rules_prompt_text(agent_rules)
@@ -174,6 +184,21 @@ def _build_sql_prompt(
         "- Never invent, rename, infer, or alias a missing metadata column into existence.\n"
         "- Every referenced identifier must match a metadata table/column exactly, including in SELECT, JOIN, WHERE, GROUP BY, HAVING, and ORDER BY.\n"
         "- Treat the metadata table column lists as the complete allowlist; if a column is absent there, do not use it.\n"
+        "\n"
+        "CRITICAL ANTI-HALLUCINATION RULES:\n"
+        "- ONLY use existing joins, table names, and column names from the metadata above. Do NOT hallucinate, invent, or guess any identifier.\n"
+        "- Before writing each column reference, verify it appears in the metadata column list for that table.\n"
+        "- If a column you expect is NOT listed in the metadata, it does NOT exist. Do NOT use it under any name.\n"
+        "- Do NOT guess column names based on common naming conventions. Only metadata-listed columns are real.\n"
+        "- JOIN conditions must use ONLY column pairs explicitly documented in the metadata Joins section.\n"
+        "\n"
+        "- If you cannot create valid SQL that answers the request using ONLY the provided metadata columns, tables, and joins, "
+        "return this alternative JSON instead:\n"
+        '{"cannot_answer": true, "reason": "brief explanation of why", '
+        '"suggested_questions": ["rephrased question 1 that CAN be answered with available metadata", '
+        '"rephrased question 2"]}.\n'
+        "- Only use the cannot_answer format when you are genuinely unable to answer; prefer generating valid SQL when possible.\n"
+        "\n"
         "- Keep SELECT minimal: include only columns required for the final answer, plus columns strictly required for aggregate output ordering or grouping.\n"
         "- Do not project join-only, filter-only, helper, or intermediate calculation columns unless the user explicitly asked to see them.\n"
         "- Prefer aggregate expressions or ORDER BY aliases instead of exposing extra raw columns in SELECT.\n"
@@ -198,13 +223,24 @@ def _retry_context_prompt_text(retry_context: dict[str, Any] | None) -> str:
 
     disqualify_reasons = _as_string_list(retry_context.get("disqualify_reasons"))[:10]
     blocked_patterns = _as_string_list(retry_context.get("blocked_sql_patterns"))[:8]
-    if not disqualify_reasons and not blocked_patterns:
+    rejected_columns = _as_string_list(retry_context.get("rejected_columns"))[:20]
+    valid_columns_hint = _as_string_list(retry_context.get("valid_columns_hint"))[:30]
+    if not disqualify_reasons and not blocked_patterns and not rejected_columns:
         return ""
 
     lines = [
         "Retry Guidance (Attempt 2):",
         "- This is a retry after candidate disqualification and/or judge failure.",
+        "- CRITICAL: The previous attempt used columns that do NOT exist in metadata. Do NOT repeat this mistake.",
     ]
+    if rejected_columns:
+        lines.append(
+            f"- REJECTED columns (do NOT use these, they do not exist): {', '.join(rejected_columns)}"
+        )
+    if valid_columns_hint:
+        lines.append(
+            f"- VALID columns you should use instead: {', '.join(valid_columns_hint)}"
+        )
     if disqualify_reasons:
         lines.append(
             f"- Previously observed disqualify reasons: {', '.join(disqualify_reasons)}"
@@ -212,7 +248,24 @@ def _retry_context_prompt_text(retry_context: dict[str, Any] | None) -> str:
     if blocked_patterns:
         lines.append(f"- Previously risky SQL patterns: {', '.join(blocked_patterns)}")
     lines.append("- Generate 3 alternatives that avoid these failures.")
+    lines.append("- If you still cannot answer with valid columns, return the cannot_answer JSON format.")
     return "\n".join(lines) + "\n\n"
+
+
+def _check_cannot_answer(raw: str) -> None:
+    """Raise SQLCannotAnswerSuggestion if the LLM returned a cannot_answer response."""
+    text = _strip_fence(raw)
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        return
+    if not isinstance(parsed, dict):
+        return
+    if not parsed.get("cannot_answer"):
+        return
+    reason = str(parsed.get("reason", "The request cannot be answered with available metadata.")).strip()
+    suggestions = _as_string_list(parsed.get("suggested_questions"))
+    raise SQLCannotAnswerSuggestion(reason=reason, suggested_questions=suggestions)
 
 
 def _parse_candidates_json(raw: str) -> list[dict[str, str]]:
@@ -322,7 +375,7 @@ def _strip_fence(text: str) -> str:
     return stripped.strip()
 
 
-def _metadata_prompt_text(metadata: dict[str, Any]) -> str:
+def _metadata_prompt_text(metadata: dict[str, Any], *, max_tables: int | None = None) -> str:
     lines: list[str] = []
     dialect = str(metadata.get("dialect", "oracle sql")).strip() or "oracle sql"
     lines.append(f"- Dialect: {dialect}")
@@ -337,6 +390,28 @@ def _metadata_prompt_text(metadata: dict[str, Any]) -> str:
     if not isinstance(relevant, list) or not relevant:
         lines.append("  - No relevant metadata found.")
     else:
+        if max_tables is not None:
+            core_lower = {
+                t.lower().strip()
+                for t in _as_string_list(metadata.get("core_tables"))
+            }
+            prioritized = [
+                item for item in relevant
+                if float(item.get("score", 0)) > 0
+                or str(item.get("table", "")).strip().lower() in core_lower
+            ]
+            if len(prioritized) > max_tables:
+                core_items = [
+                    i for i in prioritized
+                    if str(i.get("table", "")).strip().lower() in core_lower
+                ]
+                non_core = [
+                    i for i in prioritized
+                    if str(i.get("table", "")).strip().lower() not in core_lower
+                ]
+                budget = max(0, max_tables - len(core_items))
+                prioritized = core_items + non_core[:budget]
+            relevant = prioritized
         for item in relevant:
             if not isinstance(item, dict):
                 continue
@@ -346,15 +421,10 @@ def _metadata_prompt_text(metadata: dict[str, Any]) -> str:
             columns = _metadata_columns_text(item.get("columns"))
             if columns:
                 lines.append(f"  - {table}({columns})")
-                table_metadata = item.get("table_metadata")
-                if isinstance(table_metadata, dict) and table_metadata:
-                    lines.append("    Table Metadata:")
-                    for line in json.dumps(
-                        table_metadata,
-                        ensure_ascii=False,
-                        indent=2,
-                    ).splitlines():
-                        lines.append(f"      {line}")
+                table_metadata = _filter_table_metadata(item.get("table_metadata"))
+                if table_metadata:
+                    for tm_line in _format_table_metadata(table_metadata):
+                        lines.append(f"    {tm_line}")
             else:
                 lines.append(f"  - {table}")
 
@@ -364,6 +434,12 @@ def _metadata_prompt_text(metadata: dict[str, Any]) -> str:
             indexes = _as_string_list(item.get("indexes"))
             if indexes:
                 lines.append(f"    Indexes: {', '.join(indexes)}")
+
+    global_notes = _as_string_list(metadata.get("global_reporting_notes"))
+    if global_notes:
+        lines.append("- Global Reporting Notes:")
+        for note in global_notes[:15]:
+            lines.append(f"  - {_short_metadata_text(note, limit=500)}")
 
     mandatory_rules = _as_string_list(metadata.get("mandatory_rules"))
     if mandatory_rules:
@@ -376,11 +452,55 @@ def _metadata_prompt_text(metadata: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+_TABLE_METADATA_ALLOWED_KEYS = frozenset({
+    "description",
+    "grain",
+    "keywords",
+    "business_notes",
+    "performance_rules",
+    "relationships",
+    "mandatory_filters",
+})
+
+
+def _filter_table_metadata(raw: Any) -> dict[str, Any]:
+    if not isinstance(raw, dict):
+        return {}
+    return {
+        key: value
+        for key, value in raw.items()
+        if key in _TABLE_METADATA_ALLOWED_KEYS and value not in (None, "", [], {})
+    }
+
+
+def _format_table_metadata(tm: dict[str, Any]) -> list[str]:
+    lines: list[str] = []
+    desc = _short_metadata_text(tm.get("description"), limit=800)
+    if desc:
+        lines.append(f"Description: {desc}")
+    grain = _short_metadata_text(tm.get("grain"), limit=300)
+    if grain:
+        lines.append(f"Grain: {grain}")
+    keywords = _as_string_list(tm.get("keywords"))
+    if keywords:
+        lines.append(f"Keywords: {', '.join(_short_metadata_text(k, limit=60) for k in keywords[:30])}")
+    for note in _as_string_list(tm.get("business_notes"))[:15]:
+        lines.append(f"Note: {_short_metadata_text(note, limit=500)}")
+    for rule in _as_string_list(tm.get("performance_rules"))[:10]:
+        lines.append(f"Perf: {_short_metadata_text(rule, limit=300)}")
+    for flt in _as_string_list(tm.get("mandatory_filters"))[:10]:
+        lines.append(f"Filter: {_short_metadata_text(flt, limit=200)}")
+    rels = _as_string_list(tm.get("relationships"))
+    if rels:
+        lines.append(f"Relationships: {', '.join(_short_metadata_text(r, limit=200) for r in rels[:15])}")
+    return lines
+
+
 def _metadata_columns_text(columns: Any) -> str:
     if not isinstance(columns, list):
         return ""
     out: list[str] = []
-    for col in columns[:80]:
+    for col in columns:
         if not isinstance(col, dict):
             continue
         name = str(col.get("name", "")).strip()
@@ -390,24 +510,30 @@ def _metadata_columns_text(columns: Any) -> str:
         base = f"{name} {col_type}".strip()
         extras: list[str] = []
 
-        description = _short_metadata_text(col.get("description"), limit=120)
+        description = _short_metadata_text(col.get("description"), limit=500)
         if description:
             extras.append(f"desc: {description}")
 
-        semantic_type = _short_metadata_text(col.get("semantic_type"), limit=60)
+        semantic_type = _short_metadata_text(col.get("semantic_type"), limit=200)
         if semantic_type:
             extras.append(f"semantic_type: {semantic_type}")
 
         keywords = _as_string_list(col.get("keywords"))
         if keywords:
             extras.append(
-                f"keywords: {', '.join(_short_metadata_text(item, limit=24) for item in keywords[:6])}"
+                f"keywords: {', '.join(_short_metadata_text(item, limit=60) for item in keywords[:15])}"
             )
 
         properties = _as_string_list(col.get("properties"))
         if properties:
             extras.append(
-                f"properties: {', '.join(_short_metadata_text(item, limit=48) for item in properties[:5])}"
+                f"properties: {', '.join(_short_metadata_text(item, limit=100) for item in properties[:10])}"
+            )
+
+        select_expressions = _as_string_list(col.get("select_expressions"))
+        if select_expressions:
+            extras.append(
+                f"select_expr: {', '.join(_short_metadata_text(item, limit=300) for item in select_expressions[:5])}"
             )
 
         if extras:
@@ -438,6 +564,7 @@ def _sql_rule_prompt_text(
         "- Every projected SELECT expression must be necessary for the requested output.",
         "- Keep filter and join support columns out of SELECT unless the request explicitly asks for them.",
         "- If ordering by a derived aggregate already selected, reuse that expression or alias instead of adding extra columns.",
+        "- When using TO_CHAR on date columns, ALWAYS provide the format mask as the second argument: TO_CHAR(column, 'YYYY') for year, TO_CHAR(column, 'YYYYMM') for year-month, TO_CHAR(column, 'YYYYMMDD') for full date. Never write TO_CHAR(column) without a format mask.",
     ]
 
     for rule in _as_string_list((agent_rules or {}).get("sql_prompt_rules")):
@@ -530,3 +657,94 @@ def _call_llm(
         )
     except LLMError as exc:
         raise SQLGenerationError(f"LLM request failed: {exc}") from exc
+
+
+def generate_clarification_suggestions(
+    user_request: str,
+    metadata_used: dict[str, Any],
+    validation_errors: list[str],
+    llm_client: LLMClient | None = None,
+) -> dict[str, Any]:
+    """Generate suggested alternative questions when all SQL candidates fail.
+
+    Returns dict with 'reason' and 'suggested_questions' keys.
+    """
+    if llm_client is None:
+        return {
+            "reason": "Mevcut metadata ile bu istek cevaplanamadi.",
+            "suggested_questions": [],
+        }
+
+    tables_summary = _tables_summary_for_suggestion(metadata_used)
+    errors_text = "\n".join(f"- {e}" for e in validation_errors[:10]) if validation_errors else "- Unknown validation errors"
+
+    prompt = (
+        "The user asked a data question that could not be answered with the available database metadata.\n\n"
+        f"User request:\n{user_request}\n\n"
+        f"Validation errors (why SQL candidates failed):\n{errors_text}\n\n"
+        f"Available tables and columns:\n{tables_summary}\n\n"
+        "Task:\n"
+        "1. Explain briefly (in Turkish) why this request could not be answered.\n"
+        "2. Suggest 2-3 alternative questions (in the same language as the user request) "
+        "that CAN be answered using ONLY the available tables and columns listed above.\n"
+        "3. Make suggestions specific and actionable, referencing actual column names.\n\n"
+        'Return strict JSON: {"reason": "...", "suggested_questions": ["...", "..."]}'
+    )
+
+    try:
+        raw = llm_client.chat(
+            "You are a helpful data analyst assistant. Return strict JSON only.",
+            prompt,
+            temperature=0.2,
+            max_tokens=600,
+        )
+    except LLMError:
+        return {
+            "reason": "Mevcut metadata ile bu istek cevaplanamadi.",
+            "suggested_questions": [],
+        }
+
+    text = _strip_fence(raw)
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        return {
+            "reason": "Mevcut metadata ile bu istek cevaplanamadi.",
+            "suggested_questions": [],
+        }
+
+    if not isinstance(parsed, dict):
+        return {
+            "reason": "Mevcut metadata ile bu istek cevaplanamadi.",
+            "suggested_questions": [],
+        }
+
+    return {
+        "reason": str(parsed.get("reason", "")).strip() or "Mevcut metadata ile bu istek cevaplanamadi.",
+        "suggested_questions": _as_string_list(parsed.get("suggested_questions"))[:5],
+    }
+
+
+def _tables_summary_for_suggestion(metadata: dict[str, Any]) -> str:
+    """Build a compact tables+columns summary for the suggestion prompt."""
+    relevant = metadata.get("relevant_items")
+    if not isinstance(relevant, list) or not relevant:
+        return "No metadata available."
+    lines: list[str] = []
+    for item in relevant[:20]:
+        if not isinstance(item, dict):
+            continue
+        table = str(item.get("table", "")).strip()
+        if not table:
+            continue
+        columns = item.get("columns")
+        if isinstance(columns, list):
+            col_names = [str(c.get("name", "")).strip() for c in columns if isinstance(c, dict)]
+            col_names = [c for c in col_names if c]
+            lines.append(f"{table}: {', '.join(col_names)}")
+        else:
+            lines.append(table)
+        joins = _as_string_list(item.get("joins"))
+        if joins:
+            lines.append(f"  Joins: {', '.join(joins[:5])}")
+    return "\n".join(lines) if lines else "No metadata available."

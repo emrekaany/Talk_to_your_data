@@ -1,0 +1,25 @@
+{
+  "intent": "Retrieve total premium production for December 2025",
+  "required_filters": [
+    "{'year': '2025', 'month': 'December'}"
+  ],
+  "measures": [
+    "total_premium"
+  ],
+  "dimensions": [],
+  "grain": [
+    "month"
+  ],
+  "join_needs": [],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "Request appears to be in Turkish. '202512 ayı tanzimli total prim üretimi' translates to 'December 2025 organized total premium production'.",
+  "row_limit": 1,
+  "report_period": "month",
+  "time_granularity": "month",
+  "time_value": "2025-12",
+  "time_range": {
+    "start": "2025-12-01",
+    "end": "2025-12-31"
+  }
+}

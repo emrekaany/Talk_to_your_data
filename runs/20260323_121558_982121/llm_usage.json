@@ -1,0 +1,12 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-23T12:15:53.425868+00:00",
+  "finished_at_utc": "2026-03-23T12:16:28.688481+00:00",
+  "total_calls": 4,
+  "by_source": {
+    "talk_to_data.llm_client": 4
+  },
+  "request": "202512 ayı tanzimli total prim üretimi",
+  "attempt_count": 1,
+  "retry_attempted": false
+}

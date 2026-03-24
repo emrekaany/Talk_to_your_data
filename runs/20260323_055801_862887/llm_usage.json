@@ -1,0 +1,12 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-23T05:57:56.948276+00:00",
+  "finished_at_utc": "2026-03-23T05:58:27.884187+00:00",
+  "total_calls": 4,
+  "by_source": {
+    "talk_to_data.llm_client": 4
+  },
+  "request": "202512 ayı tanzimli üretim ne kadardır",
+  "attempt_count": 1,
+  "retry_attempted": false
+}

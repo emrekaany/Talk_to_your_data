@@ -1,0 +1,29 @@
+{
+  "intent": "202512 dönemine ait toplam prim üretimi",
+  "required_filters": [
+    "{'ek_tanzim_tarihi': '2025-12'}"
+  ],
+  "measures": [
+    "{'total_prime': 'SUM(prim_miktari)'}"
+  ],
+  "dimensions": [],
+  "grain": [
+    "aylık"
+  ],
+  "join_needs": [
+    "{'POL_POLICE_OZET': {'join_to': 'FACT_POL_POLICE_EK', 'on': 'police_id'}, 'ACE_ACENTE': {'join_to': 'FACT_POL_POLICE_EK', 'on': 'acente_id'}}"
+  ],
+  "security_constraints": [
+    "{'acente_id': 'user_acente_id'}"
+  ],
+  "invalid_request": false,
+  "notes": "Kullanıcı 2025-12 dönemine ait üretim raporu istemiştir. Üretim raporlarında ek tanzim tarihi temel alınır. Toplam prim üretimini hesaplamak için 'prim_miktari' ölçüsü kullanılır.",
+  "row_limit": 200,
+  "report_period": "2025-12",
+  "time_granularity": "ay",
+  "time_value": "ek_tanzim_tarihi",
+  "time_range": {
+    "start": "2025-12-01",
+    "end": "2025-12-31"
+  }
+}

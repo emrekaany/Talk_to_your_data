@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT AS_DWH.POL_BRANS.BRANS_KODU, SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID JOIN AS_DWH.POL_BRANS ON AS_DWH.POL_POLICE_OZET.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.EK_TANZIM_TARIHI, 'YYYYMM') = '202512' GROUP BY AS_DWH.POL_BRANS.BRANS_KODU ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and POL_BRANS to group total premium by branch code for December 2025.",
+    "risk_notes": "Assumes EK_TANZIM_TARIHI is the correct date column for December 2025 filtering.",
+    "description": "Question answered: What is the total premium amount by branch code for policies created in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS\nFilters: Policies created in December 2025 based on EK_TANZIM_TARIHI\nGrouping/measures: Summing BRUT_PRIM_TL grouped by BRANS_KODU\nExpected output columns: BRANS_KODU, total_premium\nAssumptions: BRUT_PRIM_TL represents the gross premium amount, and BRANS_KODU represents the branch code.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT AS_DWH.POL_BRANS.BRANS_KODU, SUM(AS_DWH.FACT_POL_POLICE_TEM_ASSET.VOP_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID JOIN AS_DWH.POL_BRANS ON AS_DWH.POL_POLICE_OZET.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.EK_TANZIM_TARIHI, 'YYYYMM') = '202512' GROUP BY AS_DWH.POL_BRANS.BRANS_KODU ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL from FACT_POL_POLICE_TEM_ASSET joined with POL_POLICE_OZET and POL_BRANS to group total premium by branch code for December 2025.",
+    "risk_notes": "Assumes EK_TANZIM_TARIHI is the correct date column for December 2025 filtering.",
+    "description": "Question answered: What is the total premium amount by branch code for policies created in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS\nFilters: Policies created in December 2025 based on EK_TANZIM_TARIHI\nGrouping/measures: Summing VOP_TL grouped by BRANS_KODU\nExpected output columns: BRANS_KODU, total_premium\nAssumptions: VOP_TL represents the premium amount, and BRANS_KODU represents the branch code.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT AS_DWH.POL_BRANS.BRANS_KODU, SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK JOIN AS_DWH.POL_POLICE_OZET ON AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID JOIN AS_DWH.POL_BRANS ON AS_DWH.POL_POLICE_OZET.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID WHERE TO_CHAR(AS_DWH.POL_POLICE_OZET.POLICE_BASLANGIC_TARIHI, 'YYYYMM') = '202512' GROUP BY AS_DWH.POL_BRANS.BRANS_KODU ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and POL_BRANS to group total premium by branch code for December 2025.",
+    "risk_notes": "Uses POLICE_BASLANGIC_TARIHI instead of EK_TANZIM_TARIHI, which may not align with production reporting conventions.",
+    "description": "Question answered: What is the total premium amount by branch code for policies starting in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS\nFilters: Policies starting in December 2025 based on POLICE_BASLANGIC_TARIHI\nGrouping/measures: Summing BRUT_PRIM_TL grouped by BRANS_KODU\nExpected output columns: BRANS_KODU, total_premium\nAssumptions: BRUT_PRIM_TL represents the gross premium amount, and BRANS_KODU represents the branch code.",
+    "recommended": false
+  }
+]

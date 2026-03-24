@@ -1,0 +1,27 @@
+{
+  "intent": "Retrieve and aggregate total premium production by branch code for December 2025.",
+  "required_filters": [
+    "{'month': 'December', 'year': '2025'}"
+  ],
+  "measures": [
+    "{'total_premium': 'sum'}"
+  ],
+  "dimensions": [
+    "{'branch_code': 'string'}"
+  ],
+  "grain": [
+    "branch_code"
+  ],
+  "join_needs": [],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "Request is to group total premium production by branch code for the month of December 2025.",
+  "row_limit": 200,
+  "report_period": "month",
+  "time_granularity": "month",
+  "time_value": "2025-12",
+  "time_range": {
+    "start": "2025-12-01",
+    "end": "2025-12-31"
+  }
+}

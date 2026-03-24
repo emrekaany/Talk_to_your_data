@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and GNL_TARIH to filter by 2025 tanzim tarihi.",
+    "risk_notes": "Assumes correct join paths and that BRUT_PRIM_TL is the correct measure for 'total üretim'.",
+    "description": "Question answered: What is the total production (in TL) for policies where the main policy date falls in the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Policies where the TANZIM_TARIH (registration date) is in the year 2025\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: The TANZIM_TARIH field represents the main registration date of the policy.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.ANA_POLICE_TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Filters using ANA_POLICE_TANZIM_TARIH_ID instead of TANZIM_TARIH_ID to align with metadata join options.",
+    "risk_notes": "May include different data than expected if ANA_POLICE_TANZIM_TARIH_ID differs from TANZIM_TARIH_ID.",
+    "description": "Question answered: What is the total production (in TL) for policies where the main policy registration date falls in the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Policies where the ANA_POLICE_TANZIM_TARIH (main policy registration date) is in the year 2025\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: The ANA_POLICE_TANZIM_TARIH field represents the registration date of the main policy.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_üretim FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.BASLANGIC_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BASLANGIC_TARIH_ID as an alternative join path to filter by year.",
+    "risk_notes": "May not align with intended 'tanzim tarihi' logic if BASLANGIC_TARIH_ID is unrelated to tanzim tarihi.",
+    "description": "Question answered: What is the total production (in TL) for policies where the start date falls in the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Policies where the BASLANGIC_TARIH (start date) is in the year 2025\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_üretim\nAssumptions: The BASLANGIC_TARIH field represents the start date of the policy.",
+    "recommended": false
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "intent": "Get total premium production by agency type for the period of 202512",
+  "required_filters": [
+    "{'ek_tanzim_tarihi': '202512'}"
+  ],
+  "measures": [
+    "{'total_premium': 'SUM(prim)'}"
+  ],
+  "dimensions": [
+    "{'acente_tipi': 'AGENCY_TYPE'}"
+  ],
+  "grain": [
+    "acente_tipi"
+  ],
+  "join_needs": [
+    "{'FACT_POL_POLICE_EK': {'joins': ['AS_DWH.FACT_POL_POLICE_EK.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID', 'AS_DWH.FACT_POL_POLICE_EK.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID']}, 'ACE_ACENTE': {'joins': ['AS_DWH.ACE_ACENTE.ACENTE_ID = AS_DWH.FACT_POL_POLICE_EK.ACENTE_ID']}, 'POL_POLICE_OZET': {'joins': ['AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID']}}"
+  ],
+  "security_constraints": [
+    "{'acente_id': 'USER_ACENTE_ID'}"
+  ],
+  "invalid_request": false,
+  "notes": "The request refers to premium production by agency type for the month of December 2025. The time filter is applied on ek_tanzim_tarihi as per production reporting rules.",
+  "row_limit": 200,
+  "report_period": "202512",
+  "time_granularity": "month",
+  "time_value": "202512",
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "metadata_version": 1,
+  "agent_id": "uretim",
+  "known_tables": [
+    "AGGR.AS400_YENI_URUN",
+    "AS_DWH.ACE_ACENTE",
+    "AS_DWH.ACE_ACENTE_ADRES",
+    "AS_DWH.ACE_SATIS_MUDURLUGU",
+    "AS_DWH.FACT_POL_POLICE_EK",
+    "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+    "AS_DWH.GNL_KAYNAK_SISTEM",
+    "AS_DWH.GNL_TARIH",
+    "AS_DWH.MUS_MUSTERI",
+    "AS_DWH.MUS_MUSTERI_CINSIYET",
+    "AS_DWH.POLICE_SAYISI",
+    "AS_DWH.POL_BRANS",
+    "AS_DWH.POL_POLICE_DURUMU",
+    "AS_DWH.POL_POLICE_KIRILIM",
+    "AS_DWH.POL_POLICE_KOD",
+    "AS_DWH.POL_POLICE_OZET",
+    "AS_DWH.POL_POLICE_REF_TANIM",
+    "AS_DWH.POL_POLICE_SATIS_KANALI",
+    "AS_DWH.POL_TKZ",
+    "AS_DWH.POL_URUN"
+  ],
+  "global_reporting_notes": [
+    "Özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur. Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+    "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+    "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır.",
+    "Tarih kolonlari surrogate key modeliyle calisir. Tablolarda dogrudan tarih kolonu YOKTUR; tarih bilgisine TARIH_ID uzerinden GNL_TARIH tablosuna JOIN yapilarak erisilir. EK_TANZIM_TARIHI, TANZIM_TARIHI gibi dogrudan tarih kolonu adlari UYDURMAK YASAKTIR. Dogru kullanim kalibi: JOIN AS_DWH.GNL_TARIH t ON <fact_table>.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = :report_period. Mevcut TARIH_ID kolonlari: TANZIM_TARIH_ID (ek tanzim), ANA_POLICE_TANZIM_TARIH_ID (ana police tanzim), BASLANGIC_TARIH_ID (ek baslangic), BITIS_TARIH_ID (ek bitis), ANA_POLICE_BASLANGIC_TARIH_ID (ana police baslangic), ANA_POLICE_BITIS_TARIH_ID (ana police bitis)."
+  ],
+  "core_tables": [
+    "AS_DWH.FACT_POL_POLICE_EK",
+    "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+    "AS_DWH.POLICE_SAYISI",
+    "AS_DWH.GNL_TARIH"
+  ],
+  "measure_columns": [
+    {
+      "column": "BRUT_PRIM_TL",
+      "table": "AS_DWH.FACT_POL_POLICE_EK",
+      "label": "Brut Prim TL — toplam prim uretimi, uretim tutari, brut police primi, vergi dahil prim"
+    },
+    {
+      "column": "VOP_TL",
+      "table": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+      "label": "Vergi Oncesi Prim TL — net prim, vergisiz prim tutari, VOP"
+    },
+    {
+      "column": "POLICE_SAYISI",
+      "table": "AS_DWH.POLICE_SAYISI",
+      "label": "Police Sayisi — police adedi, toplam police, police miktari"
+    },
+    {
+      "column": "MUSTERI_NUMARASI",
+      "table": "AS_DWH.MUS_MUSTERI",
+      "label": "Musteri No — musteri sayisi, musteri adedi, musteri miktari"
+    },
+    {
+      "column": "TARIH",
+      "table": "AS_DWH.GNL_TARIH",
+      "label": "Tarih — tanzim tarihi, baslangic tarihi, bitis tarihi, ek tanzim tarihi"
+    }
+  ],
+  "domain_vocabulary": {
+    "uretim": ["BRUT_PRIM_TL", "VOP_TL", "FACT_POL_POLICE_EK", "FACT_POL_POLICE_TEM_ASSET", "POLICE_SAYISI"],
+    "prim": ["BRUT_PRIM_TL", "VOP_TL", "FACT_POL_POLICE_EK", "FACT_POL_POLICE_TEM_ASSET"],
+    "tanzim": ["TANZIM_TARIHI", "POLICE_TANZIM_TARIHI", "GNL_TARIH", "TANZIM_TARIH_ID", "ANA_POLICE_TANZIM_TARIH_ID"],
+    "acente": ["ACE_ACENTE", "ACENTE_ID", "ACENTE_ADI", "ACENTE_KODU", "ACE_ACENTE_ADRES"],
+    "brans": ["POL_BRANS", "BRANS_ADI", "BRANS_KODU", "POL_POLICE_REF_TANIM"],
+    "police": ["POL_POLICE_OZET", "POLICE_NO", "POLICE_ID", "POLICE_EK_NO"],
+    "musteri": ["MUS_MUSTERI", "MUSTERI_NUMARASI", "MUSTERI_ADI", "MUS_MUSTERI_CINSIYET"],
+    "bolge": ["ACE_SATIS_MUDURLUGU", "SATIS_MUDURLUGU_ADI", "SATIS_MUDURLUGU_KODU", "BOLGE_MUDURLUGU_ID"],
+    "urun": ["POL_URUN", "URUN_ADI", "URUN_KODU", "POL_POLICE_KOD"],
+    "tkz": ["POL_TKZ", "TKZ_ADI", "TKZ_KODU"],
+    "tarih": ["GNL_TARIH", "TARIH", "TARIH_ID", "TANZIM_TARIH_ID", "ANA_POLICE_TANZIM_TARIH_ID", "BASLANGIC_TARIH_ID", "BITIS_TARIH_ID"],
+    "kanal": ["POL_POLICE_SATIS_KANALI", "SATIS_KANALI", "DAGITIM_KANALI"],
+    "kaynak": ["GNL_KAYNAK_SISTEM", "KAYNAK_SISTEM_ID"],
+    "doviz": ["POLICE_DOVIZ_CINSI"],
+    "durum": ["POL_POLICE_DURUMU", "POLICE_DURUMU_ADI"],
+    "yenileme": ["POLICE_YENILEME_NO"],
+    "zeyil": ["POLICE_EK_NO"]
+  }
+}

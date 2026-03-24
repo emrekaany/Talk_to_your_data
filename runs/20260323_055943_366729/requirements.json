@@ -1,0 +1,25 @@
+{
+  "intent": "retrieve_data",
+  "required_filters": [
+    "{'month': '202512'}"
+  ],
+  "measures": [
+    "prim_üretim"
+  ],
+  "dimensions": [],
+  "grain": [
+    "monthly"
+  ],
+  "join_needs": [],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "Kullanıcı, 2025 Aralık ayına ait 'tanzimli prim üretim' verisini istemektedir.",
+  "row_limit": 1,
+  "report_period": "monthly",
+  "time_granularity": "month",
+  "time_value": "2025-12",
+  "time_range": {
+    "start": "2025-12-01",
+    "end": "2025-12-31"
+  }
+}

@@ -21,6 +21,8 @@ class AgentConfig:
     label: str
     metadata_path: Path
     table_metadata_path: Path
+    column_metadata_path: Path | None
+    general_metadata_path: Path | None
     rules_path: Path
     description: str
 
@@ -41,6 +43,8 @@ class AgentRegistry:
                 "description": agent.description,
                 "metadata_path": str(agent.metadata_path),
                 "table_metadata_path": str(agent.table_metadata_path),
+                "column_metadata_path": str(agent.column_metadata_path or ""),
+                "general_metadata_path": str(agent.general_metadata_path or ""),
                 "rules_path": str(agent.rules_path),
             }
             for agent in self.agents
@@ -152,11 +156,31 @@ def _parse_agent(raw: dict[str, Any], base_dir: Path, *, index: int) -> AgentCon
             f"Agent '{agent_id}' rules_path does not exist: '{rules_path}'."
         )
 
+    raw_column_metadata_path = str(raw.get("column_metadata_path", "")).strip()
+    column_metadata_path: Path | None = None
+    if raw_column_metadata_path:
+        column_metadata_path = Path(raw_column_metadata_path)
+        if not column_metadata_path.is_absolute():
+            column_metadata_path = (base_dir / column_metadata_path).resolve()
+        if not column_metadata_path.exists():
+            column_metadata_path = None
+
+    raw_general_metadata_path = str(raw.get("general_metadata_path", "")).strip()
+    general_metadata_path: Path | None = None
+    if raw_general_metadata_path:
+        general_metadata_path = Path(raw_general_metadata_path)
+        if not general_metadata_path.is_absolute():
+            general_metadata_path = (base_dir / general_metadata_path).resolve()
+        if not general_metadata_path.exists():
+            general_metadata_path = None
+
     return AgentConfig(
         id=agent_id,
         label=label,
         metadata_path=metadata_path,
         table_metadata_path=table_metadata_path,
+        column_metadata_path=column_metadata_path,
+        general_metadata_path=general_metadata_path,
         rules_path=rules_path,
         description=description,
     )

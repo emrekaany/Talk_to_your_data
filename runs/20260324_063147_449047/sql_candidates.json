@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT p.urun_adi, SUM(f.BRUT_PRIM_TL) AS total_prime FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID JOIN AS_DWH.POL_URUN u ON o.URUN_KODU = u.URUN_KODU JOIN AGGR.AS400_YENI_URUN p ON u.URUN_KODU = p.NEW_FPOLK JOIN AS_DWH.ACE_ACENTE a ON o.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(o.EK_TANZIM_TARIH_ID, 'YYYYMM') = '202512' GROUP BY p.urun_adi ORDER BY total_prime DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups production premium by product name using the effective adjustment date in December 2025.",
+    "risk_notes": "Assumes EK_TANZIM_TARIH_ID is valid and accessible.",
+    "description": "Question answered: What is the total prime amount per product for policies created in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_URUN, AGGR.AS400_YENI_URUN, AS_DWH.ACE_ACENTE\nFilters: Policies created in December 2025 based on EK_TANZIM_TARIH_ID.\nGrouping/measures: Summing BRUT_PRIM_TL grouped by product name.\nExpected output columns: urun_adi (product name), total_prime (sum of prime amounts).\nAssumptions: BRUT_PRIM_TL represents the gross prime amount per policy.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT p.urun_adi, SUM(f.VOP_TL) AS total_prime FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID JOIN AS_DWH.POL_URUN u ON o.URUN_KODU = u.URUN_KODU JOIN AGGR.AS400_YENI_URUN p ON u.URUN_KODU = p.NEW_FPOLK JOIN AS_DWH.ACE_ACENTE a ON o.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(o.EK_TANZIM_TARIH_ID, 'YYYYMM') = '202512' GROUP BY p.urun_adi ORDER BY total_prime DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups net premium (VOP_TL) by product name using the effective adjustment date in December 2025.",
+    "risk_notes": "Assumes EK_TANZIM_TARIH_ID is valid and accessible.",
+    "description": "Question answered: What is the total VOP amount per product for policies created in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_URUN, AGGR.AS400_YENI_URUN, AS_DWH.ACE_ACENTE\nFilters: Policies created in December 2025 based on EK_TANZIM_TARIH_ID.\nGrouping/measures: Summing VOP_TL grouped by product name.\nExpected output columns: urun_adi (product name), total_prime (sum of VOP amounts).\nAssumptions: VOP_TL represents the value of premium (VOP) amount per policy.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT p.urun_adi, SUM(f.BRUT_PRIM_TL) AS total_prime FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID JOIN AS_DWH.POL_URUN u ON o.URUN_KODU = u.URUN_KODU JOIN AGGR.AS400_YENI_URUN p ON u.URUN_KODU = p.NEW_FPOLK JOIN AS_DWH.ACE_ACENTE a ON o.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(o.EK_TANZIM_TARIH_ID, 'YYYYMM') = '202512' GROUP BY p.urun_adi ORDER BY p.urun_adi FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups total production premium by product name alphabetically using the effective adjustment date in December 2025.",
+    "risk_notes": "Assumes EK_TANZIM_TARIH_ID is valid and accessible.",
+    "description": "Question answered: What is the total prime amount per product for policies created in December 2025, sorted alphabetically by product name?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_URUN, AGGR.AS400_YENI_URUN, AS_DWH.ACE_ACENTE\nFilters: Policies created in December 2025 based on EK_TANZIM_TARIH_ID.\nGrouping/measures: Summing BRUT_PRIM_TL grouped by product name.\nExpected output columns: urun_adi (product name), total_prime (sum of prime amounts).\nAssumptions: BRUT_PRIM_TL represents the gross prime amount per policy.",
+    "recommended": false
+  }
+]

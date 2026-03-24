@@ -1,0 +1,31 @@
+{
+  "intent": "Compare premium production between 2025 and 2024 grouped by year",
+  "required_filters": [
+    "{'year': ['2024', '2025']}"
+  ],
+  "measures": [
+    "{'premium_production': 'SUM(prime_amount)'}"
+  ],
+  "dimensions": [
+    "{'year': 'year'}"
+  ],
+  "grain": [
+    "year"
+  ],
+  "join_needs": [
+    "{'tables': ['AS_DWH.FACT_POL_POLICE_EK', 'AS_DWH.POL_POLICE_OZET', 'AS_DWH.GNL_TARIH'], 'joins': ['FACT_POL_POLICE_EK.police_id = POL_POLICE_OZET.police_id', 'GNL_TARIH.date_key = POL_POLICE_OZET.ek_tanzim_tarihi_key']}"
+  ],
+  "security_constraints": [
+    "{'user_access': 'filtered_by_user_accent', 'data_masking': 'applied'}"
+  ],
+  "invalid_request": false,
+  "notes": "The request is valid and aligns with standard production reporting practices. The comparison between 2024 and 2025 is typical for year-over-year analysis.",
+  "row_limit": 200,
+  "report_period": "annual",
+  "time_granularity": "year",
+  "time_value": "ek_tanzim_tarihi",
+  "time_range": {
+    "start": "2024-01-01",
+    "end": "2025-12-31"
+  }
+}

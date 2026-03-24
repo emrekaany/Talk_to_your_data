@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT SUM(f.BRUT_PRIM_TL) AS total_prime FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and GNL_TARIH via TANZIM_TARIH_ID to filter by ek_tanzim_tarihi for December 2025.",
+    "risk_notes": "Assumes TANZIM_TARIH_ID corresponds to ek_tanzim_tarihi as per metadata guidance.",
+    "description": "Question answered: What is the total prime amount for policies in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Policies with a policy date in December 2025\nGrouping/measures: Summing the BRUT_PRIM_TL column\nExpected output columns: total_prime\nAssumptions: BRUT_PRIM_TL represents the gross premium amount.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT SUM(f.VOP_TL) AS total_prime FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL from FACT_POL_POLICE_TEM_ASSET joined with POL_POLICE_OZET and GNL_TARIH via TANZIM_TARIH_ID to filter by ek_tanzim_tarihi for December 2025.",
+    "risk_notes": "VOP_TL represents pre-tax premium; may not align with BRUT_PRIM_TL depending on business context.",
+    "description": "Question answered: What is the total VOP amount for policies in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Policies with a policy date in December 2025\nGrouping/measures: Summing the VOP_TL column\nExpected output columns: total_prime\nAssumptions: VOP_TL represents the value of the policy or a specific financial metric.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT SUM(p.POLICE_SAYISI) AS total_prime FROM AS_DWH.POLICE_SAYISI p JOIN AS_DWH.POL_POLICE_OZET o ON p.POLICE_ID = o.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Counts total police using POLICE_SAYISI joined with POL_POLICE_OZET and GNL_TARIH via TANZIM_TARIH_ID to filter by ek_tanzim_tarihi for December 2025.",
+    "risk_notes": "Returns count of policies, not monetary value of production; may not match expected 'total_prime' definition.",
+    "description": "Question answered: What is the total number of policies in December 2025?\nTables used: AS_DWH.POLICE_SAYISI, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Policies with a policy date in December 2025\nGrouping/measures: Summing the POLICE_SAYISI column\nExpected output columns: total_prime\nAssumptions: POLICE_SAYISI represents the count of policies.",
+    "recommended": false
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT a.ACENTE_NO, ad.IL, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID JOIN AS_DWH.ACE_ACENTE_ADRES ad ON a.ACENTE_ID = ad.ACENTE_ID JOIN AS_DWH.GNL_TARIH t ON f.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND ad.IL = 'ISTANBUL' GROUP BY a.ACENTE_NO, ad.IL ORDER BY premium_production DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET, ACENTE, and ACENTE_ADRES tables to filter Istanbul agencies and calculate total premium production for 2025.",
+    "risk_notes": "Relies on correct join paths and assumes ACENTE_NO and IL columns exist in metadata tables.",
+    "description": "Question answered: What is the total premium production by branch number and city for Istanbul in the year 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.ACE_ACENTE_ADRES, AS_DWH.GNL_TARIH\nFilters: Year is 2025 and city is Istanbul\nGrouping/measures: Group by branch number and city, summing the total premium amount\nExpected output columns: Branch number, city, total premium production\nAssumptions: The data includes valid entries for Istanbul in 2025.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT a.ACENTE_NO, ad.IL, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID JOIN AS_DWH.ACE_ACENTE_ADRES ad ON a.ACENTE_ID = ad.ACENTE_ID JOIN AS_DWH.GNL_TARIH t ON f.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = :year_value AND ad.IL = 'ISTANBUL' GROUP BY a.ACENTE_NO, ad.IL ORDER BY premium_production DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Parameterizes the year filter using :year_value to allow dynamic input while maintaining the same logic as option_1.",
+    "risk_notes": "Requires the user to bind :year_value correctly.",
+    "description": "Question answered: What is the total premium production by branch number and city for Istanbul in a specified year?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.ACE_ACENTE_ADRES, AS_DWH.GNL_TARIH\nFilters: Year is specified via parameter and city is Istanbul\nGrouping/measures: Group by branch number and city, summing the total premium amount\nExpected output columns: Branch number, city, total premium production\nAssumptions: The year parameter is provided dynamically.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT a.ACENTE_NO, ad.IL, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID JOIN AS_DWH.ACE_ACENTE_ADRES ad ON a.ACENTE_ID = ad.ACENTE_ID JOIN AS_DWH.GNL_TARIH t ON f.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' AND ad.IL = 'ISTANBUL' GROUP BY a.ACENTE_NO, ad.IL HAVING SUM(f.BRUT_PRIM_TL) > 0 ORDER BY premium_production DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Adds a HAVING clause to exclude agencies with zero premium production, ensuring only active agencies are included.",
+    "risk_notes": "May exclude agencies with low or zero production unintentionally.",
+    "description": "Question answered: What is the total premium production by branch number and city for Istanbul in the year 2025, excluding zero values?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.ACE_ACENTE_ADRES, AS_DWH.GNL_TARIH\nFilters: Year is 2025 and city is Istanbul\nGrouping/measures: Group by branch number and city, summing the total premium amount, filtering out groups with zero premium\nExpected output columns: Branch number, city, total premium production\nAssumptions: The data includes valid entries for Istanbul in 2025 and excludes zero production.",
+    "recommended": false
+  }
+]

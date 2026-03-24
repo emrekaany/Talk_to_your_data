@@ -1,0 +1,29 @@
+{
+  "intent": "Retrieve total premium production for 'tanzimli' policies in the year 2025.",
+  "required_filters": [
+    "{'ek_tanzim': True, 'year': '2025'}"
+  ],
+  "measures": [
+    "{'total_premium': 'SUM(prime)'}"
+  ],
+  "dimensions": [],
+  "grain": [
+    "Yearly"
+  ],
+  "join_needs": [
+    "{'POL_POLICE_OZET': ['POLICE_KOD'], 'POL_POLICE_KIRILIM': ['POLICE_KOD'], 'POL_POLICE_SATIS_KANALI': ['SATIS_KANALI_KOD'], 'ACE_ACENTE': ['ACENTE_KOD']}"
+  ],
+  "security_constraints": [
+    "{'user_access': 'ACENTE_KOD'}"
+  ],
+  "invalid_request": false,
+  "notes": "The request refers to 'tanzimli' policies in 2025, which implies policies with an 'ek tanzim' (additional adjustment) status. Based on performance rules, the production should be calculated using the 'ek tanzim tarihi'.",
+  "row_limit": 1,
+  "report_period": "2025",
+  "time_granularity": "Year",
+  "time_value": "2025",
+  "time_range": {
+    "start": "2025-01-01",
+    "end": "2025-12-31"
+  }
+}

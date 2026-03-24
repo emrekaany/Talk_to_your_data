@@ -1,0 +1,12 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-24T07:16:21.225325+00:00",
+  "finished_at_utc": "2026-03-24T07:17:38.471798+00:00",
+  "total_calls": 4,
+  "by_source": {
+    "talk_to_data.llm_client": 4
+  },
+  "request": "2025 ve 2024 yılı prim üretimlerini yıl bazında gruplanmış yaz",
+  "attempt_count": 1,
+  "retry_attempted": false
+}

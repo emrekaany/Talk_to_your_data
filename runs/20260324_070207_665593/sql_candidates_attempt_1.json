@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT a.ACENTE_TIP, SUM(f.BRUT_PRIM_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON f.ACENTE_ID = a.ACENTE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_TIP ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with ACE_ACENTE via ACENTE_ID and filtered by ek_tanzim_tarihi via GNL_TARIH.",
+    "risk_notes": "Assumes ACENTE_TIP is available in ACE_ACENTE table.",
+    "description": "Question answered: What is the total premium amount by agent type for policies issued in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.GNL_TARIH\nFilters: Policies issued in December 2025\nGrouping/measures: Group by agent type and sum the gross premium amount in Turkish Lira\nExpected output columns: Agent type, total premium\nAssumptions: The BRUT_PRIM_TL column represents the gross premium amount.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT a.ACENTE_TIP, SUM(f.VOP_TL) AS total_premium FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON f.ACENTE_ID = a.ACENTE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_TIP ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL from FACT_POL_POLICE_TEM_ASSET joined with ACE_ACENTE via ACENTE_ID and filtered by ek_tanzim_tarihi via GNL_TARIH.",
+    "risk_notes": "VOP_TL may not represent the correct production metric depending on business logic.",
+    "description": "Question answered: What is the total premium amount by agent type for policies issued in December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.GNL_TARIH\nFilters: Policies issued in December 2025\nGrouping/measures: Group by agent type and sum the VOP_TL amount\nExpected output columns: Agent type, total premium\nAssumptions: The VOP_TL column represents the premium amount.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT a.ACENTE_TIP, SUM(f.POLICE_SAYISI) AS total_premium FROM AS_DWH.POLICE_SAYISI f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON f.ACENTE_ID = a.ACENTE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_TIP ORDER BY total_premium DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses POLICE_SAYISI as a proxy for production volume grouped by ACENTE_TIP.",
+    "risk_notes": "POLICE_SAYISI is a count metric, not a monetary value, which may not align with 'total premium' expectations.",
+    "description": "Question answered: What is the total number of policies by agent type for policies issued in December 2025?\nTables used: AS_DWH.POLICE_SAYISI, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.GNL_TARIH\nFilters: Policies issued in December 2025\nGrouping/measures: Group by agent type and sum the number of policies\nExpected output columns: Agent type, total number of policies\nAssumptions: The POLICE_SAYISI column represents the number of policies.",
+    "recommended": false
+  }
+]

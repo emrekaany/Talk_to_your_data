@@ -1,0 +1,36 @@
+{
+  "recommended_candidate_id": "option_3",
+  "recommended_canonical_id": "option_3",
+  "selection_mode": "llm_judge",
+  "fallback_reason": "",
+  "judge_error_kind": "none",
+  "all_candidates_disqualified": false,
+  "disqualified_count": 1,
+  "retry_recommended": false,
+  "llm_raw_output": "option_3",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 8.5
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: f.TANZIM_TARIH_ID (expected metadata table: AS_DWH.FACT_POL_POLICE_EK)"
+      ],
+      "fallback_score": 8.5
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 8.5
+    }
+  ]
+}

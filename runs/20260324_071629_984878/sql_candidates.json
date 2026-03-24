@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYY') AS year, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.EK_TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') IN ('2024', '2025') GROUP BY TO_CHAR(t.TARIH, 'YYYY') ORDER BY year FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups production by year using EK_TANZIM_TARIH_ID joined to GNL_TARIH, sums BRUT_PRIM_TL from FACT_POL_POLICE_EK.",
+    "risk_notes": "Assumes EK_TANZIM_TARIH_ID is valid and populated for all relevant records.",
+    "description": "Question answered: What is the total premium production per year for the years 2024 and 2025 based on the 'EK_TANZIM_TARIH_ID' date field?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the year is either 2024 or 2025 based on the 'EK_TANZIM_TARIH_ID' field.\nGrouping/measures: Summing the 'BRUT_PRIM_TL' column grouped by year.\nExpected output columns: year, premium_production\nAssumptions: The 'EK_TANZIM_TARIH_ID' field represents the effective date of the policy for production reporting.",
+    "recommended": false
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYY') AS year, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.ANA_POLICE_TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') IN ('2024', '2025') GROUP BY TO_CHAR(t.TARIH, 'YYYY') ORDER BY year FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups production by year using ANA_POLICE_TANZIM_TARIH_ID joined to GNL_TARIH, sums BRUT_PRIM_TL from FACT_POL_POLICE_EK.",
+    "risk_notes": "Uses ANA_POLICE_TANZIM_TARIH_ID instead of EK_TANZIM_TARIH_ID, which may not align with production reporting conventions.",
+    "description": "Question answered: What is the total premium production per year for the years 2024 and 2025 based on the 'ANA_POLICE_TANZIM_TARIH_ID' date field?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the year is either 2024 or 2025 based on the 'ANA_POLICE_TANZIM_TARIH_ID' field.\nGrouping/measures: Summing the 'BRUT_PRIM_TL' column grouped by year.\nExpected output columns: year, premium_production\nAssumptions: The 'ANA_POLICE_TANZIM_TARIH_ID' field represents the effective date of the main policy for production reporting.",
+    "recommended": true
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYY') AS year, SUM(f.BRUT_PRIM_TL) AS premium_production FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.BASLANGIC_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') IN ('2024', '2025') GROUP BY TO_CHAR(t.TARIH, 'YYYY') ORDER BY year FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Groups production by year using BASLANGIC_TARIH_ID joined to GNL_TARIH, sums BRUT_PRIM_TL from FACT_POL_POLICE_EK.",
+    "risk_notes": "Uses POLICE start date instead of EK_TANZIM_TARIH_ID, which may not reflect actual production timing.",
+    "description": "Question answered: What is the total premium production per year for the years 2024 and 2025 based on the 'BASLANGIC_TARIH_ID' date field?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the year is either 2024 or 2025 based on the 'BASLANGIC_TARIH_ID' field.\nGrouping/measures: Summing the 'BRUT_PRIM_TL' column grouped by year.\nExpected output columns: year, premium_production\nAssumptions: The 'BASLANGIC_TARIH_ID' field represents the start date of the policy for production reporting.",
+    "recommended": false
+  }
+]

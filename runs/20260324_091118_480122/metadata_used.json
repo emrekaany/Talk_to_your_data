@@ -1,0 +1,1656 @@
+{
+  "dialect": "oracle sql",
+  "relevant_items": [
+    {
+      "score": 0.0,
+      "table": "AGGR.AS400_YENI_URUN",
+      "columns": [
+        {
+          "table": "AGGR.AS400_YENI_URUN",
+          "name": "NEW_FPOLK",
+          "type": "VARCHAR2",
+          "description": "Poliçe Kodu Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisinin kodu (410*,420-1 vb.) içerir. (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Kodu Detay"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, CASE WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 741 THEN 71602 WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 742 THEN 71603 ELSE AGGR.AS400_YENI_URUN.NEW_FPOLK END"
+          ]
+        },
+        {
+          "table": "AGGR.AS400_YENI_URUN",
+          "name": "YENI_FPOLAC",
+          "type": "VARCHAR2",
+          "description": "Poliçe Adı Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisini (Güvenli Gelecek, Sınırsız Trafik, VW Kasko vb.) içerir. (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Adı Detay"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_REF_TANIM.POLICE_ADI_DETAY, UPPER(AGGR.AS400_YENI_URUN.YENI_FPOLAC)"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.NEW_FPOLK = AGGR.AS400_YENI_URUN.NEW_FPOLK"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+        "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe",
+        "keywords": [
+          "Poliçe Kodu Detay",
+          "Üretim",
+          "AGGR.AS400_YENI_URUN",
+          "Poliçe Adı Detay"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AGGR.AS400_YENI_URUN tablosuna gidebilirsin."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.ACE_ACENTE",
+      "columns": [
+        {
+          "table": "AS_DWH.ACE_ACENTE",
+          "name": "ACENTE_ADI",
+          "type": "VARCHAR2",
+          "description": "Acente Unvanı Acente Unvanı, sigorta acentesinin resmî ticari adını veya işletme unvanını ifade eder. Acente unvanı = Sigorta acentesinin resmî şirket adı (Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir.",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Adı",
+            "Acente Unvanı",
+            "ACENTE_ADI"
+          ],
+          "select_expressions": [
+            "AS_DWH.ACE_ACENTE.ACENTE_ADI"
+          ]
+        },
+        {
+          "table": "AS_DWH.ACE_ACENTE",
+          "name": "ACENTE_ID",
+          "type": "NUMBER",
+          "description": "",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "ACENTE_ID"
+          ]
+        },
+        {
+          "table": "AS_DWH.ACE_ACENTE",
+          "name": "ACENTE_KODU",
+          "type": "VARCHAR2",
+          "description": "Acente İl Adı Kanalın faaliyet adresine ilişkin il adıdır. Acente İl Adı, sigorta acentesinin faaliyet gösterdiği veya kayıtlı olduğu ilin adını ifade eder. Acente İl Adı = Sigorta acentesinin bulunduğu şehrin adı Tablo baglami: Acentelere ait adres bilgilerini tutar. AS_DWH.ACE_ACENTE tablosuna ...",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Şehri",
+            "Acente İl Bilgisi",
+            "Acente Konum İli",
+            "Acente İl Adı",
+            "ACENTE_KODU"
+          ],
+          "select_expressions": [
+            "CASE WHEN AS_DWH.ACE_ACENTE.ACENTE_KODU IS NOT NULL THEN AS_DWH.ACE_ACENTE_ADRES.IL_ADI END"
+          ]
+        },
+        {
+          "table": "AS_DWH.ACE_ACENTE",
+          "name": "ACENTE_KODU_NUMERIC",
+          "type": "VARCHAR2",
+          "description": "Acente Kodu Acente Kodu, sigorta şirketi sistemlerinde her acenteyi benzersiz şekilde tanımlamak için verilen özel numara veya koddur. Acente kodu = Sigorta acentesini sistemde tanıtan özel kimlik numarası (Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir.)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acenta Tanımlama Kodu",
+            "Acenta Referans Kodu",
+            "Acenta Numarası",
+            "Satış Acentesi Kodu",
+            "Acente Kodu"
+          ],
+          "select_expressions": [
+            "AS_DWH.ACE_ACENTE.ACENTE_KODU_NUMERIC"
+          ],
+          "sample_questions": [
+            "320020 no'lu acentenin cari yıl üretimini gösterebilir misin ?"
+          ]
+        },
+        {
+          "table": "AS_DWH.ACE_ACENTE",
+          "name": "ACENTE_MODEL_KODU",
+          "type": "VARCHAR2",
+          "description": "Acente Tipi Acente tipi = Acentenin hangi tür acente olduğunu gösteren bilgi (Acentelere ait bilgileri tutan tablo. Acente_ID üzerinden bağlanarak bilgilere erişilir.",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Türü",
+            "Acente Sınıfı",
+            "Acente Sınıflandırması",
+            "Acente Tipi",
+            "ACENTE_MODEL_KODU"
+          ],
+          "select_expressions": [
+            "AS_DWH.ACE_ACENTE.ACENTE_MODEL_KODU"
+          ]
+        },
+        {
+          "table": "AS_DWH.ACE_ACENTE",
+          "name": "DAGITIM_KANALI",
+          "type": "VARCHAR2",
+          "description": "Dağıtım Kanalı Acente, Banka , Broker vs. kırılımda dağıtım kanalı bilgisini getirir.",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Dağıtım Kanalı"
+          ],
+          "sample_questions": [
+            "Dağıtım kanalı bazında üretimi gösterebilir misin?"
+          ]
+        },
+        {
+          "table": "AS_DWH.ACE_ACENTE",
+          "name": "SATIS_MUDURLUGU",
+          "type": "VARCHAR2",
+          "description": "Satış Müdürlüğü Kanalın bağlı olduğu satış müdürlüğü bilgisidir. Satış Müdürlüğü, sigorta şirketi içinde satış faaliyetlerini yöneten ve belirli bir bölge, kanal veya acente grubundan sorumlu olan yönetim birimini ifade eder. Satış Müdürlüğü = Belirli bir bölgedeki veya kanal grubundaki satışları...",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Satış Bölge Müdürlüğü",
+            "Bölge Satış Birimi",
+            "Satış Müdürlüğü",
+            "SATIS_MUDURLUGU"
+          ],
+          "select_expressions": [
+            "AS_DWH.ACE_ACENTE.SATIS_MUDURLUGU"
+          ],
+          "sample_questions": [
+            "Bölge müdürlüğü bazında üretim en fazla olduğu 5 acente nedir?"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID",
+        "AS_DWH.ACE_ACENTE_ADRES.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+        "AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Acentelere ait bilgileri tutan tablo.",
+        "grain": "veri_seviyesi=Acente Kodu; degisim_seviyesi=Acente Kodu",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.ACE_ACENTE",
+          "Kanal",
+          "Acente Kodu",
+          "Acenta Tanımlama Kodu",
+          "Acenta Referans Kodu",
+          "Acenta Numarası",
+          "Satış Acentesi Kodu",
+          "Acente Unvanı",
+          "Acente Adı",
+          "Acente Bölge Kodu",
+          "Satış Müdürlüğü",
+          "Satış Bölge Müdürlüğü",
+          "Bölge Satış Birimi",
+          "Acente Tipi",
+          "Acente Türü",
+          "Acente Sınıfı",
+          "Acente Sınıflandırması",
+          "Dağıtım Kanalı"
+        ],
+        "performance_rules": [
+          "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+          "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+          "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+        "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+        "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.ACE_ACENTE_ADRES",
+      "columns": [
+        {
+          "table": "AS_DWH.ACE_ACENTE_ADRES",
+          "name": "IL_ADI",
+          "type": "VARCHAR2",
+          "description": "Acente İl Adı Kanalın faaliyet adresine ilişkin il adıdır. Acente İl Adı, sigorta acentesinin faaliyet gösterdiği veya kayıtlı olduğu ilin adını ifade eder. Acente İl Adı = Sigorta acentesinin bulunduğu şehrin adı Tablo baglami: Acentelere ait adres bilgilerini tutar. AS_DWH.ACE_ACENTE tablosuna ...",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Şehri",
+            "Acente İl Bilgisi",
+            "Acente Konum İli",
+            "Acente İl Adı"
+          ],
+          "select_expressions": [
+            "CASE WHEN AS_DWH.ACE_ACENTE.ACENTE_KODU IS NOT NULL THEN AS_DWH.ACE_ACENTE_ADRES.IL_ADI END"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.ACE_ACENTE_ADRES.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Acentelere ait adres bilgilerini tutar.",
+        "grain": "veri_seviyesi=Acente Kodu; degisim_seviyesi=Acente Kodu",
+        "keywords": [
+          "AS_DWH.ACE_ACENTE_ADRES",
+          "Kanal",
+          "Acente İl Adı",
+          "Acente Şehri",
+          "Acente İl Bilgisi",
+          "Acente Konum İli"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.ACE_SATIS_MUDURLUGU",
+      "columns": [
+        {
+          "table": "AS_DWH.ACE_SATIS_MUDURLUGU",
+          "name": "SATIS_MUDURLUGU_ADI",
+          "type": "VARCHAR2",
+          "description": "Acente Bölge Adı Acente Bölge Adı = Acentenin bağlı olduğu bölgenin ismi (Acente bölgelerine ait bilgileri tutan tablo. SATIS_MUDURLUGU_ID üzerinden bağlanarak bilgilere erişilir.)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Bölge İsmi",
+            "Acentenin Bağlı Olduğu Bölge",
+            "Satış Bölgesi Adı",
+            "Acente Bölge Bilgisi",
+            "Acente Bölge Adı"
+          ],
+          "select_expressions": [
+            "AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ADI"
+          ]
+        },
+        {
+          "table": "AS_DWH.ACE_SATIS_MUDURLUGU",
+          "name": "SATIS_MUDURLUGU_KODU",
+          "type": "VARCHAR2",
+          "description": "Acente Bölge Kodu Acente Bölge Kodu = Acentenin hangi bölgeye bağlı olduğunu gösteren kod (Acente bölgelerine ait bilgileri tutan tablo. SATIS_MUDURLUGU_ID üzerinden bağlanarak bilgilere erişilir.)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Acente Bölge Kodu"
+          ],
+          "select_expressions": [
+            "AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_KODU"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Acente bölgelerine ait bilgileri tutan tablo.",
+        "grain": "veri_seviyesi=Satış Müdürlüğü; degisim_seviyesi=Satış Müdürlüğü",
+        "keywords": [
+          "AS_DWH.ACE_SATIS_MUDURLUGU",
+          "Acente Bölge Kodu",
+          "Satış Müdürlüğü",
+          "Satış Bölge Müdürlüğü",
+          "Bölge Satış Birimi",
+          "Acente Bölge Adı",
+          "Acente Bölge İsmi",
+          "Acentenin Bağlı Olduğu Bölge",
+          "Satış Bölgesi Adı",
+          "Acente Bölge Bilgisi"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.FACT_POL_POLICE_EK",
+      "columns": [
+        {
+          "table": "AS_DWH.FACT_POL_POLICE_EK",
+          "name": "BRUT_PRIM_TL",
+          "type": "NUMBER",
+          "description": "Brüt Prim TL Brüt Prim TL, bir sigorta poliçesi için müşteriden tahsil edilen toplam prim tutarının Türk Lirası (TL) cinsinden değerini ifade eder. Bu tutar, primin vergi ve yasal kesintiler dahil edilmiş halidir. Brüt Prim TL = Vergiler ve fonlar dahil müşterinin ödediği toplam prim. Net prim + ...",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Toplam Prim",
+            "Brüt Poliçe Primi",
+            "Toplam Prim Tutarı",
+            "Vergi Dahil Prim",
+            "Poliçe Brüt Primi",
+            "Brüt Prim TL",
+            "Üretim",
+            "Üretim Tutarı",
+            "Prim Üretimi"
+          ],
+          "select_expressions": [
+            "SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL)"
+          ],
+          "sample_questions": [
+            "Bana Son 5 Yılı Tanzim Yılı Bazında Brüt Prim Tutarlarını Yazar mısın?"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe Ek seviyesinde Bazı Tutarsal Bilgileri Tutar",
+        "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+        "keywords": [
+          "Brüt Prim TL",
+          "Üretim",
+          "AS_DWH.FACT_POL_POLICE_EK",
+          "Toplam Prim",
+          "Brüt Poliçe Primi",
+          "Toplam Prim Tutarı",
+          "Vergi Dahil Prim",
+          "Poliçe Brüt Primi"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+      "columns": [
+        {
+          "table": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+          "name": "VOP_TL",
+          "type": "NUMBER",
+          "description": "Vergi Öncesi Prim TL Vergi Öncesi Prim TL, bir sigorta poliçesi için hesaplanan prim tutarının vergiler ve yasal kesintiler eklenmeden önceki Türk Lirası (TL) cinsinden değerini ifade eder. Vergi Öncesi Prim TL = Poliçenin vergiler eklenmeden önceki prim tutarı Tablo baglami: Poliçe Teminat (TKZ)...",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Net Prim Tutarı",
+            "Vergisiz Prim",
+            "Prim Tutarı (Vergi Hariç)",
+            "Net Poliçe Primi",
+            "VOP TL",
+            "Vergi Öncesi Prim TL",
+            "Üretim",
+            "Üretim Tutarı",
+            "Tanzimli Üretim",
+            "Prim Üretimi",
+            "Varsayılan Üretim"
+          ],
+          "select_expressions": [
+            "SUM(AS_DWH.FACT_POL_POLICE_TEM_ASSET.VOP_TL)"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe Teminat (TKZ) seviyesinde bazı tutarsal bilgileri tutar.",
+        "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+          "Vergi Öncesi Prim TL",
+          "Net Prim Tutarı",
+          "Vergisiz Prim",
+          "Prim Tutarı (Vergi Hariç)",
+          "Net Poliçe Primi",
+          "VOP TL"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_POLICE_KOD tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AGGR.AS400_YENI_URUN tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.GNL_KAYNAK_SISTEM",
+      "columns": [
+        {
+          "table": "AS_DWH.GNL_KAYNAK_SISTEM",
+          "name": "KAYNAK_SISTEM_ID",
+          "type": "VARCHAR2",
+          "description": "Kaynak Sistem Poliçe verisinin hangi kaynak sistemden (1-AS400/2-ASOS/15-ASTRA) geldiğini gösteren objedir. Kaynak Sistem, bir verinin ilk üretildiği veya alındığı sistemi ifade eder. Kaynak sistem = Verinin geldiği ana sistem",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Veri Kaynağı",
+            "Kaynak Uygulama",
+            "Kaynak Platform",
+            "Kaynak Sistem Adı",
+            "Veri Üretim Sistemi",
+            "Kaynak Sistem"
+          ],
+          "select_expressions": [
+            "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID"
+          ],
+          "sample_questions": [
+            "AS400 Poliçe Sayım ve Geçen Yılki Üretimim Nedir? (Üretim Denilince aksi belirtilmedikçe Vergi Öncesi Prim TL kolonu kullanılır)"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe verisinin hangi kaynak sistemden (1-AS400/2-ASOS/15-ASTRA) geldiğini gösteren tablodur.",
+        "grain": "veri_seviyesi=Kaynak Sistem; degisim_seviyesi=Kaynak Sistem",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.GNL_KAYNAK_SISTEM",
+          "Kaynak Sistem",
+          "Veri Kaynağı",
+          "Kaynak Uygulama",
+          "Kaynak Platform",
+          "Kaynak Sistem Adı",
+          "Veri Üretim Sistemi"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.GNL_TARIH",
+      "columns": [
+        {
+          "table": "AS_DWH.GNL_TARIH",
+          "name": "TARIH",
+          "type": "NUMBER",
+          "description": "Ana Poliçe Tanzim Tarihi Tanzim tarihi = Poliçe Belgesinin oluşturulduğu / yazıldığı tarih Poliçenin hazırlandığı ve düzenlendiği gün Belgenin düzenlendiği tarih Sistemde poliçenin oluşturulduğu tarih Tablo baglami: Genel Tarih Bilgileri Tutan Takvim Tablosu. Join üzerinden ilgili ID ile istenile...",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Poliçe Tanzim Tarihi",
+            "Tanzim Tarihi",
+            "Tan Tarih",
+            "Tanzim Trh",
+            "Tan Trh",
+            "Bas Tarih",
+            "Bas Trh",
+            "Poliçe Düzenleme Tarihi",
+            "Ek Tanzim Tarihi",
+            "Tanzimli",
+            "Üretim Tarihi",
+            "Ana Plc Baslangic Tarihi",
+            "Ana Pol BTS TRH",
+            "Ana Pol Btis Tarihi",
+            "Ana Poliçe Başlangıç Tarihi",
+            "Ana Poliçe Btitiş Tarihi",
+            "Bitiş Tarihi",
+            "Ek Baslangic Trh",
+            "Ek Başlangıç Tarihi",
+            "Ek Düzenleme Tarihi",
+            "Ek Geçerlilik Başlangıç Tarihi",
+            "Ek Geçerlilik Bitiş Tarihi",
+            "Ek Süre Bitiş Tarihi",
+            "Ek Tarihi",
+            "Ek Teminat Başlangıç Tarihi",
+            "Ek Teminat Bitiş Tarihi",
+            "Ek Teminat Yürürlük Tarihi",
+            "Ek Tnzm Tarihi",
+            "Ek Tnzm Trh",
+            "Ek Trh",
+            "Ek İşlem Tarihi",
+            "Police Baslangic Tarihi",
+            "Poliçe Ana Bitiş Tarihi",
+            "Poliçe Başlangıç Tarihi",
+            "Poliçe Bitiş Tarihi",
+            "Poliçe Kayıt Tarihi",
+            "Poliçe Oluşturma Tarihi",
+            "Poliçe Sonlanma Tarihi",
+            "Poliçe Yürürlük Tarihi",
+            "Sigorta Başlangıç Tarihi",
+            "Sigorta Bitiş Tarihi",
+            "Teminat Başlangıcı",
+            "Teminat Başlangıç Tarihi",
+            "Teminat Bitiş Tarihi",
+            "Teminat Sonu Tarihi",
+            "Zeyil Başlangıç Tarihi",
+            "Zeyil Bitiş Tarihi",
+            "Zeyil Düzenleme Tarihi",
+            "Zeyil Geçerlilik Sonu",
+            "Zeyil Kayıt Tarihi",
+            "Zeyil Yürürlük Tarihi"
+          ],
+          "select_expressions": [
+            "MAX(AS_DWH.GNL_TARIH.TARIH)"
+          ],
+          "sample_questions": [
+            "2025 Yılı Tanzimli Üretimi Verebilir Misin?",
+            "Aksi belirtilmediği sürece üretim raporları ek tanzim tarihi esasıyla hazırlanır.Örneğin kullanıcı 2026 yılındaki üretimini getir dediğinde bu tarihe göre çalışmalıdır.Opr 54 ve Prim adet yasal raporu örnek verilebilir.",
+            "2025 Yılı başlangıçlı poliçelerin listesini verebilir misin?",
+            "2. Ekin Başlangıç Tarihini Verebilir Misin?",
+            "2026 İçerisinde Bitecek Poliçelerin Sayısı Nedir?"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Genel Tarih Bilgileri Tutan Takvim Tablosu. Join üzerinden ilgili ID ile istenilen tarih bilgisi elde edilir.",
+        "grain": "veri_seviyesi=Tarih; degisim_seviyesi=Tarih",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.GNL_TARIH",
+          "Ana Poliçe Tanzim Tarihi",
+          "Poliçe Tanzim Tarihi",
+          "Tanzim Tarihi",
+          "Tan Tarih",
+          "Tanzim Trh",
+          "Tan Trh",
+          "Bas Tarih",
+          "Bas Trh",
+          "Poliçe Düzenleme Tarihi",
+          "Ana Poliçe Düzenleme Tarihi",
+          "Poliçe Oluşturma Tarihi",
+          "Poliçe Kayıt Tarihi",
+          "Ek Tanzim Tarihi",
+          "Ek Tarihi",
+          "Ek Trh",
+          "Ek Tnzm Tarihi",
+          "Ek Tnzm Trh",
+          "Zeyil Tanzim Tarihi",
+          "Ek Düzenleme Tarihi",
+          "Zeyil Düzenleme Tarihi",
+          "Ek İşlem Tarihi",
+          "Zeyil Kayıt Tarihi",
+          "Ana Poliçe Başlangıç Tarihi",
+          "Poliçe Başlangıç Tarihi",
+          "Police Baslangic Tarihi",
+          "Ana Plc Baslangic Tarihi",
+          "Plc Bas Tarih",
+          "Teminat Başlangıç Tarihi",
+          "Sigorta Başlangıç Tarihi",
+          "Poliçe Yürürlük Tarihi",
+          "Teminat Başlangıcı",
+          "Ek Başlangıç Tarihi",
+          "Ek Bas Trh",
+          "Ek Baslangic Trh",
+          "Ek Bas Tarihi",
+          "Zeyil Başlangıç Tarihi",
+          "Ek Teminat Başlangıç Tarihi",
+          "Zeyil Yürürlük Tarihi",
+          "Ek Geçerlilik Başlangıç Tarihi",
+          "Ek Teminat Yürürlük Tarihi",
+          "Ana Poliçe Bitiş Tarihi",
+          "Ana Poliçe Btitiş Tarihi",
+          "Ana Pol Btis Tarihi",
+          "Ana Pol BTS TRH",
+          "Poliçe Bitiş Tarihi",
+          "Poliçe Ana Bitiş Tarihi",
+          "Bitiş Tarihi",
+          "Teminat Bitiş Tarihi",
+          "Sigorta Bitiş Tarihi",
+          "Poliçe Sonlanma Tarihi",
+          "Teminat Sonu Tarihi",
+          "Ek Bitiş Tarihi",
+          "Zeyil Bitiş Tarihi",
+          "Ek Teminat Bitiş Tarihi",
+          "Ek Geçerlilik Bitiş Tarihi",
+          "Zeyil Geçerlilik Sonu",
+          "Ek Süre Bitiş Tarihi"
+        ],
+        "performance_rules": [
+          "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+          "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+          "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+        "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+        "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.MUS_MUSTERI",
+      "columns": [
+        {
+          "table": "AS_DWH.MUS_MUSTERI",
+          "name": "MUSTERI_ADI",
+          "type": "VARCHAR2",
+          "description": "Müşteri Adı Müşteri Adı, sigorta poliçesinin sahibi olan kişinin veya kurumun adı ya da ticari unvanını ifade eder. Müşteri adı = Sigorta poliçesinin ait olduğu kişi veya şirketin adı Tablo baglami: Müşteri Bilgilerini İçeren Tablo (Müşteri Bilgilerini İçeren Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigortalı Adı",
+            "Müşteri Unvanı",
+            "Müşteri İsmi",
+            "Müşteri Adı"
+          ],
+          "select_expressions": [
+            "AS_DWH.MUS_MUSTERI.MUSTERI_ADI"
+          ]
+        },
+        {
+          "table": "AS_DWH.MUS_MUSTERI",
+          "name": "MUSTERI_NUMARASI",
+          "type": "VARCHAR2",
+          "description": "Müşteri No Müşteri No, bir sigorta şirketinin sistemlerinde her müşteriyi benzersiz şekilde tanımlamak için verilen özel numaradır. Müşteri No = Müşteriyi sistemde tanıtan kimlik numarası Tablo baglami: Müşteri Bilgilerini İçeren Tablo Müşteri Sayısı Müşteri Sayısı, belirli bir sistemde, poliçede...",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Müşteri Numarası",
+            "Müşteri ID",
+            "Müşteri Tanımlama Numarası",
+            "Müşteri No",
+            "Toplam Müşteri Adedi",
+            "Müşteri Adedi",
+            "Müşteri Miktarı",
+            "Müşteri Sayısı"
+          ],
+          "select_expressions": [
+            "AS_DWH.MUS_MUSTERI.MUSTERI_NUMARASI",
+            "COUNT (DISTINCT AS_DWH.MUS_MUSTERI.MUSTERI_NUMARASI)"
+          ],
+          "sample_questions": [
+            "Müşteri Bazında top 10/20 üretimi olan müşterileri gösterebilir misin?"
+          ]
+        },
+        {
+          "table": "AS_DWH.MUS_MUSTERI",
+          "name": "MUSTERI_SOYADI",
+          "type": "VARCHAR2",
+          "description": "Müşteri Soyadı Müşteri Soyadı, sigorta poliçesine sahip olan bireysel müşterinin aile adını (soyadını) ifade eder. Müşteri Soyadı = Sigortalı kişinin soyadı Tablo baglami: Müşteri Bilgilerini İçeren Tablo (Müşteri Bilgilerini İçeren Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Soyadı",
+            "Sigortalı Soyadı",
+            "Müşteri Soyadı"
+          ],
+          "select_expressions": [
+            "AS_DWH.MUS_MUSTERI.MUSTERI_SOYADI"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID",
+        "AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Müşteri Bilgilerini İçeren Tablo",
+        "grain": "veri_seviyesi=Müşteri; degisim_seviyesi=Müşteri",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.MUS_MUSTERI",
+          "Müşteri No",
+          "Müşteri",
+          "Müşteri Numarası",
+          "Müşteri ID",
+          "Müşteri Tanımlama Numarası",
+          "Müşteri Adı",
+          "Sigortalı Adı",
+          "Müşteri Unvanı",
+          "Müşteri İsmi",
+          "Müşteri Soyadı",
+          "Soyadı",
+          "Sigortalı Soyadı",
+          "Müşteri Sayısı",
+          "Toplam Müşteri Adedi",
+          "Müşteri Adedi",
+          "Müşteri Miktarı"
+        ],
+        "performance_rules": [
+          "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+          "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+          "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+        "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+        "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.MUS_MUSTERI_CINSIYET",
+      "columns": [
+        {
+          "table": "AS_DWH.MUS_MUSTERI_CINSIYET",
+          "name": "MUSTERI_CINSIYET_ADI",
+          "type": "VARCHAR2",
+          "description": "Müşteri Cinsiyet Müşteri Cinsiyet, sigorta müşterisinin biyolojik veya resmi kayıtlarına göre belirtilen cinsiyet bilgisini ifade eder. Müşteri cinsiyet = Müşterinin kadın mı erkek mi olduğunu gösteren bilgi (Müşteri Bilgilerini İçeren Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Cinsiyet",
+            "Müşteri Cinsiyet Bilgisi",
+            "Sigortalı Cinsiyeti",
+            "Müşteri Cinsiyet"
+          ],
+          "select_expressions": [
+            "AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ADI"
+          ],
+          "sample_questions": [
+            "952 kodlu ürünün müşteri cinsiyet bazında üretim dağılımını getirebilir misin ?"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Müşteri cinsiyet tanımlarını içeren look up tablo.",
+        "grain": "veri_seviyesi=Müşteri; degisim_seviyesi=Müşteri",
+        "keywords": [
+          "Müşteri Cinsiyet",
+          "Müşteri",
+          "AS_DWH.MUS_MUSTERI_CINSIYET",
+          "Cinsiyet",
+          "Müşteri Cinsiyet Bilgisi",
+          "Sigortalı Cinsiyeti"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POLICE_SAYISI",
+      "columns": [
+        {
+          "table": "AS_DWH.POLICE_SAYISI",
+          "name": "POLICE_SAYISI",
+          "type": "NUMBER",
+          "description": "Poliçe Sayısı Poliçe Sayısı Bilgisini Verir. Poliçe Sayısı, belirli bir kapsam içinde bulunan toplam sigorta poliçesi adedini ifade eder. Poliçe Sayısı = Belirli bir dönemde veya grupta bulunan toplam poliçe adedi Tablo baglami: Poliçe Sayısı Bilgisini Tutar (Poliçe Sayısı Bilgisini Tutar)",
+          "semantic_type": "Numerical",
+          "keywords": [
+            "Toplam Poliçe Adedi",
+            "Poliçe Adedi",
+            "Poliçe Toplamı",
+            "Poliçe Miktarı",
+            "Policy Count",
+            "Poliçe Sayısı"
+          ],
+          "select_expressions": [
+            "SUM(AS_DWH.POLICE_SAYISI.POLICE_SAYISI)"
+          ],
+          "sample_questions": [
+            "Cari yılda ürettiğim poliçe"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe Sayısı Bilgisini Tutar",
+        "grain": "veri_seviyesi=Police ID",
+        "keywords": [
+          "Poliçe Sayısı",
+          "Üretim",
+          "AS_DWH.POLICE_SAYISI",
+          "Toplam Poliçe Adedi",
+          "Poliçe Adedi",
+          "Poliçe Toplamı",
+          "Poliçe Miktarı",
+          "Policy Count"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POL_BRANS",
+      "columns": [
+        {
+          "table": "AS_DWH.POL_BRANS",
+          "name": "BRANS_ADI",
+          "type": "VARCHAR2",
+          "description": "Branş Açıklama Üretim branş açıklaması bilgisidir. Branş Açıklama, sigortacılıkta bir poliçenin ait olduğu sigorta branşının adını veya tanımını açıklayıcı şekilde gösteren bilgidir. Branş açıklama = Sigorta branşının adının veya detaylı tanımının yazıldığı alan",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Hayır",
+            "Branş Açıklama"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_BRANS.BRANS_ADI, AS_DWH.POL_POLICE_REF_TANIM.BRANS_ADI"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_BRANS",
+          "name": "BRANS_KODU",
+          "type": "VARCHAR2",
+          "description": "Branş Üretim branşı bilgisidir. Branş, sigortacılıkta bir poliçenin ait olduğu sigorta türünü veya faaliyet alanını ifade eder. Branş = Poliçenin hangi sigorta alanına ait olduğunu gösteren sınıflandırma (Branş Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigorta Branşı",
+            "Sigorta Türü",
+            "Poliçe Branşı",
+            "Branş"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_BRANS.BRANS_KODU, AS_DWH.POL_POLICE_REF_TANIM.BRANS_KODU"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Branş Tanımlarını İçeren Look Up Tablo",
+        "grain": "veri_seviyesi=Branş; degisim_seviyesi=Branş",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_BRANS",
+          "Branş",
+          "Sigorta Branşı",
+          "Sigorta Türü",
+          "Poliçe Branşı",
+          "Branş Açıklama",
+          "Hayır"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POL_POLICE_DURUMU",
+      "columns": [
+        {
+          "table": "AS_DWH.POL_POLICE_DURUMU",
+          "name": "POLICE_DURUMU_ADI",
+          "type": "VARCHAR2",
+          "description": "Poliçe Durumu Poliçenin güncel durum açıklamalarını içerir.(Yürürlükte, başlangıcından iptal vb.) (Poliçenin Yürürlükte mi ; İptal Mi Yoksa Süresini mi tamamladı gibi durum bilgisini veren tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Statüsü",
+            "Poliçe Geçerlilik Durumu",
+            "Poliçe Aktiflik Durumu",
+            "Poliçe Durumu"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_ADI"
+          ],
+          "sample_questions": [
+            "Yürürlükteki Poliçe Adedim Kaçtır?"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_KODU"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçenin Yürürlükte mi, İptal mi yoksa süresini mi tamamladı gibi durum bilgisini veren tablo.",
+        "grain": "veri_seviyesi=Poliçe Durumu; degisim_seviyesi=Poliçe Durumu",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_POLICE_DURUMU",
+          "Poliçe Durumu",
+          "Poliçe Statüsü",
+          "Poliçe Geçerlilik Durumu",
+          "Poliçe Aktiflik Durumu"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POL_POLICE_KOD",
+      "columns": [
+        {
+          "table": "AS_DWH.POL_POLICE_KOD",
+          "name": "POLICE_KOD_ADI",
+          "type": "VARCHAR2",
+          "description": "Poliçe Adı Poliçe kodunun açıklamasını içerir. Ürünün Adını verin (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Açıklama",
+            "Poliçe Kodu Açıklama",
+            "Poliçe Adı",
+            "Ürün Adı"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, AS_DWH.POL_POLICE_KOD.POLICE_KOD_ADI"
+          ],
+          "sample_questions": [
+            "Bu Poliçe Hangi Ürüne Aittir?, Ürün bazında üretimimiz nedir ?"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_KOD",
+          "name": "POLICE_KOD_KODU",
+          "type": "VARCHAR2",
+          "description": "Poliçe Kodu Poliçe Kodu, bir sigorta poliçesini sistem içinde tanımlamak, sınıflandırmak veya ayırt etmek için kullanılan özel koddur. Poliçe kodu = Poliçeyi sistemde tanımlayan veya hangi ürün/poliçe tipine ait olduğunu gösteren kod (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Kodu",
+            "Pol Kod"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_KOD.POLICE_KOD_KODU"
+          ],
+          "sample_questions": [
+            "Poliçe Koduna göre üretimleri gösterebilir misin?"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+        "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe",
+        "keywords": [
+          "Poliçe Kodu",
+          "Üretim",
+          "AS_DWH.POL_POLICE_KOD",
+          "Pol Kod",
+          "Poliçe Adı",
+          "Poliçe Açıklama",
+          "Poliçe Kodu Açıklama",
+          "Ürün Adı"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_POLICE_KOD tablosuna gidebilirsin."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "columns": [
+        {
+          "table": "AS_DWH.POL_POLICE_OZET",
+          "name": "POLICE_DOVIZ_CINSI",
+          "type": "VARCHAR2",
+          "description": "Poliçe Döviz Cinsi Poliçe priminin döviz cinsini ifade eder. Poliçe Döviz Cinsi, bir sigorta poliçesinde yer alan prim, teminat ve diğer finansal tutarların hangi para birimi üzerinden ifade edildiğini gösteren bilgidir. (Poliçe Bilgilerini Tutan Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Para Birimi",
+            "Poliçe Kur Cinsi",
+            "Poliçe Döviz Türü",
+            "Poliçe Para Cinsi",
+            "Poliçe Currency Bilgisi",
+            "Poliçe Döviz Cinsi"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_OZET.POLICE_DOVIZ_CINSI"
+          ],
+          "sample_questions": [
+            "Yabancı para cinsinden üretimim bu sene ne kadardır ? -Poliçe döviz cinsi hariç bırakılıp diğer para birimleri tablo haline getirilip sunulmalıdır."
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_OZET",
+          "name": "POLICE_EK_NO",
+          "type": "VARCHAR2",
+          "description": "Ek No Ek No, bir sigorta poliçesine sonradan yapılan değişikliklerin sıra numarasını ifade eder. Ek No = Poliçeye yapılan ek işlemin (zeyilin) kaçıncı değişiklik olduğunu gösteren numara Tablo baglami: Poliçe Bilgilerini Tutan Tablo (Poliçe Bilgilerini Tutan Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Zeyil Numarası",
+            "Poliçe Ek Numarası",
+            "Zeyil Sıra Numarası",
+            "Ek İşlem Numarası",
+            "Ek No",
+            "Ek Numarası",
+            "Poliçe Ek No"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_OZET.POLICE_EK_NO"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_OZET",
+          "name": "POLICE_NO",
+          "type": "VARCHAR2",
+          "description": "Poliçe No Poliçe numarası bilgisini tutar Tablo baglami: Poliçe Bilgilerini Tutan Tablo (Poliçe Bilgilerini Tutan Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Numarası",
+            "Poliçe No",
+            "Pol No",
+            "Pol Numarası",
+            "Sigorta Poliçe Numarası"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_OZET.POLICE_NO"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_OZET",
+          "name": "POLICE_YENILEME_NO",
+          "type": "VARCHAR2",
+          "description": "Yenileme No Yenileme No, bir sigorta poliçesinin aynı teminat ve sözleşme yapısıyla kaçıncı kez yenilendiğini gösteren numaradır. Yenileme No = Poliçenin kaçıncı kez yenilendiğini gösteren sayı Tablo baglami: Poliçe Bilgilerini Tutan Tablo (Poliçe Bilgilerini Tutan Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Yenileme Numarası",
+            "Poliçe Yenileme Sayısı",
+            "Tecdit No",
+            "Tecdit Numarası",
+            "Yenileme No"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_OZET.POLICE_YENILEME_NO"
+          ],
+          "sample_questions": [
+            "Bu Poliçenin Kaç Adet Yenilemesi Vardır?  Bu yıl poliçesini yenileyenlerin Üretimi Nedir? ( Ana Poliçe Başlangıç Tarihi daha çok sorgulanmak istenir.). Poliçe Yenileme Tarihini Söyler Misin? (Sıfırıncı Ekteki Tanzim Tarihini Sorguluyor)"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID",
+        "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.ANA_POLICE_TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID",
+        "AS_DWH.POL_POLICE_OZET.NEW_FPOLK = AGGR.AS400_YENI_URUN.NEW_FPOLK",
+        "AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_KODU",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID",
+        "AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+        "AS_DWH.POL_POLICE_OZET.URUN_KODU = AS_DWH.POL_URUN.URUN_KODU",
+        "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe Bilgilerini Tutan Tablo",
+        "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası",
+        "keywords": [
+          "Poliçe No",
+          "Üretim",
+          "AS_DWH.POL_POLICE_OZET",
+          "Poliçe Numarası",
+          "Pol No",
+          "Pol Numarası",
+          "Sigorta Poliçe Numarası",
+          "Yenileme No",
+          "Poliçe Yenileme Numarası",
+          "Poliçe Yenileme Sayısı",
+          "Tecdit No",
+          "Tecdit Numarası",
+          "Ek No",
+          "Zeyil Numarası",
+          "Poliçe Ek Numarası",
+          "Zeyil Sıra Numarası",
+          "Ek İşlem Numarası",
+          "Ek Numarası",
+          "Poliçe Ek No",
+          "Poliçe Döviz Cinsi",
+          "Poliçe Para Birimi",
+          "Poliçe Kur Cinsi",
+          "Poliçe Döviz Türü",
+          "Poliçe Para Cinsi",
+          "Poliçe Currency Bilgisi"
+        ],
+        "performance_rules": [
+          "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+          "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+          "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_POLICE_KOD tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AGGR.AS400_YENI_URUN tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+        "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+        "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "columns": [
+        {
+          "table": "AS_DWH.POL_POLICE_REF_TANIM",
+          "name": "BRANS_ADI",
+          "type": "VARCHAR2",
+          "description": "Branş Açıklama Üretim branş açıklaması bilgisidir. Branş Açıklama, sigortacılıkta bir poliçenin ait olduğu sigorta branşının adını veya tanımını açıklayıcı şekilde gösteren bilgidir. Branş açıklama = Sigorta branşının adının veya detaylı tanımının yazıldığı alan",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Hayır",
+            "Branş Açıklama"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_BRANS.BRANS_ADI, AS_DWH.POL_POLICE_REF_TANIM.BRANS_ADI"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_REF_TANIM",
+          "name": "BRANS_KODU",
+          "type": "VARCHAR2",
+          "description": "Branş Üretim branşı bilgisidir. Branş, sigortacılıkta bir poliçenin ait olduğu sigorta türünü veya faaliyet alanını ifade eder. Branş = Poliçenin hangi sigorta alanına ait olduğunu gösteren sınıflandırma (Branş Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigorta Branşı",
+            "Sigorta Türü",
+            "Poliçe Branşı",
+            "Branş"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_BRANS.BRANS_KODU, AS_DWH.POL_POLICE_REF_TANIM.BRANS_KODU"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_REF_TANIM",
+          "name": "POLICE_ADI_DETAY",
+          "type": "VARCHAR2",
+          "description": "Poliçe Adı Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisini (Güvenli Gelecek, Sınırsız Trafik, VW Kasko vb.) içerir. (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Adı Detay"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_REF_TANIM.POLICE_ADI_DETAY, UPPER(AGGR.AS400_YENI_URUN.YENI_FPOLAC)"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_REF_TANIM",
+          "name": "POLICE_KODU_DETAY",
+          "type": "VARCHAR2",
+          "description": "Poliçe Kodu Detay Trafik, Kasko, Ferdi Kaza gibi ürünlerde poliçe kodunun alt kırılımında tutulan paket bilgisinin kodu (410*,420-1 vb.) içerir. (Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Kodu Detay"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, CASE WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 741 THEN 71602 WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 742 THEN 71603 ELSE AGGR.AS400_YENI_URUN.NEW_FPOLK END"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_REF_TANIM",
+          "name": "POLICE_KOD_ADI",
+          "type": "VARCHAR2",
+          "description": "Poliçe Adı Poliçe kodunun açıklamasını içerir. Ürünün Adını verin",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Poliçe Açıklama",
+            "Poliçe Kodu Açıklama",
+            "Poliçe Adı",
+            "Ürün Adı",
+            "Poliçe Kodu Detay"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, AS_DWH.POL_POLICE_KOD.POLICE_KOD_ADI",
+            "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, CASE WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 741 THEN 71602 WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 742 THEN 71603 ELSE AGGR.AS400_YENI_URUN.NEW_FPOLK END"
+          ],
+          "sample_questions": [
+            "Bu Poliçe Hangi Ürüne Aittir?, Ürün bazında üretimimiz nedir ?"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_REF_TANIM",
+          "name": "TKZ_ADI",
+          "type": "VARCHAR2",
+          "description": "TKZ Kodu Açıklaması TKZ Kodu Açıklaması, sigorta sistemlerinde kullanılan TKZ kodunun neyi ifade ettiğini açıklayan metinsel bilgidir. TKZ kodu açıklaması = TKZ kodunun hangi tarife, kapsam veya ürün tanımına karşılık geldiğini açıklayan bilgi (TKZ Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "TKZ Tanımı",
+            "Tarife Kodu Açıklaması",
+            "TKZ Kodu Açıklaması"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_TKZ.TKZ_ADI, AS_DWH.POL_POLICE_REF_TANIM.TKZ_ADI"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_POLICE_REF_TANIM",
+          "name": "TKZ_KODU",
+          "type": "VARCHAR2",
+          "description": "TKZ Kodu TKZ Kodu, sigortacılıkta bir poliçenin veya işlemin tarife, kapsam veya özel ürün sınıflandırmasını belirlemek için kullanılan tanımlayıcı koddur. TKZ Kodu = Poliçenin hangi tarife veya kapsam grubuna ait olduğunu gösteren kod. (TKZ Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Tarife Kodu",
+            "Teminat Kodu",
+            "Ürün Tarife Kodu",
+            "Tarife Tanımlama Kodu",
+            "TKZ Kodu"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_TKZ.TKZ_KODU, AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU"
+          ],
+          "sample_questions": [
+            "TKZ kodu bazında üretimimi gösterebilir misin ?"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe kodu, branş ve TKZ referans tanımlarını içeren tablo. Vergi Öncesi Prim TL hesaplamalarında kullanılır.",
+        "grain": "veri_seviyesi=Referans Tanım (REF_ID); degisim_seviyesi=Referans Tanım (REF_ID)",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_POLICE_REF_TANIM",
+          "Poliçe Adı",
+          "Poliçe Açıklama",
+          "Poliçe Kodu Açıklama",
+          "Ürün Adı",
+          "Poliçe Kodu Detay",
+          "Poliçe Adı Detay",
+          "Branş",
+          "Sigorta Branşı",
+          "Sigorta Türü",
+          "Poliçe Branşı",
+          "Branş Açıklama",
+          "Hayır",
+          "TKZ Kodu",
+          "Tarife Kodu",
+          "Teminat Kodu",
+          "Ürün Tarife Kodu",
+          "Tarife Tanımlama Kodu",
+          "TKZ Kodu Açıklaması",
+          "TKZ Tanımı",
+          "Tarife Kodu Açıklaması"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_POLICE_KOD tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AGGR.AS400_YENI_URUN tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POL_POLICE_SATIS_KANALI",
+      "columns": [
+        {
+          "table": "AS_DWH.POL_POLICE_SATIS_KANALI",
+          "name": "SATIS_KANALI",
+          "type": "VARCHAR2",
+          "description": "Satış Kanalı Asos ürünlerine ait satış kanalı bilgisidir. Satış Kanalı, bir sigorta poliçesinin hangi dağıtım yolu veya aracılık yöntemi üzerinden satıldığını gösteren bilgidir. Satış kanalı = Poliçenin müşteriye hangi yol üzerinden ulaştırıldığını gösteren bilgi",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Satış Dağıtım Kanalı",
+            "Poliçe Satış Kanalı",
+            "Dağıtım Kanalı",
+            "Satış Platformu",
+            "Satış Kanalı"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI"
+          ],
+          "sample_questions": [
+            "Satış Kanalına göre üretimleri gösterebilir misin?"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe Satış Kanallarını İçeren Look Up Tablo",
+        "grain": "veri_seviyesi=Satış Kanalı; degisim_seviyesi=Satış Kanalı",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_POLICE_SATIS_KANALI",
+          "Satış Kanalı",
+          "Satış Dağıtım Kanalı",
+          "Poliçe Satış Kanalı",
+          "Dağıtım Kanalı",
+          "Satış Platformu"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POL_TKZ",
+      "columns": [
+        {
+          "table": "AS_DWH.POL_TKZ",
+          "name": "TKZ_ADI",
+          "type": "VARCHAR2",
+          "description": "TKZ Kodu Açıklaması TKZ Kodu Açıklaması, sigorta sistemlerinde kullanılan TKZ kodunun neyi ifade ettiğini açıklayan metinsel bilgidir. TKZ kodu açıklaması = TKZ kodunun hangi tarife, kapsam veya ürün tanımına karşılık geldiğini açıklayan bilgi (TKZ Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "TKZ Tanımı",
+            "Tarife Kodu Açıklaması",
+            "TKZ Kodu Açıklaması"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_TKZ.TKZ_ADI, AS_DWH.POL_POLICE_REF_TANIM.TKZ_ADI"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_TKZ",
+          "name": "TKZ_KODU",
+          "type": "VARCHAR2",
+          "description": "TKZ Kodu TKZ Kodu, sigortacılıkta bir poliçenin veya işlemin tarife, kapsam veya özel ürün sınıflandırmasını belirlemek için kullanılan tanımlayıcı koddur. TKZ Kodu = Poliçenin hangi tarife veya kapsam grubuna ait olduğunu gösteren kod. (TKZ Tanımlarını İçeren Look Up Tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Tarife Kodu",
+            "Teminat Kodu",
+            "Ürün Tarife Kodu",
+            "Tarife Tanımlama Kodu",
+            "TKZ Kodu"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_TKZ.TKZ_KODU, AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU"
+          ],
+          "sample_questions": [
+            "TKZ kodu bazında üretimimi gösterebilir misin ?"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "TKZ Tanımlarını İçeren Look Up Tablo",
+        "grain": "veri_seviyesi=TKZ; degisim_seviyesi=TKZ",
+        "keywords": [
+          "TKZ Kodu",
+          "Üretim",
+          "AS_DWH.POL_TKZ",
+          "Tarife Kodu",
+          "Teminat Kodu",
+          "Ürün Tarife Kodu",
+          "Tarife Tanımlama Kodu",
+          "TKZ Kodu Açıklaması",
+          "TKZ Tanımı",
+          "Tarife Kodu Açıklaması"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POL_URUN",
+      "columns": [
+        {
+          "table": "AS_DWH.POL_URUN",
+          "name": "URUN_ADI",
+          "type": "VARCHAR2",
+          "description": "Ürün Adı Ürün Adı, sigorta şirketinin müşterilere sunduğu sigorta ürününün veya teminat paketinin adını ifade eder. Ürün adı = Satılan sigorta ürününün ismi (Ürünlere ait bilgileri tutan tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigorta Ürün Adı",
+            "Poliçe Ürün Adı",
+            "Ürün Tanımı",
+            "Sigorta Ürün İsmi",
+            "Ürün Tanımlaması",
+            "Ürün Adı"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_URUN.URUN_ADI"
+          ]
+        },
+        {
+          "table": "AS_DWH.POL_URUN",
+          "name": "URUN_KODU",
+          "type": "VARCHAR2",
+          "description": "Ürün Kodu Ürün Kodu, sigorta şirketinin sunduğu her sigorta ürününü sistem içinde benzersiz şekilde tanımlamak için kullanılan koddur. Ürün kodu = Sigorta ürününü sistemde tanımlayan özel kod (Ürünlere ait bilgileri tutan tablo)",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "Sigorta Ürün Kodu",
+            "Ürün Tanımlama Kodu",
+            "Ürün Kodu"
+          ],
+          "select_expressions": [
+            "AS_DWH.POL_URUN.URUN_KODU"
+          ]
+        }
+      ],
+      "joins": [
+        "AS_DWH.POL_POLICE_OZET.URUN_KODU = AS_DWH.POL_URUN.URUN_KODU"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Ürünlere ait bilgileri tutan tablo.",
+        "grain": "veri_seviyesi=Ürün; degisim_seviyesi=Ürün",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_URUN",
+          "Ürün Adı",
+          "Sigorta Ürün Adı",
+          "Poliçe Ürün Adı",
+          "Ürün Tanımı",
+          "Sigorta Ürün İsmi",
+          "Ürün Tanımlaması",
+          "Ürün Kodu",
+          "Sigorta Ürün Kodu",
+          "Ürün Tanımlama Kodu"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    },
+    {
+      "score": 0.0,
+      "table": "AS_DWH.POL_POLICE_KIRILIM",
+      "columns": [],
+      "joins": [
+        "AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID",
+        "AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID",
+        "AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+        "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID"
+      ],
+      "indexes": [],
+      "table_metadata": {
+        "description": "Poliçe bazında branş ve TKZ kırılım bilgilerini tutan köprü tablo.",
+        "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID",
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_POLICE_KIRILIM",
+          "Branş",
+          "Sigorta Branşı",
+          "Sigorta Türü",
+          "Poliçe Branşı",
+          "Branş Açıklama",
+          "Hayır",
+          "TKZ Kodu",
+          "Tarife Kodu",
+          "Teminat Kodu",
+          "Ürün Tarife Kodu",
+          "Tarife Tanımlama Kodu",
+          "TKZ Kodu Açıklaması",
+          "TKZ Tanımı",
+          "Tarife Kodu Açıklaması"
+        ],
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ]
+      },
+      "mandatory_filters": [],
+      "performance_rules": [
+        "Apply selective date filters for production reporting queries.",
+        "Prefer key-based joins observed in workbook join definitions."
+      ]
+    }
+  ],
+  "guardrails": [
+    "Apply selective date filters for production reporting queries.",
+    "Prefer key-based joins observed in workbook join definitions.",
+    "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+    "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+    "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+  ],
+  "mandatory_rules": [],
+  "runtime_mandatory_rules": [],
+  "global_reporting_notes": [
+    "Özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur. Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+    "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+    "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır.",
+    "Tarih kolonlari surrogate key modeliyle calisir. Tablolarda dogrudan tarih kolonu YOKTUR; tarih bilgisine TARIH_ID uzerinden GNL_TARIH tablosuna JOIN yapilarak erisilir. EK_TANZIM_TARIHI, TANZIM_TARIHI gibi dogrudan tarih kolonu adlari UYDURMAK YASAKTIR. Dogru kullanim kalibi: JOIN AS_DWH.GNL_TARIH t ON <fact_table>.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = :report_period. Mevcut TARIH_ID kolonlari: TANZIM_TARIH_ID (ek tanzim), ANA_POLICE_TANZIM_TARIH_ID (ana police tanzim), BASLANGIC_TARIH_ID (ek baslangic), BITIS_TARIH_ID (ek bitis), ANA_POLICE_BASLANGIC_TARIH_ID (ana police baslangic), ANA_POLICE_BITIS_TARIH_ID (ana police bitis)."
+  ],
+  "core_tables": [
+    "AS_DWH.FACT_POL_POLICE_EK",
+    "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+    "AS_DWH.POLICE_SAYISI",
+    "AS_DWH.GNL_TARIH"
+  ],
+  "retrieval_debug": {
+    "retrieval_mode": "column_based",
+    "selected_column_count": 42,
+    "matched_table_count": 20,
+    "total_columns": 42,
+    "effective_top_k": 60,
+    "min_score": 0.01,
+    "column_metadata_source": "C:\\Users\\ky4642\\talk-to-your-data-v0\\metadata\\agents\\column_metadata_uretim.json",
+    "table_metadata_source": "C:\\Users\\ky4642\\talk-to-your-data-v0\\metadata\\agents\\table_metadata_uretim.json"
+  }
+}
