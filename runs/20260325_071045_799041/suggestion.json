@@ -1,0 +1,7 @@
+{
+  "reason": "The required agency table AS_DWH.ACE_ACENTE is not present in the metadata, and there is no join path or column to retrieve agency names (acenta_adı).",
+  "suggested_questions": [
+    "202512 dönemi için en çok prim üretimi olan ilk 3 acente kimdir?",
+    "202512 dönemi üretim raporunda en yüksek üretim değerlerine sahip ilk üç acenteyi listeleyin."
+  ]
+}

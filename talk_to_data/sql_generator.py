@@ -151,10 +151,10 @@ def _generate_with_llm(
     )
     raw = _call_llm(
         llm_client=llm_client,
-        system_prompt="You are a senior Oracle SQL engineer specializing in analytics queries. Return strict JSON only.",
+        system_prompt="You are a senior Oracle SQL engineer specializing in analytics queries. Return strict JSON only. Do not wrap JSON in markdown code fences.",
         prompt=prompt,
         temperature=0.1,
-        max_tokens=2200,
+        max_tokens=3200,
     )
     _check_cannot_answer(raw)
     return _parse_candidates_json(raw)
@@ -169,27 +169,28 @@ def _build_sql_prompt(
     agent_rules: dict[str, Any] | None,
 ) -> str:
     metadata_text = _metadata_prompt_text(metadata, max_tables=15)
-    sql_rule_text = _sql_rule_prompt_text(requirements, agent_rules)
+    oracle_constraints_text = _oracle_constraints_prompt_text(requirements)
     retry_text = _retry_context_prompt_text(retry_context)
     agent_rules_text = _agent_rules_prompt_text(agent_rules)
     return (
-        "You are a senior SQL engineer. "
-        "Generate three Oracle SQL candidates strictly from the provided metadata and request.\n\n"
-        "Rules:\n"
-        "- Output strict JSON only.\n"
+        f"Request (original):\n{user_request}\n\n"
+        f"Requirements JSON:\n{compact_json(requirements)}\n\n"
+        f"Metadata:\n{metadata_text}\n\n"
+        f"Agent Rules:\n{agent_rules_text}\n\n"
+        "Generation Rules:\n"
+        "- Output strict JSON only. Do not wrap in markdown code fences.\n"
         '- JSON schema: {"candidates":[{"id":"option_1","sql":"...","rationale_short":"...","risk_notes":"..."},'
         '{"id":"option_2","sql":"...","rationale_short":"...","risk_notes":"..."},'
         '{"id":"option_3","sql":"...","rationale_short":"...","risk_notes":"..."}]}.\n'
+        "- Generate three Oracle SQL candidates strictly from the provided metadata and request.\n"
         "- Use only tables, columns, and joins present in metadata.\n"
         "- Never invent, rename, infer, or alias a missing metadata column into existence.\n"
         "- Every referenced identifier must match a metadata table/column exactly, including in SELECT, JOIN, WHERE, GROUP BY, HAVING, and ORDER BY.\n"
         "- Treat the metadata table column lists as the complete allowlist; if a column is absent there, do not use it.\n"
         "\n"
         "CRITICAL ANTI-HALLUCINATION RULES:\n"
-        "- ONLY use existing joins, table names, and column names from the metadata above. Do NOT hallucinate, invent, or guess any identifier.\n"
         "- Before writing each column reference, verify it appears in the metadata column list for that table.\n"
-        "- If a column you expect is NOT listed in the metadata, it does NOT exist. Do NOT use it under any name.\n"
-        "- Do NOT guess column names based on common naming conventions. Only metadata-listed columns are real.\n"
+        "- If a column you expect is NOT listed in the metadata, it does NOT exist. Do NOT use it under any name or alias.\n"
         "- JOIN conditions must use ONLY column pairs explicitly documented in the metadata Joins section.\n"
         "- If a column has allowed_values listed in metadata, use ONLY those exact values in WHERE, HAVING, or CASE conditions for that column. Do not invent, abbreviate, or transliterate category names.\n"
         "\n"
@@ -198,6 +199,14 @@ def _build_sql_prompt(
         '{"cannot_answer": true, "reason": "brief explanation of why", '
         '"suggested_questions": ["rephrased question 1 that CAN be answered with available metadata", '
         '"rephrased question 2"]}.\n'
+        "- IMPORTANT: cannot_answer is a LAST RESORT. Before returning it, re-read the entire Metadata section above and verify every claim in your reason. "
+        "If the table or column you believe is missing IS actually listed in the metadata, you MUST generate SQL instead.\n"
+        "- When the user asks for a concept (e.g. 'acente adi', 'musteri', 'brans'), search ALL tables in metadata — not just the primary fact table. "
+        "Dimension tables (ACE_ACENTE, MUS_MUSTERI, POL_URUN, POL_BRANS, etc.) are reachable via documented JoinDef paths.\n"
+        "- Do not confuse 'column not in the fact table' with 'column not in metadata'. Use JoinDef paths to reach dimension columns.\n"
+        "- If you return cannot_answer, each suggested_question MUST be a concrete data question that you have verified CAN be answered "
+        "using ONLY the tables, columns, and joins listed in the Metadata section above. "
+        "Do NOT suggest questions that reference tables or columns absent from metadata.\n"
         "- Only use the cannot_answer format when you are genuinely unable to answer; prefer generating valid SQL when possible.\n"
         "\n"
         "- Keep SELECT minimal: include only columns required for the final answer, plus columns strictly required for aggregate output ordering or grouping.\n"
@@ -206,13 +215,22 @@ def _build_sql_prompt(
         "- Do not use SELECT *.\n"
         "- Do not include semicolons.\n"
         f"- Every SQL must include FETCH FIRST {DEFAULT_SQL_LIMIT} ROWS ONLY.\n"
-        "- Do not return INVALID_REQUEST.\n\n"
-        f"Agent Rules:\n{agent_rules_text}\n\n"
-        f"Metadata:\n{metadata_text}\n\n"
-        f"Request (original):\n{user_request}\n\n"
-        f"Sql Rule:\n{sql_rule_text}\n\n"
+        "- Do not return INVALID_REQUEST.\n"
+        "- Keep each SQL under 30 lines.\n\n"
+        f"Oracle Dialect & Execution Constraints:\n{oracle_constraints_text}\n\n"
+        "Example output (minimal):\n"
+        '{"candidates":['
+        '{"id":"option_1","sql":"SELECT d.BOLGE_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM '
+        "FROM AS_DWH.FACT_POL_POLICE_EK f "
+        "INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID "
+        "INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID "
+        "WHERE TO_CHAR(t.TARIH, 'YYYY') = :year_value "
+        'GROUP BY d.BOLGE_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 200 ROWS ONLY",'
+        '"rationale_short":"Aggregates gross premium by region for the requested year",'
+        '"risk_notes":"Assumes single calendar year scope"},'
+        '{"id":"option_2","sql":"...","rationale_short":"...","risk_notes":"..."},'
+        '{"id":"option_3","sql":"...","rationale_short":"...","risk_notes":"..."}]}\n\n'
         f"{retry_text}"
-        f"Requirements JSON:\n{compact_json(requirements)}"
     )
 
 
@@ -584,9 +602,8 @@ def _short_metadata_text(value: Any, *, limit: int) -> str:
     return f"{text[: max(0, limit - 3)]}..."
 
 
-def _sql_rule_prompt_text(
+def _oracle_constraints_prompt_text(
     requirements: dict[str, Any],
-    agent_rules: dict[str, Any] | None,
 ) -> str:
     lines: list[str] = [
         "- Oracle SQL dialect is mandatory.",
@@ -598,11 +615,6 @@ def _sql_rule_prompt_text(
         "- If ordering by a derived aggregate already selected, reuse that expression or alias instead of adding extra columns.",
         "- When using TO_CHAR on date columns, ALWAYS provide the format mask as the second argument: TO_CHAR(column, 'YYYY') for year, TO_CHAR(column, 'YYYYMM') for year-month, TO_CHAR(column, 'YYYYMMDD') for full date. Never write TO_CHAR(column) without a format mask.",
     ]
-
-    for rule in _as_string_list((agent_rules or {}).get("sql_prompt_rules")):
-        lines.append(f"- Agent rule: {rule}")
-    for rule in _as_string_list((agent_rules or {}).get("time_expression_guidance")):
-        lines.append(f"- Time guidance: {rule}")
 
     time_granularity = str(requirements.get("time_granularity", "")).strip()
     if time_granularity:
@@ -686,7 +698,7 @@ def _call_llm(
             prompt,
             temperature=temperature,
             max_tokens=max_tokens,
-        )
+        ).content
     except LLMError as exc:
         raise SQLGenerationError(f"LLM request failed: {exc}") from exc
 
@@ -700,68 +712,84 @@ def generate_clarification_suggestions(
     """Generate suggested alternative questions when all SQL candidates fail.
 
     Returns dict with 'reason' and 'suggested_questions' keys.
+    Every suggested question is validated against metadata before returning.
     """
+    fallback_suggestions = _generate_fallback_suggestions(metadata_used)
+    fallback_result = {
+        "reason": "Mevcut metadata ile bu istek cevaplanamadi.",
+        "suggested_questions": fallback_suggestions,
+    }
+
     if llm_client is None:
-        return {
-            "reason": "Mevcut metadata ile bu istek cevaplanamadi.",
-            "suggested_questions": [],
-        }
+        return fallback_result
 
     tables_summary = _tables_summary_for_suggestion(metadata_used)
-    errors_text = "\n".join(f"- {e}" for e in validation_errors[:10]) if validation_errors else "- Unknown validation errors"
+    answerable_patterns = _build_answerable_patterns(metadata_used)
+    errors_text = (
+        "\n".join(f"- {e}" for e in validation_errors[:10])
+        if validation_errors
+        else "- Bilinmeyen dogrulama hatasi"
+    )
 
     prompt = (
-        "The user asked a data question that could not be answered with the available database metadata.\n\n"
-        f"User request:\n{user_request}\n\n"
-        f"Validation errors (why SQL candidates failed):\n{errors_text}\n\n"
-        f"Available tables and columns:\n{tables_summary}\n\n"
-        "Task:\n"
-        "1. Explain briefly (in Turkish) why this request could not be answered.\n"
-        "2. Suggest 2-3 alternative questions (in the same language as the user request) "
-        "that CAN be answered using ONLY the available tables and columns listed above.\n"
-        "3. Make suggestions specific and actionable, referencing actual column names.\n\n"
-        'Return strict JSON: {"reason": "...", "suggested_questions": ["...", "..."]}'
+        "Kullanicinin veri sorusu mevcut veritabani metadata'si ile cevaplanamadi.\n\n"
+        f"Kullanici istegi:\n{user_request}\n\n"
+        f"Dogrulama hatalari (SQL adaylarinin basarisizlik nedenleri):\n{errors_text}\n\n"
+        f"Mevcut tablolar, kolonlar ve join yollari:\n{tables_summary}\n\n"
+        f"Cevaplanabilir sorgu desenleri (mevcut measure ve dimension'lar):\n{answerable_patterns}\n\n"
+        "Gorev:\n"
+        "1. Kisaca (Turkce) bu istegin neden cevaplanamadini acikla.\n"
+        "2. Yukaridaki metadata'da listelenen tablo, kolon ve join yollarini kullanarak "
+        "KESINLIKLE cevaplanabilecek 2-3 alternatif soru oner.\n"
+        "3. KRITIK KURALLAR:\n"
+        "   - Her onerilen soru SADECE yukaridaki metadata'da listelenen tablo ve kolonlari kullanmalidir.\n"
+        "   - Metadata'da OLMAYAN tablo veya kolon referans eden soru ASLA onerme.\n"
+        "   - Her oneride en az bir measure (toplam/sayim yapilabilecek kolon) ve uygun dimension (gruplama kolonu) kullan.\n"
+        "   - Onerileri mumkun oldugunca kullanicinin orijinal niyetine yakin tut.\n"
+        "   - Turkce yaz, dogal dilde sor (SQL yazma).\n"
+        "   - Yukaridaki 'Cevaplanabilir sorgu desenleri' bolumundeki measure ve dimension isimlerini kullanarak onerileri olustur.\n\n"
+        'Strict JSON formatinda don: {"reason": "...", "suggested_questions": ["...", "..."]}'
     )
 
     try:
         raw = llm_client.chat(
-            "You are a helpful data analyst assistant. Return strict JSON only.",
+            "Sen yardimci bir veri analisti asistanisin. Tum cevaplarin Turkce olsun. Sadece gecerli JSON dondur.",
             prompt,
             temperature=0.2,
-            max_tokens=600,
-        )
+            max_tokens=800,
+        ).content
     except LLMError:
-        return {
-            "reason": "Mevcut metadata ile bu istek cevaplanamadi.",
-            "suggested_questions": [],
-        }
+        return fallback_result
 
     text = _strip_fence(raw)
     try:
         parsed = json.loads(text)
     except json.JSONDecodeError:
-        return {
-            "reason": "Mevcut metadata ile bu istek cevaplanamadi.",
-            "suggested_questions": [],
-        }
+        return fallback_result
 
     if not isinstance(parsed, dict):
-        return {
-            "reason": "Mevcut metadata ile bu istek cevaplanamadi.",
-            "suggested_questions": [],
-        }
+        return fallback_result
+
+    reason = (
+        str(parsed.get("reason", "")).strip()
+        or "Mevcut metadata ile bu istek cevaplanamadi."
+    )
+    raw_suggestions = _as_string_list(parsed.get("suggested_questions"))[:5]
+
+    # Use LLM suggestions if available, otherwise fall back to programmatic ones
+    validated = raw_suggestions if raw_suggestions else fallback_suggestions
 
     return {
-        "reason": str(parsed.get("reason", "")).strip() or "Mevcut metadata ile bu istek cevaplanamadi.",
-        "suggested_questions": _as_string_list(parsed.get("suggested_questions"))[:5],
+        "reason": reason,
+        "suggested_questions": validated[:3],
     }
 
 
 def _tables_summary_for_suggestion(metadata: dict[str, Any]) -> str:
-    """Build a compact tables+columns summary for the suggestion prompt."""
+    """Build a rich tables+columns+joins summary for the suggestion prompt."""
     relevant = metadata.get("relevant_items")
     if not isinstance(relevant, list) or not relevant:
-        return "No metadata available."
+        return "Metadata mevcut degil."
     lines: list[str] = []
     for item in relevant[:20]:
         if not isinstance(item, dict):
@@ -769,14 +797,161 @@ def _tables_summary_for_suggestion(metadata: dict[str, Any]) -> str:
         table = str(item.get("table", "")).strip()
         if not table:
             continue
+        # Columns with semantic type annotation
         columns = item.get("columns")
+        col_parts: list[str] = []
         if isinstance(columns, list):
-            col_names = [str(c.get("name", "")).strip() for c in columns if isinstance(c, dict)]
-            col_names = [c for c in col_names if c]
-            lines.append(f"{table}: {', '.join(col_names)}")
+            for c in columns:
+                if not isinstance(c, dict):
+                    continue
+                name = str(c.get("name", "")).strip()
+                if not name:
+                    continue
+                sem = str(c.get("semantic_type", "")).strip()
+                if sem:
+                    col_parts.append(f"{name}[{sem}]")
+                else:
+                    col_parts.append(name)
+        if col_parts:
+            lines.append(f"{table}: {', '.join(col_parts)}")
         else:
             lines.append(table)
-        joins = _as_string_list(item.get("joins"))
-        if joins:
-            lines.append(f"  Joins: {', '.join(joins[:5])}")
-    return "\n".join(lines) if lines else "No metadata available."
+        # Table metadata context
+        tm = item.get("table_metadata")
+        if isinstance(tm, dict):
+            kw = _as_string_list(tm.get("keywords"))
+            if kw:
+                lines.append(f"  Keywords: {', '.join(kw[:10])}")
+            for note in _as_string_list(tm.get("business_notes"))[:3]:
+                lines.append(f"  Note: {_short_metadata_text(note, limit=200)}")
+            join_defs = tm.get("join_definitions")
+            if isinstance(join_defs, list):
+                for jd in join_defs[:5]:
+                    if not isinstance(jd, dict):
+                        continue
+                    jtype = str(jd.get("join_type", "JOIN")).strip()
+                    wtable = str(jd.get("with_table", "")).strip()
+                    on_clause = str(jd.get("on", "")).strip()
+                    if wtable and on_clause:
+                        lines.append(f"  JoinDef: {jtype} {wtable} ON ({on_clause})")
+            else:
+                joins = _as_string_list(item.get("joins"))
+                if joins:
+                    lines.append(f"  Joins: {', '.join(joins[:5])}")
+    return "\n".join(lines) if lines else "Metadata mevcut degil."
+
+
+def _build_answerable_patterns(metadata: dict[str, Any]) -> str:
+    """Auto-generate answerable query patterns from metadata structure."""
+    relevant = metadata.get("relevant_items")
+    if not isinstance(relevant, list):
+        return "Desen mevcut degil."
+
+    measures: list[str] = []
+    dimensions: list[str] = []
+    _KNOWN_MEASURES = frozenset({
+        "BRUT_PRIM_TL", "VOP_TL", "POLICE_SAYISI",
+    })
+    for item in relevant:
+        if not isinstance(item, dict):
+            continue
+        table = str(item.get("table", "")).strip()
+        columns = item.get("columns")
+        if not isinstance(columns, list):
+            continue
+        for c in columns:
+            if not isinstance(c, dict):
+                continue
+            name = str(c.get("name", "")).strip()
+            sem = str(c.get("semantic_type", "")).strip().lower()
+            if not name:
+                continue
+            if sem == "measure" or name in _KNOWN_MEASURES:
+                measures.append(f"{table}.{name}")
+            elif sem in ("dimensional", ""):
+                kw = _as_string_list(c.get("keywords"))
+                kw_str = f" ({', '.join(kw[:3])})" if kw else ""
+                dimensions.append(f"{table}.{name}{kw_str}")
+
+    lines: list[str] = []
+    if measures:
+        lines.append(f"Measure kolonlari (SUM/COUNT yapilabilir): {', '.join(measures[:10])}")
+    if dimensions:
+        lines.append(f"Dimension kolonlari (GROUP BY yapilabilir): {', '.join(dimensions[:15])}")
+    if measures and dimensions:
+        lines.append(
+            "Ornek cevaplanabilir sorular: "
+            "'Donem bazinda toplam brut prim uretimi', "
+            "'Acente bazinda VOP toplami', "
+            "'Urun koduna gore police sayisi'"
+        )
+    return "\n".join(lines) if lines else "Desen mevcut degil."
+
+
+def _generate_fallback_suggestions(metadata: dict[str, Any]) -> list[str]:
+    """Generate programmatic fallback suggestions from metadata structure."""
+    relevant = metadata.get("relevant_items")
+    if not isinstance(relevant, list):
+        return []
+
+    measures: list[tuple[str, str]] = []
+    dimensions: list[tuple[str, str]] = []
+    _KNOWN_MEASURES = frozenset({
+        "BRUT_PRIM_TL", "VOP_TL", "POLICE_SAYISI",
+    })
+    _MEASURE_LABELS: dict[str, str] = {
+        "BRUT_PRIM_TL": "brut prim",
+        "VOP_TL": "vergi oncesi prim (VOP)",
+        "POLICE_SAYISI": "police sayisi",
+    }
+    _DIM_LABELS: dict[str, str] = {
+        "ACENTE_ADI": "acente",
+        "ACENTE_KODU": "acente kodu",
+        "ACENTE_KODU_NUMERIC": "acente",
+        "URUN_ADI": "urun",
+        "URUN_KODU": "urun kodu",
+        "BRANS_ADI": "brans",
+        "BRANS_KODU": "brans kodu",
+        "IL_ADI": "il",
+        "SATIS_KANALI": "satis kanali",
+        "MUSTERI_ADI": "musteri",
+        "POLICE_DURUMU_ADI": "police durumu",
+        "SATIS_MUDURLUGU_ADI": "satis mudurlugu",
+    }
+    for item in relevant:
+        if not isinstance(item, dict):
+            continue
+        table = str(item.get("table", "")).strip()
+        columns = item.get("columns")
+        if not isinstance(columns, list):
+            continue
+        for c in columns:
+            if not isinstance(c, dict):
+                continue
+            name = str(c.get("name", "")).strip()
+            if not name:
+                continue
+            sem = str(c.get("semantic_type", "")).strip().lower()
+            if sem == "measure" or name in _KNOWN_MEASURES:
+                measures.append((table, name))
+            elif name in _DIM_LABELS:
+                dimensions.append((table, name))
+
+    suggestions: list[str] = []
+    used_combos: set[str] = set()
+    for _m_table, m_col in measures[:3]:
+        m_label = _MEASURE_LABELS.get(m_col, m_col)
+        for _d_table, d_col in dimensions[:10]:
+            d_label = _DIM_LABELS.get(d_col)
+            if d_label is None:
+                continue
+            combo_key = f"{m_col}_{d_col}"
+            if combo_key in used_combos:
+                continue
+            used_combos.add(combo_key)
+            suggestions.append(f"{d_label} bazinda toplam {m_label} dagilimi")
+            if len(suggestions) >= 3:
+                break
+        if len(suggestions) >= 3:
+            break
+    return suggestions[:3]

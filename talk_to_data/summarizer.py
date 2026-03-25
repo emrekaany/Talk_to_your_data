@@ -177,45 +177,49 @@ def _summarize_with_llm(
 
     metadata_summary = _build_metadata_summary(metadata_used)
     schema = {
-        "summary_tr": "string (max 4 cumle)",
+        "summary_tr": "string (en fazla 4 cumle, Turkce)",
         "chart_plan": {
-            "draw_chart": "boolean",
-            "chart_type": "bar|line|scatter|pie|none",
-            "x": "string|null",
-            "y": "string|null",
-            "aggregation": "sum|avg|count|none",
-            "top_n": "integer|null",
-            "sort": "asc|desc|none",
-            "title_tr": "string",
-            "reason_tr": "string",
+            "draw_chart": "boolean (true veya false)",
+            "chart_type": "SADECE birini sec: bar, line, scatter, pie, none",
+            "x": "string veya null",
+            "y": "string veya null",
+            "aggregation": "SADECE birini sec: sum, avg, count, none",
+            "top_n": "integer veya null",
+            "sort": "SADECE birini sec: asc, desc, none",
+            "title_tr": "string (Turkce grafik basligi)",
+            "reason_tr": "string (Turkce, neden bu grafik oneriliyor)",
         },
     }
     prompt = (
-        "Gorev: Calistirilmis SQL sonucunu turkce yorumla ve grafik plani oner.\n"
+        "Gorev: Calistirilan SQL sonucunu Turkce yorumla ve grafik plani oner.\n"
         "Kurallar:\n"
         "- Sadece verilen veri ve baglami kullan, tahmin yapma.\n"
         "- Veri yetersizse summary_tr alanina tam olarak "
         f"'{_NO_SUMMARY_TEXT}' yaz.\n"
         "- Markdown kullanma.\n"
-        "- Sadece gecerli JSON dondur.\n"
-        "- summary_tr en fazla 4 cumle olsun.\n"
-        "- Grafik kodu dondurme; yalnizca chart_plan nesnesi dondur.\n\n"
-        f"JSON semasi:\n{json.dumps(schema, ensure_ascii=True)}\n\n"
+        "- Sadece gecerli JSON dondur. JSON'u markdown code fence icine sarma.\n"
+        "- summary_tr en fazla 4 cumle olsun ve Turkce yazilsin.\n"
+        "- Grafik kodu dondurme; yalnizca chart_plan nesnesi dondur.\n"
+        "- chart_type icin SADECE su degerlerden birini kullan: bar, line, scatter, pie, none.\n"
+        "- aggregation icin SADECE su degerlerden birini kullan: sum, avg, count, none.\n"
+        "- sort icin SADECE su degerlerden birini kullan: asc, desc, none.\n"
+        "- Fallback ozeti temel baglam olarak kullan ama birebir kopyalama; veriden daha iyi bir yorum uret.\n\n"
+        f"JSON semasi:\n{json.dumps(schema, ensure_ascii=False)}\n\n"
         f"Kullanici istegi:\n{user_request or ''}\n\n"
         f"Calistirilan SQL:\n{sql or ''}\n\n"
-        f"Ilgili metadata ozeti:\n{json.dumps(metadata_summary, ensure_ascii=True)}\n\n"
-        f"Sonuc profili:\n{json.dumps(profile, ensure_ascii=True)}\n\n"
+        f"Ilgili metadata ozeti:\n{json.dumps(metadata_summary, ensure_ascii=False)}\n\n"
+        f"Sonuc profili:\n{json.dumps(profile, ensure_ascii=False)}\n\n"
         f"Ilk satirlar (JSON):\n{rows_json}\n\n"
         f"Fallback ozet:\n{fallback_summary}"
     )
 
     try:
         text = llm_client.chat(
-            "Sen kidemli bir veri analisti ve is zekasi danismanisin. Sadece JSON dondur.",
+            "Sen kidemli bir veri analisti ve is zekasi danismanisin. Tum cevaplarin Turkce olsun. Sadece gecerli JSON dondur, markdown code fence kullanma.",
             prompt,
             temperature=0.0,
-            max_tokens=900,
-        ).strip()
+            max_tokens=1200,
+        ).content.strip()
     except LLMError:
         return None
 

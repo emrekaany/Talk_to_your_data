@@ -30,12 +30,25 @@ REQUIRED_KEYS = (
 
 
 PART_25_SYSTEM_PROMPT = (
-    "You are a senior data modeler. "
-    "Extract structured query requirements from a user request. "
-    "Return strict JSON only with keys: "
-    "intent, required_filters, measures, dimensions, grain, time_range, "
-    "report_period, time_granularity, time_value, join_needs, row_limit, "
-    "security_constraints, invalid_request, notes. "
+    "You are a senior data modeler specializing in insurance domain analytics. "
+    "The user request is in Turkish. Interpret Turkish insurance/business domain terminology faithfully. "
+    "All text values in your response must be in Turkish. "
+    "Extract structured query requirements from the user request. "
+    "Return strict JSON only (do not wrap in markdown code fences) with the following keys and definitions:\n"
+    "- intent: query type — one of listing, metric, comparison, anomaly\n"
+    "- required_filters: list of filter expressions the query needs (e.g. [\"BRANS_ADI = 'Kasko'\"])\n"
+    "- measures: list of numeric columns to aggregate (e.g. [\"BRUT_PRIM_TL\", \"VOP_TL\"])\n"
+    "- dimensions: list of grouping/breakdown columns (e.g. [\"BOLGE_ADI\", \"ACENTE_ADI\"])\n"
+    "- grain: aggregation granularity — e.g. [\"police\"], [\"acente\"], [\"brans\"], [\"musteri\"], [\"tarih\"], [\"urun\"], [\"bolge\"], [\"satis_mudurlugu\"]\n"
+    "- time_range: {\"start\": \"YYYY-MM-DD\", \"end\": \"YYYY-MM-DD\"} or nulls\n"
+    "- report_period: period string if mentioned (e.g. \"202501\", \"2025\")\n"
+    "- time_granularity: one of year, month, day, or null\n"
+    "- time_value: literal time value from the request (e.g. \"2025\", \"202503\")\n"
+    "- join_needs: tables that must be joined to answer (e.g. [\"GNL_TARIH\", \"POL_BRANS\"])\n"
+    "- row_limit: max rows, default 200\n"
+    "- security_constraints: list of security constraints if applicable (e.g. [\"PII_DISALLOWED\"])\n"
+    "- invalid_request: boolean — true only if request is completely unanswerable\n"
+    "- notes: any additional observations in Turkish\n"
     "Do not rewrite the user request; interpret it as-is."
 )
 
@@ -143,7 +156,7 @@ def _run_extraction_prompt(
         prompt,
         temperature=temperature,
         max_tokens=max_tokens,
-    )
+    ).content
 
 
 def _try_parse_json(raw: str) -> dict[str, Any] | None:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from pathlib import Path
 import re
 from typing import Any
@@ -46,11 +47,30 @@ def save_run_artifacts(
     (run_dir / "request.txt").write_text(sanitize_request(user_request), encoding="utf-8")
 
 
-def save_result_excel(df: pd.DataFrame, run_dir: Path) -> Path:
-    """Save query result to Excel and return file path."""
+def save_result_excel(df: pd.DataFrame, run_dir: Path, *, background: bool = True) -> Path:
+    """Save query result to Excel and return file path.
+
+    When *background* is True the write runs in a daemon thread so the
+    caller can return immediately after the CSV preview is saved.
+    """
     output_path = run_dir / "result.xlsx"
-    df.to_excel(output_path, index=False)
+    if background:
+        thread = threading.Thread(
+            target=_write_excel,
+            args=(df.copy(), output_path),
+            daemon=True,
+        )
+        thread.start()
+    else:
+        df.to_excel(output_path, index=False)
     return output_path
+
+
+def _write_excel(df: pd.DataFrame, path: Path) -> None:
+    try:
+        df.to_excel(path, index=False)
+    except Exception:
+        pass
 
 
 def save_result_preview(df: pd.DataFrame, run_dir: Path, max_rows: int = 200) -> Path:

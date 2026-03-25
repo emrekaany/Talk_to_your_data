@@ -1,0 +1,9 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-25T07:12:02.846688+00:00",
+  "finished_at_utc": "2026-03-25T07:13:03.155139+00:00",
+  "total_calls": 5,
+  "by_source": {
+    "talk_to_data.llm_client": 5
+  }
+}

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter
 from typing import Any
@@ -12,7 +13,7 @@ from .sql_generator import sanity_check_sql
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
 
 
-MAX_JUDGE_TOKENS = 64
+MAX_JUDGE_TOKENS = 2100
 _OPTION_PATTERN = re.compile(r"\boption_[123]\b", flags=re.IGNORECASE)
 _AGGREGATION_TOKENS = (
     "sum",
@@ -35,6 +36,7 @@ def select_best_sql_option_id(
     candidates: list[dict[str, Any]],
     llm_client: LLMClient | None = None,
     validation_catalog: dict[str, Any] | None = None,
+    requirements: dict[str, Any] | None = None,
 ) -> str:
     """Return best candidate id, using LLM judge first then deterministic fallback."""
     result = choose_best_sql_candidate(
@@ -43,6 +45,7 @@ def select_best_sql_option_id(
         candidates=candidates,
         llm_client=llm_client,
         validation_catalog=validation_catalog,
+        requirements=requirements,
     )
     return str(result["recommended_candidate_id"])
 
@@ -54,6 +57,7 @@ def choose_best_sql_candidate(
     candidates: list[dict[str, Any]],
     llm_client: LLMClient | None = None,
     validation_catalog: dict[str, Any] | None = None,
+    requirements: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """
     Evaluate SQL candidates and return recommendation details.
@@ -105,18 +109,22 @@ def choose_best_sql_candidate(
 
     llm_raw_output = ""
     llm_choice_canonical: str | None = None
+    llm_descriptions: dict[str, str] = {}
     fallback_reason = ""
     judge_error_kind = "none"
 
     if llm_client is not None:
         try:
-            llm_raw_output = _call_llm_judge(
+            judge_response = _call_llm_judge(
                 llm_client=llm_client,
                 user_request=user_request,
                 metadata_used=metadata_used,
                 candidates=normalized_candidates,
+                requirements=requirements,
             )
-            parsed = _parse_option_id(llm_raw_output)
+            llm_raw_output = judge_response.get("raw", "")
+            llm_descriptions = judge_response.get("descriptions", {})
+            parsed = judge_response.get("choice")
             if parsed is not None:
                 eval_item = evaluation_by_canonical.get(parsed.lower())
                 if eval_item is not None and not bool(eval_item["hard_disqualified"]):
@@ -154,6 +162,7 @@ def choose_best_sql_candidate(
                 "retry_recommended": retry_recommended,
                 "llm_raw_output": llm_raw_output,
                 "candidate_evaluations": evaluations,
+                "candidate_descriptions": llm_descriptions,
             }
 
     chosen = _fallback_pick(evaluations)
@@ -170,6 +179,7 @@ def choose_best_sql_candidate(
             "retry_recommended": retry_recommended,
             "llm_raw_output": llm_raw_output,
             "candidate_evaluations": evaluations,
+            "candidate_descriptions": llm_descriptions,
         }
 
     return {
@@ -183,6 +193,7 @@ def choose_best_sql_candidate(
         "retry_recommended": retry_recommended,
         "llm_raw_output": llm_raw_output,
         "candidate_evaluations": evaluations,
+        "candidate_descriptions": llm_descriptions,
     }
 
 
@@ -210,23 +221,28 @@ def _call_llm_judge(
     user_request: str,
     metadata_used: dict[str, Any],
     candidates: list[dict[str, str]],
-) -> str:
+    requirements: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Call LLM judge; returns dict with 'choice' and optional 'descriptions'."""
     system_prompt = (
         "You are a strict Oracle SQL candidate evaluator.\n"
         "You must pick exactly one best SQL option for the user request.\n"
+        "Also provide a brief business-language explanation for each candidate.\n"
         "Be conservative, safety-first, and metadata-grounded."
     )
     prompt = _build_judge_prompt(
         user_request=user_request,
         metadata_used=metadata_used,
         candidates=candidates,
+        requirements=requirements,
     )
-    return llm_client.chat(
+    raw = llm_client.chat(
         system_prompt,
         prompt,
         temperature=0.0,
         max_tokens=MAX_JUDGE_TOKENS,
-    )
+    ).content
+    return _parse_judge_response(raw)
 
 
 def _build_judge_prompt(
@@ -234,6 +250,7 @@ def _build_judge_prompt(
     user_request: str,
     metadata_used: dict[str, Any],
     candidates: list[dict[str, str]],
+    requirements: dict[str, Any] | None = None,
 ) -> str:
     option_map = {item["canonical_id"]: item for item in candidates}
     option_1 = option_map.get("option_1", {"sql": "", "explanation": ""})
@@ -251,6 +268,27 @@ def _build_judge_prompt(
         )
     )
 
+    # Build explanation fallbacks: use rationale_short + risk_notes when explanation is empty
+    def _option_explanation(opt: dict[str, str]) -> str:
+        expl = opt.get("explanation", "").strip()
+        if expl:
+            return expl
+        parts = []
+        rs = opt.get("rationale_short", "").strip()
+        rn = opt.get("risk_notes", "").strip()
+        if rs:
+            parts.append(rs)
+        if rn:
+            parts.append(f"Risk: {rn}")
+        return " | ".join(parts) if parts else "No explanation available."
+
+    requirements_text = ""
+    if isinstance(requirements, dict) and requirements:
+        requirements_text = (
+            "REQUIREMENTS_JSON:\n"
+            f"{compact_prompt_json(requirements)}\n\n"
+        )
+
     return (
         "Task:\n"
         "Select which SQL candidate best satisfies the request using the provided metadata context and constraints.\n\n"
@@ -258,29 +296,37 @@ def _build_judge_prompt(
         "- Disqualify any candidate that conflicts with guardrails/security notes.\n"
         "- Disqualify any candidate that uses tables/columns not supported by metadata context.\n"
         "- Disqualify any candidate that does not match Oracle SELECT/CTE intent.\n\n"
-        "Ranking criteria (in order):\n"
-        "1) Request satisfaction and semantic correctness\n"
-        "2) Correct grain/aggregation for the request intent\n"
-        "3) Minimal unnecessary columns/joins\n"
-        "4) Performance-safe structure (early filters, sensible grouping)\n\n"
+        "Ranking criteria (in priority order):\n"
+        "1) Covers all explicitly requested measures and dimensions faithfully\n"
+        "2) Applies requested filters (time range, categories, etc.) correctly\n"
+        "3) Uses the simplest join path that satisfies the request\n"
+        "4) Correct grain/aggregation matching the request intent\n"
+        "5) No unnecessary columns or joins beyond what the request requires\n"
+        "6) Performance-safe structure (early filters, sensible grouping)\n\n"
         "Output rule:\n"
-        "- Return ONLY one token: option_1 or option_2 or option_3\n"
-        "- No JSON, no explanation, no extra text.\n\n"
+        "- Return strict JSON only (no markdown code fences).\n"
+        "- JSON schema: {\"choice\": \"option_1\", \"descriptions\": ["
+        "{\"id\": \"option_1\", \"description\": \"Question answered: ...\\nTables used: ...\\nFilters: ...\\nGrouping/measures: ...\\nExpected output columns: ...\\nAssumptions: ...\"},"
+        "{\"id\": \"option_2\", \"description\": \"...\"},"
+        "{\"id\": \"option_3\", \"description\": \"...\"}]}\n"
+        "- choice must be exactly one of: option_1, option_2, option_3\n"
+        "- Each description must explain the candidate in plain business language using the template above.\n\n"
         "Input:\n"
         "REQUEST:\n"
         f"{user_request}\n\n"
+        f"{requirements_text}"
         "METADATA_CONTEXT_JSON:\n"
         f"{metadata_summary}\n\n"
         "SQL_CANDIDATES:\n"
         "option_1:\n"
         f"SQL: {option_1['sql']}\n"
-        f"EXPLANATION: {option_1['explanation']}\n\n"
+        f"EXPLANATION: {_option_explanation(option_1)}\n\n"
         "option_2:\n"
         f"SQL: {option_2['sql']}\n"
-        f"EXPLANATION: {option_2['explanation']}\n\n"
+        f"EXPLANATION: {_option_explanation(option_2)}\n\n"
         "option_3:\n"
         f"SQL: {option_3['sql']}\n"
-        f"EXPLANATION: {option_3['explanation']}"
+        f"EXPLANATION: {_option_explanation(option_3)}"
     )
 
 
@@ -289,6 +335,44 @@ def _parse_option_id(text: str) -> str | None:
     if not match:
         return None
     return match.group(0).lower()
+
+
+def _parse_judge_response(raw: str) -> dict[str, Any]:
+    """Parse structured judge response with choice and descriptions."""
+    text = _strip_fence(raw).strip()
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        # Fallback: try to extract option_X from plain text
+        choice = _parse_option_id(text)
+        return {"choice": choice, "descriptions": {}, "raw": text}
+
+    if not isinstance(parsed, dict):
+        choice = _parse_option_id(text)
+        return {"choice": choice, "descriptions": {}, "raw": text}
+
+    choice_raw = str(parsed.get("choice", "")).strip()
+    choice = _parse_option_id(choice_raw) if choice_raw else _parse_option_id(text)
+
+    descriptions: dict[str, str] = {}
+    desc_list = parsed.get("descriptions")
+    if isinstance(desc_list, list):
+        for item in desc_list:
+            if isinstance(item, dict):
+                cid = str(item.get("id", "")).strip()
+                desc = str(item.get("description", "")).strip()
+                if cid and desc:
+                    descriptions[cid] = desc
+
+    return {"choice": choice, "descriptions": descriptions, "raw": text}
+
+
+def _strip_fence(text: str) -> str:
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        stripped = re.sub(r"^```[a-zA-Z0-9_]*\s*", "", stripped)
+        stripped = re.sub(r"\s*```$", "", stripped)
+    return stripped.strip()
 
 
 def _evaluate_candidates(

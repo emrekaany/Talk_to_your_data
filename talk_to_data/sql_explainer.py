@@ -14,13 +14,14 @@ def describe_sql_candidate(
     candidate: dict[str, Any],
     metadata: dict[str, Any],
     llm_client: LLMClient | None = None,
+    user_request: str | None = None,
 ) -> str:
     """Produce plain-language explanation for a SQL candidate."""
     sql = str(candidate.get("sql", "")).strip()
     if not sql:
         return "No SQL text was provided."
 
-    llm_description = _describe_with_llm(sql, metadata, llm_client=llm_client)
+    llm_description = _describe_with_llm(sql, metadata, llm_client=llm_client, user_request=user_request)
     if llm_description:
         return llm_description
 
@@ -48,6 +49,7 @@ def describe_sql_candidates(
     *,
     llm_enabled: bool = True,
     batch_enabled: bool = True,
+    user_request: str | None = None,
 ) -> list[str]:
     """Produce descriptions for all candidates with one batch prompt when enabled."""
     if not candidates:
@@ -58,6 +60,7 @@ def describe_sql_candidates(
             candidates,
             metadata,
             llm_client=llm_client,
+            user_request=user_request,
         )
         if batch_descriptions is not None and len(batch_descriptions) == len(candidates):
             return batch_descriptions
@@ -67,6 +70,7 @@ def describe_sql_candidates(
             candidate,
             metadata,
             llm_client=llm_client if llm_enabled and not batch_enabled else None,
+            user_request=user_request,
         )
         for candidate in candidates
     ]
@@ -77,9 +81,14 @@ def _describe_with_llm(
     metadata: dict[str, Any],
     *,
     llm_client: LLMClient | None,
+    user_request: str | None = None,
 ) -> str | None:
     if llm_client is None:
         return None
+
+    request_context = ""
+    if user_request:
+        request_context = f"User request:\n{user_request}\n\n"
 
     prompt = (
         "Explain the SQL query in plain business language.\n"
@@ -91,6 +100,7 @@ def _describe_with_llm(
         "Grouping/measures: ...\n"
         "Expected output columns: ...\n"
         "Assumptions: ...\n\n"
+        f"{request_context}"
         f"SQL:\n{sql}\n\n"
         f"Relevant metadata summary:\n{_metadata_summary_for_prompt(metadata)}"
     )
@@ -100,7 +110,7 @@ def _describe_with_llm(
             prompt,
             temperature=0.0,
             max_tokens=600,
-        )
+        ).content
     except LLMError:
         return None
 
@@ -117,6 +127,7 @@ def _describe_batch_with_llm(
     metadata: dict[str, Any],
     *,
     llm_client: LLMClient | None,
+    user_request: str | None = None,
 ) -> list[str] | None:
     if llm_client is None:
         return None
@@ -129,6 +140,10 @@ def _describe_batch_with_llm(
         for index, candidate in enumerate(candidates, start=1)
     ]
 
+    request_context = ""
+    if user_request:
+        request_context = f"User request:\n{user_request}\n\n"
+
     prompt = (
         "Explain each SQL candidate in plain business language.\n"
         "Return strict JSON only with schema:\n"
@@ -140,6 +155,7 @@ def _describe_batch_with_llm(
         "Grouping/measures: ...\\n"
         "Expected output columns: ...\\n"
         "Assumptions: ...\n\n"
+        f"{request_context}"
         f"Candidates:\n{json.dumps(candidate_payload, ensure_ascii=False, indent=2)}\n\n"
         f"Relevant metadata summary:\n{_metadata_summary_for_prompt(metadata)}"
     )
@@ -149,7 +165,7 @@ def _describe_batch_with_llm(
             prompt,
             temperature=0.0,
             max_tokens=2000,
-        )
+        ).content
     except LLMError:
         return None
 

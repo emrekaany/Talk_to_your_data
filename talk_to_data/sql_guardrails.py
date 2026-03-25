@@ -315,7 +315,7 @@ def _llm_check_obligations(
             prompt,
             temperature=0.0,
             max_tokens=500,
-        )
+        ).content
     except LLMError:
         return None
 

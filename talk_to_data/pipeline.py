@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from copy import deepcopy
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -106,6 +107,7 @@ class TalkToDataService:
             raise PipelineError("Please provide a request.")
 
         with capture_llm_calls("prepare_candidates") as llm_capture:
+            step_durations: dict[str, float] = {}
             agent = self._resolve_agent(agent_id)
             try:
                 agent_rules = self._get_agent_rules(agent)
@@ -143,6 +145,7 @@ class TalkToDataService:
             )
             validation_catalog = build_validation_catalog(metadata_docs)
 
+            _t0 = time.perf_counter()
             try:
                 requirements = extract_requirements(
                     request,
@@ -151,6 +154,7 @@ class TalkToDataService:
                 )
             except RequirementsExtractionError as exc:
                 raise PipelineError(f"Requirement extraction failed: {exc}") from exc
+            step_durations["extract_requirements_sec"] = round(time.perf_counter() - _t0, 3)
 
             if requirements.get("invalid_request"):
                 reason = str(
@@ -165,6 +169,7 @@ class TalkToDataService:
                     else f"{reason} Proceeding with conservative SQL generation."
                 )
 
+            _t0 = time.perf_counter()
             if use_all_metadata:
                 metadata_used = self._build_all_metadata(agent, metadata_docs, table_metadata_docs)
             else:
@@ -176,6 +181,7 @@ class TalkToDataService:
                     table_metadata_path=agent.table_metadata_path,
                     top_k=500,
                 )
+            step_durations["metadata_retrieval_sec"] = round(time.perf_counter() - _t0, 3)
             run_dir = create_run_dir(self.config.runs_dir)
             agent_info_dict = {
                 "id": agent.id,
@@ -196,6 +202,7 @@ class TalkToDataService:
             cannot_answer_suggestion: dict[str, Any] | None = None
 
             for attempt in (1, 2):
+                _t_gen = time.perf_counter()
                 try:
                     candidates = generate_sql_candidates(
                         user_request=request,
@@ -206,6 +213,9 @@ class TalkToDataService:
                         agent_rules=agent_rules,
                     )
                 except SQLCannotAnswerSuggestion as exc:
+                    step_durations[f"sql_generation_attempt{attempt}_sec"] = round(
+                        time.perf_counter() - _t_gen, 3
+                    )
                     if attempt == 1:
                         cannot_answer_suggestion = {
                             "reason": exc.reason,
@@ -260,23 +270,45 @@ class TalkToDataService:
                     save_llm_usage(run_dir, llm_capture.to_dict())
                     raise PipelineError(f"SQL generation failed: {exc}") from exc
 
-                descriptions = describe_sql_candidates(
-                    candidates,
-                    metadata_used,
-                    llm_client=self.llm_client,
-                    llm_enabled=self.config.sql_explainer_enabled,
-                    batch_enabled=self.config.sql_explainer_batch_enabled,
+                step_durations[f"sql_generation_attempt{attempt}_sec"] = round(
+                    time.perf_counter() - _t_gen, 3
                 )
-                for candidate, description in zip(candidates, descriptions):
-                    candidate["description"] = description
 
+                _t_judge = time.perf_counter()
                 judge_result = choose_best_sql_candidate(
                     user_request=request,
                     metadata_used=metadata_used,
                     candidates=candidates,
                     llm_client=self.llm_client,
                     validation_catalog=validation_catalog,
+                    requirements=requirements,
                 )
+                step_durations[f"sql_judge_attempt{attempt}_sec"] = round(
+                    time.perf_counter() - _t_judge, 3
+                )
+
+                # Apply descriptions from judge (merged explainer+judge)
+                judge_descriptions = judge_result.get("candidate_descriptions", {})
+                if judge_descriptions:
+                    for candidate in candidates:
+                        cid = str(candidate.get("id", "")).strip()
+                        desc = judge_descriptions.get(cid, "")
+                        if desc:
+                            candidate["description"] = desc
+                # Fallback: use heuristic explainer for candidates missing description
+                candidates_needing_desc = [
+                    c for c in candidates if not c.get("description")
+                ]
+                if candidates_needing_desc:
+                    fallback_descriptions = describe_sql_candidates(
+                        candidates_needing_desc,
+                        metadata_used,
+                        llm_client=None,
+                        llm_enabled=False,
+                    )
+                    for candidate, desc in zip(candidates_needing_desc, fallback_descriptions):
+                        candidate["description"] = desc
+
                 recommended_candidate_id = str(
                     judge_result.get("recommended_candidate_id", "")
                 ).strip()
@@ -341,6 +373,7 @@ class TalkToDataService:
             llm_usage["request"] = request
             llm_usage["attempt_count"] = final_attempt
             llm_usage["retry_attempted"] = final_attempt > 1
+            llm_usage["step_durations"] = step_durations
 
             all_disqualified = bool(
                 final_judge_result.get("all_candidates_disqualified", False)
@@ -473,6 +506,8 @@ class TalkToDataService:
             raise PipelineError(f"Execution blocked by SQL guardrails: {exc}") from exc
 
         active_config = self._apply_connection_override(connection)
+        exec_step_durations: dict[str, float] = {}
+        _t0 = time.perf_counter()
         try:
             dataframe = execute_sql(sql, requirements, active_config)
         except DatabaseExecutionError as exc:
@@ -481,11 +516,13 @@ class TalkToDataService:
                 "mandatory filters, and Oracle object names."
             )
             raise PipelineError(f"Oracle execution error: {exc}. {hint}") from exc
+        exec_step_durations["oracle_execution_sec"] = round(time.perf_counter() - _t0, 3)
 
         run_dir_str = context.get("run_dir")
         run_dir = Path(run_dir_str) if run_dir_str else create_run_dir(self.config.runs_dir)
         run_dir.mkdir(parents=True, exist_ok=True)
 
+        _t0 = time.perf_counter()
         interpreted = summarize_result(
             dataframe,
             user_request=str(context.get("request", "")),
@@ -495,6 +532,7 @@ class TalkToDataService:
             llm_enabled=self.config.llm_summarizer_enabled,
             chart_render_enabled=self.config.result_chart_render_enabled,
         )
+        exec_step_durations["summarization_sec"] = round(time.perf_counter() - _t0, 3)
         if self.config.llm_summarizer_required and interpreted.summary_mode != "llm":
             reason = interpreted.fallback_reason or "LLM summary was not produced."
             raise PipelineError(
@@ -504,8 +542,12 @@ class TalkToDataService:
 
         summary = interpreted.summary_text
         chart_plan = interpreted.chart_plan
+
+        _t0 = time.perf_counter()
         excel_path = save_result_excel(dataframe, run_dir)
         save_result_preview(dataframe, run_dir)
+        exec_step_durations["artifact_save_sec"] = round(time.perf_counter() - _t0, 3)
+
         save_result_interpretation(
             run_dir,
             {
@@ -518,6 +560,7 @@ class TalkToDataService:
                 "chart_render_enabled": interpreted.chart_render_enabled,
                 "selected_candidate_id": selected_id,
                 "executed_sql": sql,
+                "step_durations": exec_step_durations,
             },
         )
 

@@ -1,0 +1,32 @@
+{
+  "intent": "Find the top 3 agencies by production (prim) for the period 202512.",
+  "required_filters": [
+    "{'ek_tanzim_tarihi': '202512'}"
+  ],
+  "measures": [
+    "{'prim_uretimi': 'SUM(prim)'}"
+  ],
+  "dimensions": [
+    "{'acente_kodu': 'AGGR.AS400_YENI_URUN.acente_kodu', 'acente_adi': 'AS_DWH.ACE_ACENTE.acente_adi'}"
+  ],
+  "grain": [
+    "acente_kodu",
+    "acente_adi"
+  ],
+  "join_needs": [
+    "{'AGGR.AS400_YENI_URUN': {'join_to': 'AS_DWH.ACE_ACENTE', 'on': 'AGGR.AS400_YENI_URUN.acente_kodu = AS_DWH.ACE_ACENTE.acente_kodu'}}"
+  ],
+  "security_constraints": [
+    "{'acente_kodu': 'user_acente_kodu'}"
+  ],
+  "invalid_request": false,
+  "notes": "The query should use ek_tanzim_tarihi as the basis for production calculation since the period is specified as 202512.",
+  "row_limit": 3,
+  "report_period": "202512",
+  "time_granularity": "month",
+  "time_value": "202512",
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

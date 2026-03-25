@@ -1,0 +1,31 @@
+{
+  "intent": "Retrieve the top 3 agencies by production amount for the period 202512.",
+  "required_filters": [
+    "{'period': '202512'}"
+  ],
+  "measures": [
+    "{'production_amount': 'SUM(prim_üretimi)'}"
+  ],
+  "dimensions": [
+    "{'agency_name': 'acenta_adı'}"
+  ],
+  "grain": [
+    "agency_name"
+  ],
+  "join_needs": [
+    "{'agency_table': 'AS_DWH.ACE_ACENTE', 'production_fact_table': 'AS_DWH.FACT_POL_POLICE_EK'}"
+  ],
+  "security_constraints": [
+    "{'agency_access': 'User must have access to agency data.'}"
+  ],
+  "invalid_request": false,
+  "notes": "The request refers to the period '202512', which is interpreted as December 2025. The production amount is assumed to be derived from the 'prim_üretimi' field. The top 3 agencies are requested based on descending production amounts.",
+  "row_limit": 3,
+  "report_period": "202512",
+  "time_granularity": "month",
+  "time_value": "202512",
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

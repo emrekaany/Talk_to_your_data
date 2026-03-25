@@ -1,0 +1,8 @@
+{
+  "reason": "Required tables and columns like AGGR.AS400_YENI_URUN.acente_kodu and AS_DWH.ACE_ACENTE.acente_adi are not present in the metadata. Additionally, the join path between production tables and agency information is not defined.",
+  "suggested_questions": [
+    "202512 dönemi için en çok prim üretimi olan ilk 3 poliçe kimdir?",
+    "202512 dönemi için toplam üretim tutarı nedir?",
+    "202512 dönemi için üretimdeki aylık ortalama prim nedir?"
+  ]
+}
