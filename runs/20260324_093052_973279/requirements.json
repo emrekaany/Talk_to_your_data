@@ -1,0 +1,31 @@
+{
+  "intent": "Retrieve total production grouped by agent code for the period 202512.",
+  "required_filters": [
+    "{'period': '202512'}"
+  ],
+  "measures": [
+    "{'total_production': 'SUM(production_value)'}"
+  ],
+  "dimensions": [
+    "{'acente_kodu': 'agent_code'}"
+  ],
+  "grain": [
+    "acente_kodu"
+  ],
+  "join_needs": [
+    "{'acente_table': 'AS_DWH.ACE_ACENTE', 'production_table': 'AGGR.AS400_YENI_URUN'}"
+  ],
+  "security_constraints": [
+    "{'acente_kodu': 'filtered_by_user_access'}"
+  ],
+  "invalid_request": false,
+  "notes": "Production is calculated based on ek tanzim tarihi for reporting purposes.",
+  "row_limit": 100,
+  "report_period": "202512",
+  "time_granularity": null,
+  "time_value": null,
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

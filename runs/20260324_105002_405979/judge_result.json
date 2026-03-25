@@ -1,0 +1,34 @@
+{
+  "recommended_candidate_id": "option_2",
+  "recommended_canonical_id": "option_2",
+  "selection_mode": "llm_judge",
+  "fallback_reason": "",
+  "judge_error_kind": "none",
+  "all_candidates_disqualified": false,
+  "disqualified_count": 0,
+  "retry_recommended": false,
+  "llm_raw_output": "option_2",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 8.0
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 8.0
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 8.0
+    }
+  ]
+}

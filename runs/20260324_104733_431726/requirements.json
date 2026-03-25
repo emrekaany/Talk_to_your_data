@@ -1,0 +1,27 @@
+{
+  "intent": "Get the top 3 products by total premium and their total premiums",
+  "required_filters": [],
+  "measures": [
+    "{'name': 'total_premium', 'expression': 'SUM(premium)'}"
+  ],
+  "dimensions": [
+    "{'name': 'product'}"
+  ],
+  "grain": [
+    "product"
+  ],
+  "join_needs": [
+    "{'from_table': 'AS_DWH.FACT_POL_POLICE_EK', 'to_table': 'AS_DWH.POL_URUN', 'on': 'AS_DWH.FACT_POL_POLICE_EK.urun_id = AS_DWH.POL_URUN.urun_id'}"
+  ],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "The request is to retrieve the top 3 products by total premium. It does not specify a time range, so no time-based filtering is applied.",
+  "row_limit": 3,
+  "report_period": null,
+  "time_granularity": null,
+  "time_value": null,
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

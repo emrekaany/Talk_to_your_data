@@ -1,0 +1,31 @@
+{
+  "intent": "Retrieve and group premium production by month between specified months.",
+  "required_filters": [
+    "{'ek_tanzim_tarihi': {'start': '2015-12', 'end': '2025-11'}}"
+  ],
+  "measures": [
+    "{'premium': 'SUM(prim_miktari)'}"
+  ],
+  "dimensions": [
+    "{'ay': 'ek_tanzim_tarihi'}"
+  ],
+  "grain": [
+    "ay"
+  ],
+  "join_needs": [
+    "{'AS_DWH.FACT_POL_POLICE_EK': {'joins': [{'from': 'AS_DWH.FACT_POL_POLICE_EK', 'to': 'AS_DWH.GNL_TARIH', 'on': 'ek_tanzim_tarihi = tarih_key'}]}}"
+  ],
+  "security_constraints": [
+    "{'user_access': 'filtered_by_user_accentes'}"
+  ],
+  "invalid_request": false,
+  "notes": "Ek tanzim tarihi üzerinden üretim hesaplaması yapılmalıdır. Ay bazında gruplama istenmiştir.",
+  "row_limit": 200,
+  "report_period": "ek_tanzim_tarihi",
+  "time_granularity": "month",
+  "time_value": "ek_tanzim_tarihi",
+  "time_range": {
+    "start": "2015-12",
+    "end": "2025-11"
+  }
+}

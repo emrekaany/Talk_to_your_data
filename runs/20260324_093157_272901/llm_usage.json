@@ -1,0 +1,12 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-24T09:31:50.857421+00:00",
+  "finished_at_utc": "2026-03-24T09:33:04.992162+00:00",
+  "total_calls": 7,
+  "by_source": {
+    "talk_to_data.llm_client": 7
+  },
+  "request": "202512 döneminde acente kodu bazında gruplandırılmış prim üretimi",
+  "attempt_count": 2,
+  "retry_attempted": true
+}

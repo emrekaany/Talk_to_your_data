@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT a.ACENTE_KODU, SUM(f.BRUT_PRIM_TL) AS prim_üretimi FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_KODU = a.ACENTE_KODU JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_KODU ORDER BY prim_üretimi DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined via POLICE_ID to POL_POLICE_OZET and ACENTE table. Filters by EK_TANZIM_TARIHI via GNL_TARIH join.",
+    "risk_notes": "Assumes ACENTE_KODU exists in POL_POLICE_OZET and ACE_ACENTE tables.",
+    "description": "Question answered: What is the total production (BRUT_PRIM_TL) per branch office (ACENTE_KODU) for December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.GNL_TARIH\nFilters: Only records where the date is December 2025\nGrouping/measures: Summing BRUT_PRIM_TL grouped by branch office code\nExpected output columns: ACENTE_KODU, prim_üretimi\nAssumptions: BRUT_PRIM_TL represents the production value, and the data is filtered correctly for December 2025.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT a.ACENTE_KODU, SUM(ta.VOP_TL) AS prim_üretimi FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET ta JOIN AS_DWH.POL_POLICE_OZET p ON ta.POLICE_ID = p.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_KODU = a.ACENTE_KODU JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_KODU ORDER BY prim_üretimi DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL from FACT_POL_POLICE_TEM_ASSET joined via POLICE_ID to POL_POLICE_OZET and ACENTE table. Filters by EK_TANZIM_TARIHI via GNL_TARIH join.",
+    "risk_notes": "Assumes ACENTE_KODU exists in POL_POLICE_OZET and ACE_ACENTE tables.",
+    "description": "Question answered: What is the total production (VOP_TL) per branch office (ACENTE_KODU) for December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.GNL_TARIH\nFilters: Only records where the date is December 2025\nGrouping/measures: Summing VOP_TL grouped by branch office code\nExpected output columns: ACENTE_KODU, prim_üretimi\nAssumptions: VOP_TL represents the production value, and the data is filtered correctly for December 2025.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT a.ACENTE_KODU, SUM(f.BRUT_PRIM_TL) + SUM(ta.VOP_TL) AS prim_üretimi FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.FACT_POL_POLICE_TEM_ASSET ta ON p.POLICE_ID = ta.POLICE_ID JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_KODU = a.ACENTE_KODU JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_KODU ORDER BY prim_üretimi DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Combines BRUT_PRIM_TL and VOP_TL from both production tables joined via POLICE_ID to POL_POLICE_OZET and ACENTE table. Filters by EK_TANZIM_TARIHI via GNL_TARIH join.",
+    "risk_notes": "Assumes ACENTE_KODU exists in POL_POLICE_OZET and ACE_ACENTE tables.",
+    "description": "Question answered: What is the combined total production (BRUT_PRIM_TL + VOP_TL) per branch office (ACENTE_KODU) for December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.ACE_ACENTE, AS_DWH.GNL_TARIH\nFilters: Only records where the date is December 2025\nGrouping/measures: Summing both BRUT_PRIM_TL and VOP_TL grouped by branch office code\nExpected output columns: ACENTE_KODU, prim_üretimi\nAssumptions: BRUT_PRIM_TL and VOP_TL together represent the total production value, and the data is filtered correctly for December 2025.",
+    "recommended": false
+  }
+]

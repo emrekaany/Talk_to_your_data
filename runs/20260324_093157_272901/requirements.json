@@ -1,0 +1,31 @@
+{
+  "intent": "202512 döneminde acente kodu bazında gruplandırılmış prim üretimi",
+  "required_filters": [
+    "{'ek_tanzim_tarihi': '202512'}"
+  ],
+  "measures": [
+    "{'prim_üretimi': 'SUM(prim)'}"
+  ],
+  "dimensions": [
+    "{'acente_kodu': 'acente_kodu'}"
+  ],
+  "grain": [
+    "acente_kodu"
+  ],
+  "join_needs": [
+    "{'acente_kodu': 'AS_DWH.ACE_ACENTE'}"
+  ],
+  "security_constraints": [
+    "{'acente_kodu': 'user_acente_kodu'}"
+  ],
+  "invalid_request": false,
+  "notes": "Ek tanzim tarihi üzerinden üretim hesaplaması yapılmalıdır. Acente kodu bazında gruplama istenmiştir.",
+  "row_limit": 10,
+  "report_period": "202512",
+  "time_granularity": "ay",
+  "time_value": "202512",
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

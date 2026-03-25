@@ -191,6 +191,7 @@ def _build_sql_prompt(
         "- If a column you expect is NOT listed in the metadata, it does NOT exist. Do NOT use it under any name.\n"
         "- Do NOT guess column names based on common naming conventions. Only metadata-listed columns are real.\n"
         "- JOIN conditions must use ONLY column pairs explicitly documented in the metadata Joins section.\n"
+        "- If a column has allowed_values listed in metadata, use ONLY those exact values in WHERE, HAVING, or CASE conditions for that column. Do not invent, abbreviate, or transliterate category names.\n"
         "\n"
         "- If you cannot create valid SQL that answers the request using ONLY the provided metadata columns, tables, and joins, "
         "return this alternative JSON instead:\n"
@@ -460,6 +461,7 @@ _TABLE_METADATA_ALLOWED_KEYS = frozenset({
     "performance_rules",
     "relationships",
     "mandatory_filters",
+    "join_definitions",
 })
 
 
@@ -490,9 +492,33 @@ def _format_table_metadata(tm: dict[str, Any]) -> list[str]:
         lines.append(f"Perf: {_short_metadata_text(rule, limit=300)}")
     for flt in _as_string_list(tm.get("mandatory_filters"))[:10]:
         lines.append(f"Filter: {_short_metadata_text(flt, limit=200)}")
-    rels = _as_string_list(tm.get("relationships"))
-    if rels:
-        lines.append(f"Relationships: {', '.join(_short_metadata_text(r, limit=200) for r in rels[:15])}")
+    join_defs = tm.get("join_definitions")
+    if isinstance(join_defs, list) and join_defs:
+        for jd in join_defs:
+            if not isinstance(jd, dict):
+                continue
+            jtype = str(jd.get("join_type", "JOIN")).strip()
+            wtable = str(jd.get("with_table", "")).strip()
+            alias = str(jd.get("alias", "")).strip()
+            on_clause = str(jd.get("on", "")).strip()
+            semantic = str(jd.get("semantic", "")).strip()
+            note = str(jd.get("note", "")).strip()
+            if not wtable or not on_clause:
+                continue
+            parts = [jtype, wtable]
+            if alias:
+                parts.append(alias)
+            parts.append(f"ON ({on_clause})")
+            line = " ".join(parts)
+            if semantic:
+                line = f"{line} [{semantic}]"
+            if note:
+                line = f"{line} -- {note}"
+            lines.append(f"JoinDef: {line}")
+    else:
+        rels = _as_string_list(tm.get("relationships"))
+        if rels:
+            lines.append(f"Relationships: {', '.join(_short_metadata_text(r, limit=200) for r in rels[:15])}")
     return lines
 
 
@@ -534,6 +560,12 @@ def _metadata_columns_text(columns: Any) -> str:
         if select_expressions:
             extras.append(
                 f"select_expr: {', '.join(_short_metadata_text(item, limit=300) for item in select_expressions[:5])}"
+            )
+
+        allowed_values = _as_string_list(col.get("allowed_values"))
+        if allowed_values:
+            extras.append(
+                f"allowed_values: {', '.join(_short_metadata_text(item, limit=60) for item in allowed_values[:100])}"
             )
 
         if extras:

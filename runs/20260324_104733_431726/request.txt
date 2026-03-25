@@ -1,0 +1,1 @@
+en çok prim üretimi olan 3 ürün ve total primlerini getir

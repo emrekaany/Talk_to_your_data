@@ -1,0 +1,7 @@
+{
+  "reason": "Join path from AS_DWH.FACT_POL_POLICE_EK to AS_DWH.POL_URUN is not defined in metadata. No valid join exists between these tables.",
+  "suggested_questions": [
+    "En çok prim üretimi olan 3 acenteyi ve toplam primlerini getir.",
+    "En çok poliçe sayısına sahip olan 3 ürün ve toplam poliçe sayılarını getir."
+  ]
+}

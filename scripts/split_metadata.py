@@ -114,6 +114,12 @@ def extract_columns(documents: list[dict]) -> list[dict]:
                     str(e).strip() for e in select_expressions if str(e).strip()
                 ]
 
+            allowed_values = col.get("allowed_values")
+            if isinstance(allowed_values, list) and allowed_values:
+                entry["allowed_values"] = [
+                    str(v).strip() for v in allowed_values if str(v).strip()
+                ]
+
             columns.append(entry)
 
     return columns

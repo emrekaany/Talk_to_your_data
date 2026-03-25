@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYYMM') AS ay, SUM(f.BRUT_PRIM_TL) AS prim_miktari FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') BETWEEN '201512' AND '202511' GROUP BY TO_CHAR(t.TARIH, 'YYYYMM') ORDER BY ay FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses the TANZIM_TARIH_ID join path to GNL_TARIH and groups by month, summing BRUT_PRIM_TL as requested.",
+    "risk_notes": "Relies on TANZIM_TARIH_ID join path; assumes POL_POLICE_OZET is correctly joined.",
+    "description": "Question answered: What is the total gross premium amount per month between December 2015 and November 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Date range between December 2015 and November 2025\nGrouping/measures: Grouped by month, summing the BRUT_PRIM_TL column\nExpected output columns: Month (as YYYYMM format), Total premium amount\nAssumptions: BRUT_PRIM_TL represents gross premium amounts, and the data is filtered based on the policy creation date.",
+    "recommended": false
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYYMM') AS ay, SUM(f.VOP_TL) AS prim_miktari FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') BETWEEN '201512' AND '202511' GROUP BY TO_CHAR(t.TARIH, 'YYYYMM') ORDER BY ay FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL instead of BRUT_PRIM_TL, grouping by month via TANZIM_TARIH_ID join.",
+    "risk_notes": "Uses VOP_TL instead of BRUT_PRIM_TL; may not align with expected production metric.",
+    "description": "Question answered: What is the total VOP amount per month between December 2015 and November 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Date range between December 2015 and November 2025\nGrouping/measures: Grouped by month, summing the VOP_TL column\nExpected output columns: Month (as YYYYMM format), Total VOP amount\nAssumptions: VOP_TL represents value of production amounts, and the data is filtered based on the policy creation date.",
+    "recommended": true
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT TO_CHAR(t.TARIH, 'YYYYMM') AS ay, SUM(p.POLICE_SAYISI) AS police_sayisi FROM AS_DWH.POLICE_SAYISI p JOIN AS_DWH.POL_POLICE_OZET o ON p.POLICE_ID = o.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') BETWEEN '201512' AND '202511' GROUP BY TO_CHAR(t.TARIH, 'YYYYMM') ORDER BY ay FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Counts police numbers grouped by month via TANZIM_TARIH_ID join.",
+    "risk_notes": "Returns police count instead of premium production; may not satisfy request intent.",
+    "description": "Question answered: What is the total number of policies per month between December 2015 and November 2025?\nTables used: AS_DWH.POLICE_SAYISI, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Date range between December 2015 and November 2025\nGrouping/measures: Grouped by month, summing the POLICE_SAYISI column\nExpected output columns: Month (as YYYYMM format), Total number of policies\nAssumptions: POLICE_SAYISI represents the count of policies, and the data is filtered based on the policy creation date.",
+    "recommended": false
+  }
+]

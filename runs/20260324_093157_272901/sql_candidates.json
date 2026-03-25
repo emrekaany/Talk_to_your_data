@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT p.ACENTE_KODU, SUM(f.BRUT_PRIM_TL) AS prim_üretimi FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET o ON f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID AND f.POLICE_ID = o.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY p.ACENTE_KODU ORDER BY prim_üretimi DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and GNL_TARIH via TANZIM_TARIH_ID to filter by ek tanzim tarihi for 202512.",
+    "risk_notes": "Assumes POL_POLICE_OZET contains ACENTE_KODU, which is not explicitly listed in metadata columns.",
+    "description": "Question answered: What is the total production (BRUT_PRIM_TL) per ACENTE_KODU for December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the date is December 2025\nGrouping/measures: Group by ACENTE_KODU and sum BRUT_PRIM_TL\nExpected output columns: ACENTE_KODU, prim_üretimi\nAssumptions: The table AS_DWH.POL_POLICE_OZET contains ACENTE_KODU field, which is not listed in metadata.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT o.ACENTE_KODU, SUM(f.BRUT_PRIM_TL) AS prim_üretimi FROM AS_DWH.FACT_POL_POLICE_EK f JOIN AS_DWH.POL_POLICE_OZET o ON f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID AND f.POLICE_ID = o.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY o.ACENTE_KODU ORDER BY prim_üretimi DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from FACT_POL_POLICE_EK joined with POL_POLICE_OZET and GNL_TARIH via TANZIM_TARIH_ID to filter by ek tanzim tarihi for 202512.",
+    "risk_notes": "Assumes POL_POLICE_OZET contains ACENTE_KODU, which is not explicitly listed in metadata columns.",
+    "description": "Question answered: What is the total production (BRUT_PRIM_TL) per ACENTE_KODU for December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the date is December 2025\nGrouping/measures: Group by ACENTE_KODU and sum BRUT_PRIM_TL\nExpected output columns: ACENTE_KODU, prim_üretimi\nAssumptions: The join between POL_POLICE_OZET and ACENTE_KODU is valid.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT o.ACENTE_KODU, SUM(f.VOP_TL) AS prim_üretimi FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f JOIN AS_DWH.POL_POLICE_OZET o ON f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID AND f.POLICE_ID = o.POLICE_ID JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY o.ACENTE_KODU ORDER BY prim_üretimi DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL from FACT_POL_POLICE_TEM_ASSET joined with POL_POLICE_OZET and GNL_TARIH via TANZIM_TARIH_ID to filter by ek tanzim tarihi for 202512.",
+    "risk_notes": "Assumes POL_POLICE_OZET contains ACENTE_KODU, which is not explicitly listed in metadata columns.",
+    "description": "Question answered: What is the total production (VOP_TL) per ACENTE_KODU for December 2025?\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Only records where the date is December 2025\nGrouping/measures: Group by ACENTE_KODU and sum VOP_TL\nExpected output columns: ACENTE_KODU, prim_üretimi\nAssumptions: The join between POL_POLICE_OZET and ACENTE_KODU is valid.",
+    "recommended": false
+  }
+]

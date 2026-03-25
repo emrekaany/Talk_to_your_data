@@ -906,7 +906,8 @@ def retrieve_column_based_metadata(
             "table_metadata": {
                 k: v for k, v in tm.items()
                 if k in ("description", "grain", "keywords", "business_notes",
-                         "performance_rules", "mandatory_filters")
+                         "performance_rules", "mandatory_filters",
+                         "join_definitions")
                 and v not in (None, "", [], {})
             },
             "mandatory_filters": _as_string_list(tm.get("mandatory_filters")),
