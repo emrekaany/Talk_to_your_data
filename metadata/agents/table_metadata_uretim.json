@@ -157,7 +157,18 @@
             "on": "AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID"
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "SATIS_MUDURLUGU_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "SATIS MUDURLUGU ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.FACT_POL_POLICE_EK",
@@ -192,7 +203,27 @@
             "note": "Composite join: her iki kolon birlikte ON clause icinde kullanilmalidir. BRUT_PRIM_TL sorgulari icin kullanilir."
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "KAYNAK_SISTEM_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "KAYNAK SISTEM ID"
+          ]
+        },
+        {
+          "name": "POLICE_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "POLICE ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
@@ -241,7 +272,36 @@
             "note": "VOP_TL sorgularinda kullanilir."
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "KAYNAK_SISTEM_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "KAYNAK SISTEM ID"
+          ]
+        },
+        {
+          "name": "POLICE_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "POLICE ID"
+          ]
+        },
+        {
+          "name": "REF_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "REF ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.GNL_KAYNAK_SISTEM",
@@ -401,7 +461,18 @@
             "semantic": "Ek Bitis Tarihi"
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "TARIH_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = ALS_POL_EK_TANZIM_TARIHI.TARIH_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "TARIH ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.MUS_MUSTERI",
@@ -451,7 +522,27 @@
             "on": "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID"
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "MUSTERI_CINSIYET_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "MUSTERI CINSIYET ID"
+          ]
+        },
+        {
+          "name": "MUSTERI_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "MUSTERI ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.MUS_MUSTERI_CINSIYET",
@@ -482,7 +573,18 @@
             "on": "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID"
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "MUSTERI_CINSIYET_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "MUSTERI CINSIYET ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.POLICE_SAYISI",
@@ -515,7 +617,18 @@
             "on": "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID"
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "POLICE_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "POLICE ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.POL_BRANS",
@@ -552,7 +665,18 @@
             "note": "KIRILIM path uzerinden erisim; VOP_TL sorgularinda POL_POLICE_REF_TANIM tercih edilir."
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "BRANS_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_REF_TANIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "BRANS ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.POL_POLICE_DURUMU",
@@ -584,7 +708,18 @@
             "on": "AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_KODU"
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "POLICE_DURUMU_KODU",
+          "type": "VARCHAR2",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = ALS_POLICE_DURUMU.POLICE_DURUMU_KODU",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "POLICE DURUMU KODU"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.POL_POLICE_KIRILIM",
@@ -643,7 +778,45 @@
             "on": "AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID"
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "BRANS_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "BRANS ID"
+          ]
+        },
+        {
+          "name": "KAYNAK_SISTEM_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "KAYNAK SISTEM ID"
+          ]
+        },
+        {
+          "name": "POLICE_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "POLICE ID"
+          ]
+        },
+        {
+          "name": "TKZ_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "TKZ ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.POL_POLICE_KOD",
@@ -680,7 +853,18 @@
             "note": "BRUT_PRIM_TL sorgularinda kullanilir; VOP_TL sorgularinda POL_POLICE_REF_TANIM tercih edilir."
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "POLICE_KOD_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "POLICE KOD ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.POL_POLICE_OZET",
@@ -867,7 +1051,144 @@
             "on": "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID"
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "ACENTE_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "ACENTE ID"
+          ]
+        },
+        {
+          "name": "ANA_POLICE_BASLANGIC_TARIH_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.ANA_POLICE_BASLANGIC_TARIH_ID = ALS_POL_ANA_BAS_TARIHI.TARIH_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "ANA POLICE BASLANGIC TARIH ID"
+          ]
+        },
+        {
+          "name": "ANA_POLICE_BITIS_TARIH_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.ANA_POLICE_BITIS_TARIH_ID = ALS_POL_ANA_BITIS_TARIHI.TARIH_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "ANA POLICE BITIS TARIH ID"
+          ]
+        },
+        {
+          "name": "ANA_POLICE_TANZIM_TARIH_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.ANA_POLICE_TANZIM_TARIH_ID = ALS_POL_ANA_TANZIM_TARIHI.TARIH_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "ANA POLICE TANZIM TARIH ID"
+          ]
+        },
+        {
+          "name": "BASLANGIC_TARIH_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.BASLANGIC_TARIH_ID = ALS_POL_EK_BAS_TARIHI.TARIH_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "BASLANGIC TARIH ID"
+          ]
+        },
+        {
+          "name": "BITIS_TARIH_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.BITIS_TARIH_ID = ALS_POL_EK_BITIS_TARIHI.TARIH_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "BITIS TARIH ID"
+          ]
+        },
+        {
+          "name": "KAYNAK_SISTEM_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "KAYNAK SISTEM ID"
+          ]
+        },
+        {
+          "name": "MUSTERI_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "MUSTERI ID"
+          ]
+        },
+        {
+          "name": "NEW_FPOLK",
+          "type": "VARCHAR2",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.NEW_FPOLK = AGGR.AS400_YENI_URUN.NEW_FPOLK",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "NEW FPOLK"
+          ]
+        },
+        {
+          "name": "POLICE_DURUMU_KODU_AS400",
+          "type": "VARCHAR2",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = ALS_POLICE_DURUMU.POLICE_DURUMU_KODU",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "POLICE DURUMU KODU AS400"
+          ]
+        },
+        {
+          "name": "POLICE_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "POLICE ID"
+          ]
+        },
+        {
+          "name": "POLICE_KOD_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "POLICE KOD ID"
+          ]
+        },
+        {
+          "name": "SATIS_KANALI_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "SATIS KANALI ID"
+          ]
+        },
+        {
+          "name": "TANZIM_TARIH_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = ALS_POL_EK_TANZIM_TARIHI.TARIH_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "TANZIM TARIH ID"
+          ]
+        },
+        {
+          "name": "URUN_KODU",
+          "type": "VARCHAR2",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.URUN_KODU = AS_DWH.POL_URUN.URUN_KODU",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "URUN KODU"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.POL_POLICE_REF_TANIM",
@@ -954,7 +1275,18 @@
             "on": "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID"
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "SATIS_KANALI_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "SATIS KANALI ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.POL_TKZ",
@@ -993,7 +1325,18 @@
             "note": "KIRILIM path uzerinden erisim; VOP_TL sorgularinda POL_POLICE_REF_TANIM tercih edilir."
           }
         ]
-      }
+      },
+      "columns": [
+        {
+          "name": "TKZ_ID",
+          "type": "NUMBER",
+          "description": "Join key kolonu. AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID",
+          "semantic_type": "Dimensional",
+          "keywords": [
+            "TKZ ID"
+          ]
+        }
+      ]
     },
     {
       "id": "AS_DWH.POL_URUN",

@@ -1,0 +1,45 @@
+{
+  "recommended_candidate_id": "option_1",
+  "recommended_canonical_id": "option_1",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM selected a hard-disqualified option; fallback applied.",
+  "judge_error_kind": "parse_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3,
+  "retry_recommended": true,
+  "llm_raw_output": "{\n  \"choice\": \"option_3\",\n  \"descriptions\": [\n    {\n      \"id\": \"option_1\",\n      \"description\": \"Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam prim üretimi.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN.\\nFilters: Tarihe göre filtreleme (2025-12) yapılmıştır.\\nGrouping/measures: Ürün bazında gruplama ve toplam brüt prim hesaplanmıştır.\\nExpected output columns: URUN_ADI, TOPLAM_PRIM_TUTARI.\\nAssumptions: Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır.\"\n    },\n    {\n      \"id\": \"option_2\",\n      \"description\": \"Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam prim üretimi.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AGGR.AS400_YENI_URUN.\\nFilters: Tarihe göre filtreleme (2025-12) yapılmıştır.\\nGrouping/measures: Ürün bazında gruplama ve toplam brüt prim hesaplanmıştır.\\nExpected output columns: URUN_ADI, TOPLAM_PRIM_TUTARI.\\nAssumptions: Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır.\"\n    },\n    {\n      \"id\": \"option_3\",\n      \"description\": \"Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam prim üretimi.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN.\\nFilters: Tarihe göre filtreleme (2025-12) yapılmıştır.\\nGrouping/measures: Ürün bazında gruplama ve toplam brüt prim hesaplanmıştır.\\nExpected output columns: URUN_ADI, TOPLAM_PRIM_TUTARI.\\nAssumptions: Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır.\"\n    }\n  ]\n}",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: p.URUN_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); u.URUN_ID (expected metadata table: AS_DWH.POL_URUN)"
+      ],
+      "fallback_score": 12.5
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: u.URUN_ADI (expected metadata table: AGGR.AS400_YENI_URUN); p.URUN_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); u.URUN_ID (expected metadata table: AGGR.AS400_YENI_URUN)"
+      ],
+      "fallback_score": 9.0
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: p.URUN_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); u.URUN_ID (expected metadata table: AS_DWH.POL_URUN)"
+      ],
+      "fallback_score": 10.0
+    }
+  ],
+  "candidate_descriptions": {
+    "option_1": "Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN.\nFilters: Tarihe göre filtreleme (2025-12) yapılmıştır.\nGrouping/measures: Ürün bazında gruplama ve toplam brüt prim hesaplanmıştır.\nExpected output columns: URUN_ADI, TOPLAM_PRIM_TUTARI.\nAssumptions: Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır.",
+    "option_2": "Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AGGR.AS400_YENI_URUN.\nFilters: Tarihe göre filtreleme (2025-12) yapılmıştır.\nGrouping/measures: Ürün bazında gruplama ve toplam brüt prim hesaplanmıştır.\nExpected output columns: URUN_ADI, TOPLAM_PRIM_TUTARI.\nAssumptions: Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır.",
+    "option_3": "Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN.\nFilters: Tarihe göre filtreleme (2025-12) yapılmıştır.\nGrouping/measures: Ürün bazında gruplama ve toplam brüt prim hesaplanmıştır.\nExpected output columns: URUN_ADI, TOPLAM_PRIM_TUTARI.\nAssumptions: Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır."
+  }
+}

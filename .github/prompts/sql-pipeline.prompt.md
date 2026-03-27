@@ -22,7 +22,7 @@ extract_requirements() → retrieve_relevant_metadata() → generate_sql_candida
    - Table allowlist validation
    - Alias.column metadata validation
 4. **Bind Resolution:** Oracle bind params requirements'tan çözümlenir (`db.py`).
-5. **Row Limit:** `FETCH FIRST 200 ROWS ONLY` zorunlu.
+5. **Row Limit:** `FETCH FIRST N ROWS ONLY` (1 <= N <= 200) zorunlu.
 
 ## Module Responsibilities
 

@@ -13,11 +13,11 @@ import pandas as pd
 
 
 def create_run_dir(base_dir: Path) -> Path:
-    """Create and return a timestamped run directory."""
+    """Create and return a timestamped run directory (absolute path)."""
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
     run_dir = base_dir / timestamp
     run_dir.mkdir(parents=True, exist_ok=True)
-    return run_dir
+    return run_dir.resolve()
 
 
 def sanitize_request(text: str) -> str:
@@ -47,7 +47,7 @@ def save_run_artifacts(
     (run_dir / "request.txt").write_text(sanitize_request(user_request), encoding="utf-8")
 
 
-def save_result_excel(df: pd.DataFrame, run_dir: Path, *, background: bool = True) -> Path:
+def save_result_excel(df: pd.DataFrame, run_dir: Path, *, background: bool = False) -> Path:
     """Save query result to Excel and return file path.
 
     When *background* is True the write runs in a daemon thread so the

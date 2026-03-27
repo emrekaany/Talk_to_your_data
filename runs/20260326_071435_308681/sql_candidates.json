@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT f.URUN_KODU, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY f.URUN_KODU ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Uses the correct join paths and filters on ek tanzim tarihi for December 2025, aggregates by URUN_KODU.",
+    "risk_notes": "Relies on BRUT_PRIM_TL as the primary production metric, assumes URUN_KODU is available in the fact table.",
+    "description": "Question answered: 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\nFilters: Ek tanzim tarihi 2025 Aralık dönemi.\nGrouping/measures: Ürün koduna göre gruplama ve BRUT_PRIM_TL toplamı.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: BRUT_PRIM_TL, üretim tutarı olarak temel metrik olarak kabul edilmiştir.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT f.URUN_KODU, SUM(f.VOP_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY f.URUN_KODU ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL as the production metric and filters on ek tanzim tarihi for December 2025.",
+    "risk_notes": "Uses VOP_TL instead of BRUT_PRIM_TL, which may differ slightly depending on business logic.",
+    "description": "Question answered: 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\nFilters: Ek tanzim tarihi 2025 Aralık dönemi.\nGrouping/measures: Ürün koduna göre gruplama ve VOP_TL toplamı.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: VOP_TL, üretim tutarı olarak kullanılmıştır; bu, BRUT_PRIM_TL ile farklılık gösterebilir.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT f.URUN_KODU, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY f.URUN_KODU HAVING SUM(f.BRUT_PRIM_TL) > 0 ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Filters out zero-value entries and ensures meaningful results.",
+    "risk_notes": "Adds a HAVING clause to exclude zero-value production entries.",
+    "description": "Question answered: 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\nFilters: Ek tanzim tarihi 2025 Aralık dönemi ve sıfır değerli kayıtlar hariç tutulmuştur.\nGrouping/measures: Ürün koduna göre gruplama ve BRUT_PRIM_TL toplamı.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: Sıfır değerli kayıtların filtrelenmesi ek bir filtreleme adımını gerektirmektedir.",
+    "recommended": false
+  }
+]

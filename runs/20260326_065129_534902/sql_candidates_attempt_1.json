@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT b.BRANS_ADI, SUM(ft.VOP_TL) AS TOPLAM_VOP FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET ft INNER JOIN AS_DWH.POL_POLICE_OZET p ON ft.POLICE_ID = p.POLICE_ID AND ft.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_BRANS b ON ft.REF_ID = b.REF_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' GROUP BY b.BRANS_ADI ORDER BY TOPLAM_VOP DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Aggregates VOP by branch for the year 2025 using correct join paths and filters",
+    "risk_notes": "Relies on correct REF_ID mapping to BRANS_ADI",
+    "description": "Question answered: 2025 yılı için branş bazında en yüksek 10 VOP üretimi. Tables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_BRANS. Filters: Ek tanzim tarihi 2025 yılına göre filtreleme. Grouping/measures: VOP_TL toplamı, BRANS_ADI gruplaması. Expected output columns: BRANS_ADI, TOPLAM_VOP. Assumptions: VOP_TL doğrudan POL_BRANS ile ilişkilendirilmiştir.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT b.BRANS_ADI, SUM(ft.VOP_TL) AS TOPLAM_VOP FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET ft INNER JOIN AS_DWH.POL_POLICE_OZET p ON ft.POLICE_ID = p.POLICE_ID AND ft.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_POLICE_REF_TANIM r ON ft.REF_ID = r.REF_ID INNER JOIN AS_DWH.POL_BRANS b ON r.REF_ID = b.REF_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' GROUP BY b.BRANS_ADI ORDER BY TOPLAM_VOP DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Includes additional join to POL_POLICE_REF_TANIM for REF_ID validation",
+    "risk_notes": "More complex join path may impact performance",
+    "description": "Question answered: 2025 yılı için branş bazında en yüksek 10 VOP üretimi. Tables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS. Filters: Ek tanzim tarihi 2025 yılına göre filtreleme. Grouping/measures: VOP_TL toplamı, BRANS_ADI gruplaması. Expected output columns: BRANS_ADI, TOPLAM_VOP. Assumptions: Ekstra bir tablo (POL_POLICE_REF_TANIM) kullanılarak REF_ID doğrulaması yapılmış.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT b.BRANS_ADI, SUM(ft.VOP_TL) AS TOPLAM_VOP FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET ft INNER JOIN AS_DWH.POL_POLICE_OZET p ON ft.POLICE_ID = p.POLICE_ID AND ft.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_BRANS b ON ft.REF_ID = b.REF_ID WHERE t.TARIH BETWEEN TO_DATE('2025-01-01','YYYY-MM-DD') AND TO_DATE('2025-12-31','YYYY-MM-DD') GROUP BY b.BRANS_ADI ORDER BY TOPLAM_VOP DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Uses explicit date range filter instead of year mask",
+    "risk_notes": "Date range filter may be more precise but less flexible",
+    "description": "Question answered: 2025 yılı için branş bazında en yüksek 10 VOP üretimi. Tables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_BRANS. Filters: Ek tanzim tarihi 2025-01-01 ile 2025-12-31 arasında filtreleme. Grouping/measures: VOP_TL toplamı, BRANS_ADI gruplaması. Expected output columns: BRANS_ADI, TOPLAM_VOP. Assumptions: Tarihe göre filtreleme daha açık ve net bir şekilde yapılmış.",
+    "recommended": false
+  }
+]

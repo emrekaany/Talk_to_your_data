@@ -1,0 +1,703 @@
+{
+  "documents": [
+    {
+      "id": "AGGR.AS400_YENI_URUN",
+      "schema": "AGGR",
+      "name": "AS400_YENI_URUN",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_OZET.NEW_FPOLK = AGGR.AS400_YENI_URUN.NEW_FPOLK"
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AGGR.AS400_YENI_URUN tablosuna gidebilirsin."
+        ],
+        "description": "Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Poliçe Kodu Detay",
+          "Üretim",
+          "AGGR.AS400_YENI_URUN",
+          "Poliçe Adı Detay"
+        ],
+        "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe"
+      }
+    },
+    {
+      "id": "AS_DWH.ACE_ACENTE",
+      "schema": "AS_DWH",
+      "name": "ACE_ACENTE",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID",
+          "AS_DWH.ACE_ACENTE_ADRES.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+          "AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID"
+        ],
+        "description": "Acentelere ait bilgileri tutan tablo.",
+        "performance_rules": [
+          "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+          "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+          "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.ACE_ACENTE",
+          "Kanal",
+          "Acente Kodu",
+          "Acenta Tanımlama Kodu",
+          "Acenta Referans Kodu",
+          "Acenta Numarası",
+          "Satış Acentesi Kodu",
+          "Acente Unvanı",
+          "Acente Adı",
+          "Acente Bölge Kodu",
+          "Satış Müdürlüğü",
+          "Satış Bölge Müdürlüğü",
+          "Bölge Satış Birimi",
+          "Acente Tipi",
+          "Acente Türü",
+          "Acente Sınıfı",
+          "Acente Sınıflandırması",
+          "Dağıtım Kanalı"
+        ],
+        "grain": "veri_seviyesi=Acente Kodu; degisim_seviyesi=Acente Kodu"
+      }
+    },
+    {
+      "id": "AS_DWH.ACE_ACENTE_ADRES",
+      "schema": "AS_DWH",
+      "name": "ACE_ACENTE_ADRES",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.ACE_ACENTE_ADRES.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID"
+        ],
+        "description": "Acentelere ait adres bilgilerini tutar.",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "AS_DWH.ACE_ACENTE_ADRES",
+          "Kanal",
+          "Acente İl Adı",
+          "Acente Şehri",
+          "Acente İl Bilgisi",
+          "Acente Konum İli"
+        ],
+        "grain": "veri_seviyesi=Acente Kodu; degisim_seviyesi=Acente Kodu"
+      }
+    },
+    {
+      "id": "AS_DWH.ACE_SATIS_MUDURLUGU",
+      "schema": "AS_DWH",
+      "name": "ACE_SATIS_MUDURLUGU",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID"
+        ],
+        "description": "Acente bölgelerine ait bilgileri tutan tablo.",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "AS_DWH.ACE_SATIS_MUDURLUGU",
+          "Acente Bölge Kodu",
+          "Satış Müdürlüğü",
+          "Satış Bölge Müdürlüğü",
+          "Bölge Satış Birimi",
+          "Acente Bölge Adı",
+          "Acente Bölge İsmi",
+          "Acentenin Bağlı Olduğu Bölge",
+          "Satış Bölgesi Adı",
+          "Acente Bölge Bilgisi"
+        ],
+        "grain": "veri_seviyesi=Satış Müdürlüğü; degisim_seviyesi=Satış Müdürlüğü"
+      }
+    },
+    {
+      "id": "AS_DWH.FACT_POL_POLICE_EK",
+      "schema": "AS_DWH",
+      "name": "FACT_POL_POLICE_EK",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+          "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID"
+        ],
+        "description": "Poliçe Ek seviyesinde Bazı Tutarsal Bilgileri Tutar",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Brüt Prim TL",
+          "Üretim",
+          "AS_DWH.FACT_POL_POLICE_EK",
+          "Toplam Prim",
+          "Brüt Poliçe Primi",
+          "Toplam Prim Tutarı",
+          "Vergi Dahil Prim",
+          "Poliçe Brüt Primi"
+        ],
+        "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID"
+      }
+    },
+    {
+      "id": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+      "schema": "AS_DWH",
+      "name": "FACT_POL_POLICE_TEM_ASSET",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+          "AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID",
+          "AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID"
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_POLICE_KOD tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AGGR.AS400_YENI_URUN tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ],
+        "description": "Poliçe Teminat (TKZ) seviyesinde bazı tutarsal bilgileri tutar.",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+          "Vergi Öncesi Prim TL",
+          "Net Prim Tutarı",
+          "Vergisiz Prim",
+          "Prim Tutarı (Vergi Hariç)",
+          "Net Poliçe Primi",
+          "VOP TL"
+        ],
+        "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID"
+      }
+    },
+    {
+      "id": "AS_DWH.GNL_KAYNAK_SISTEM",
+      "schema": "AS_DWH",
+      "name": "GNL_KAYNAK_SISTEM",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID"
+        ],
+        "description": "Poliçe verisinin hangi kaynak sistemden (1-AS400/2-ASOS/15-ASTRA) geldiğini gösteren tablodur.",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.GNL_KAYNAK_SISTEM",
+          "Kaynak Sistem",
+          "Veri Kaynağı",
+          "Kaynak Uygulama",
+          "Kaynak Platform",
+          "Kaynak Sistem Adı",
+          "Veri Üretim Sistemi"
+        ],
+        "grain": "veri_seviyesi=Kaynak Sistem; degisim_seviyesi=Kaynak Sistem"
+      }
+    },
+    {
+      "id": "AS_DWH.GNL_TARIH",
+      "schema": "AS_DWH",
+      "name": "GNL_TARIH",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.ANA_POLICE_TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID"
+        ],
+        "description": "Genel Tarih Bilgileri Tutan Takvim Tablosu. Join üzerinden ilgili ID ile istenilen tarih bilgisi elde edilir.",
+        "performance_rules": [
+          "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+          "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+          "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.GNL_TARIH",
+          "Ana Poliçe Tanzim Tarihi",
+          "Poliçe Tanzim Tarihi",
+          "Tanzim Tarihi",
+          "Tan Tarih",
+          "Tanzim Trh",
+          "Tan Trh",
+          "Bas Tarih",
+          "Bas Trh",
+          "Poliçe Düzenleme Tarihi",
+          "Ana Poliçe Düzenleme Tarihi",
+          "Poliçe Oluşturma Tarihi",
+          "Poliçe Kayıt Tarihi",
+          "Ek Tanzim Tarihi",
+          "Ek Tarihi",
+          "Ek Trh",
+          "Ek Tnzm Tarihi",
+          "Ek Tnzm Trh",
+          "Zeyil Tanzim Tarihi",
+          "Ek Düzenleme Tarihi",
+          "Zeyil Düzenleme Tarihi",
+          "Ek İşlem Tarihi",
+          "Zeyil Kayıt Tarihi",
+          "Ana Poliçe Başlangıç Tarihi",
+          "Poliçe Başlangıç Tarihi",
+          "Police Baslangic Tarihi",
+          "Ana Plc Baslangic Tarihi",
+          "Plc Bas Tarih",
+          "Teminat Başlangıç Tarihi",
+          "Sigorta Başlangıç Tarihi",
+          "Poliçe Yürürlük Tarihi",
+          "Teminat Başlangıcı",
+          "Ek Başlangıç Tarihi",
+          "Ek Bas Trh",
+          "Ek Baslangic Trh",
+          "Ek Bas Tarihi",
+          "Zeyil Başlangıç Tarihi",
+          "Ek Teminat Başlangıç Tarihi",
+          "Zeyil Yürürlük Tarihi",
+          "Ek Geçerlilik Başlangıç Tarihi",
+          "Ek Teminat Yürürlük Tarihi",
+          "Ana Poliçe Bitiş Tarihi",
+          "Ana Poliçe Btitiş Tarihi",
+          "Ana Pol Btis Tarihi",
+          "Ana Pol BTS TRH",
+          "Poliçe Bitiş Tarihi",
+          "Poliçe Ana Bitiş Tarihi",
+          "Bitiş Tarihi",
+          "Teminat Bitiş Tarihi",
+          "Sigorta Bitiş Tarihi",
+          "Poliçe Sonlanma Tarihi",
+          "Teminat Sonu Tarihi",
+          "Ek Bitiş Tarihi",
+          "Zeyil Bitiş Tarihi",
+          "Ek Teminat Bitiş Tarihi",
+          "Ek Geçerlilik Bitiş Tarihi",
+          "Zeyil Geçerlilik Sonu",
+          "Ek Süre Bitiş Tarihi"
+        ],
+        "grain": "veri_seviyesi=Tarih; degisim_seviyesi=Tarih"
+      }
+    },
+    {
+      "id": "AS_DWH.MUS_MUSTERI",
+      "schema": "AS_DWH",
+      "name": "MUS_MUSTERI",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID",
+          "AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID"
+        ],
+        "description": "Müşteri Bilgilerini İçeren Tablo",
+        "performance_rules": [
+          "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+          "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+          "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.MUS_MUSTERI",
+          "Müşteri No",
+          "Müşteri",
+          "Müşteri Numarası",
+          "Müşteri ID",
+          "Müşteri Tanımlama Numarası",
+          "Müşteri Adı",
+          "Sigortalı Adı",
+          "Müşteri Unvanı",
+          "Müşteri İsmi",
+          "Müşteri Soyadı",
+          "Soyadı",
+          "Sigortalı Soyadı",
+          "Müşteri Sayısı",
+          "Toplam Müşteri Adedi",
+          "Müşteri Adedi",
+          "Müşteri Miktarı"
+        ],
+        "grain": "veri_seviyesi=Müşteri; degisim_seviyesi=Müşteri"
+      }
+    },
+    {
+      "id": "AS_DWH.MUS_MUSTERI_CINSIYET",
+      "schema": "AS_DWH",
+      "name": "MUS_MUSTERI_CINSIYET",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID"
+        ],
+        "description": "Müşteri cinsiyet tanımlarını içeren look up tablo.",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Müşteri Cinsiyet",
+          "Müşteri",
+          "AS_DWH.MUS_MUSTERI_CINSIYET",
+          "Cinsiyet",
+          "Müşteri Cinsiyet Bilgisi",
+          "Sigortalı Cinsiyeti"
+        ],
+        "grain": "veri_seviyesi=Müşteri; degisim_seviyesi=Müşteri"
+      }
+    },
+    {
+      "id": "AS_DWH.POLICE_SAYISI",
+      "schema": "AS_DWH",
+      "name": "POLICE_SAYISI",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID"
+        ],
+        "description": "Poliçe Sayısı Bilgisini Tutar",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Poliçe Sayısı",
+          "Üretim",
+          "AS_DWH.POLICE_SAYISI",
+          "Toplam Poliçe Adedi",
+          "Poliçe Adedi",
+          "Poliçe Toplamı",
+          "Poliçe Miktarı",
+          "Policy Count"
+        ],
+        "grain": "veri_seviyesi=Police ID"
+      }
+    },
+    {
+      "id": "AS_DWH.POL_BRANS",
+      "schema": "AS_DWH",
+      "name": "POL_BRANS",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID"
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin."
+        ],
+        "description": "Branş Tanımlarını İçeren Look Up Tablo",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_BRANS",
+          "Branş",
+          "Sigorta Branşı",
+          "Sigorta Türü",
+          "Poliçe Branşı",
+          "Branş Açıklama",
+          "Hayır"
+        ],
+        "grain": "veri_seviyesi=Branş; degisim_seviyesi=Branş"
+      }
+    },
+    {
+      "id": "AS_DWH.POL_POLICE_DURUMU",
+      "schema": "AS_DWH",
+      "name": "POL_POLICE_DURUMU",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_KODU"
+        ],
+        "description": "Poliçenin Yürürlükte mi, İptal mi yoksa süresini mi tamamladı gibi durum bilgisini veren tablo.",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_POLICE_DURUMU",
+          "Poliçe Durumu",
+          "Poliçe Statüsü",
+          "Poliçe Geçerlilik Durumu",
+          "Poliçe Aktiflik Durumu"
+        ],
+        "grain": "veri_seviyesi=Poliçe Durumu; degisim_seviyesi=Poliçe Durumu"
+      }
+    },
+    {
+      "id": "AS_DWH.POL_POLICE_KIRILIM",
+      "schema": "AS_DWH",
+      "name": "POL_POLICE_KIRILIM",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID",
+          "AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID",
+          "AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+          "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID"
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ],
+        "description": "Poliçe bazında branş ve TKZ kırılım bilgilerini tutan köprü tablo.",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_POLICE_KIRILIM",
+          "Branş",
+          "Sigorta Branşı",
+          "Sigorta Türü",
+          "Poliçe Branşı",
+          "Branş Açıklama",
+          "Hayır",
+          "TKZ Kodu",
+          "Tarife Kodu",
+          "Teminat Kodu",
+          "Ürün Tarife Kodu",
+          "Tarife Tanımlama Kodu",
+          "TKZ Kodu Açıklaması",
+          "TKZ Tanımı",
+          "Tarife Kodu Açıklaması"
+        ],
+        "grain": "veri_seviyesi=Police ID; degisim_seviyesi=Police ID"
+      }
+    },
+    {
+      "id": "AS_DWH.POL_POLICE_KOD",
+      "schema": "AS_DWH",
+      "name": "POL_POLICE_KOD",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID"
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_POLICE_KOD tablosuna gidebilirsin."
+        ],
+        "description": "Poliçe Kodlarının Tanımlarını İçeren Look Up Tablo",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Poliçe Kodu",
+          "Üretim",
+          "AS_DWH.POL_POLICE_KOD",
+          "Pol Kod",
+          "Poliçe Adı",
+          "Poliçe Açıklama",
+          "Poliçe Kodu Açıklama",
+          "Ürün Adı"
+        ],
+        "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe"
+      }
+    },
+    {
+      "id": "AS_DWH.POL_POLICE_OZET",
+      "schema": "AS_DWH",
+      "name": "POL_POLICE_OZET",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+          "AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+          "AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID",
+          "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+          "AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+          "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.ANA_POLICE_BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.ANA_POLICE_TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.BASLANGIC_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.BITIS_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+          "AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID",
+          "AS_DWH.POL_POLICE_OZET.NEW_FPOLK = AGGR.AS400_YENI_URUN.NEW_FPOLK",
+          "AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_KODU",
+          "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID",
+          "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID",
+          "AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID",
+          "AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID",
+          "AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID",
+          "AS_DWH.POL_POLICE_OZET.URUN_KODU = AS_DWH.POL_URUN.URUN_KODU",
+          "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID"
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_POLICE_KOD tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AGGR.AS400_YENI_URUN tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ],
+        "description": "Poliçe Bilgilerini Tutan Tablo",
+        "performance_rules": [
+          "Not Yukarıda yazdığım gibi özellikle belirtilmediyse üretim raporları ek tanzim tarihi esasıyla oluşturulur.Halihazırda kullanılan raporlar ve yasal raporlar bu yönde çalışmaktadır. Örneğin kullanıcı 2026 başlangıçlı poliçelerdeki üretim tutarım nedir diye sorduysa ana poliçe başlangıç yılı 2026 olmalı ama 2026 yılındaki üretimim nedir diye sorulduysa ek tanzim tarihi üzerinden hesaplama yapılmalı.",
+          "Üretim raporlarında genel olarak geçen sene ile kıyaslama yapılır. Örneğin \"Geçen yıl ile cari yıl üretimimi karşılaştır.\" üretim tarafıyla ilgilenen kullanıcılar ve üst yönetim tarafından sık sorulur.",
+          "En fazla üretim yapan 10 acenteyi / Akdeniz bölgesinde en fazla üretim yapan 10 acente / xxx no'lu acentenin en yüksek prime sahip ilk 10 müşterisini getir sık sorulan sorular arasındadır."
+        ],
+        "keywords": [
+          "Poliçe No",
+          "Üretim",
+          "AS_DWH.POL_POLICE_OZET",
+          "Poliçe Numarası",
+          "Pol No",
+          "Pol Numarası",
+          "Sigorta Poliçe Numarası",
+          "Yenileme No",
+          "Poliçe Yenileme Numarası",
+          "Poliçe Yenileme Sayısı",
+          "Tecdit No",
+          "Tecdit Numarası",
+          "Ek No",
+          "Zeyil Numarası",
+          "Poliçe Ek Numarası",
+          "Zeyil Sıra Numarası",
+          "Ek İşlem Numarası",
+          "Ek Numarası",
+          "Poliçe Ek No",
+          "Poliçe Döviz Cinsi",
+          "Poliçe Para Birimi",
+          "Poliçe Kur Cinsi",
+          "Poliçe Döviz Türü",
+          "Poliçe Para Cinsi",
+          "Poliçe Currency Bilgisi"
+        ],
+        "grain": "veri_seviyesi=Poliçe; degisim_seviyesi=Poliçe; degisim_seviyesi=Poliçe Yenileme No; degisim_seviyesi=Poliçe Ek Numarası"
+      }
+    },
+    {
+      "id": "AS_DWH.POL_POLICE_REF_TANIM",
+      "schema": "AS_DWH",
+      "name": "POL_POLICE_REF_TANIM",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID"
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_POLICE_KOD tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AGGR.AS400_YENI_URUN tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_BRANS tablosuna gidebilirsin.",
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ],
+        "description": "Poliçe kodu, branş ve TKZ referans tanımlarını içeren tablo. Vergi Öncesi Prim TL hesaplamalarında kullanılır.",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_POLICE_REF_TANIM",
+          "Poliçe Adı",
+          "Poliçe Açıklama",
+          "Poliçe Kodu Açıklama",
+          "Ürün Adı",
+          "Poliçe Kodu Detay",
+          "Poliçe Adı Detay",
+          "Branş",
+          "Sigorta Branşı",
+          "Sigorta Türü",
+          "Poliçe Branşı",
+          "Branş Açıklama",
+          "Hayır",
+          "TKZ Kodu",
+          "Tarife Kodu",
+          "Teminat Kodu",
+          "Ürün Tarife Kodu",
+          "Tarife Tanımlama Kodu",
+          "TKZ Kodu Açıklaması",
+          "TKZ Tanımı",
+          "Tarife Kodu Açıklaması"
+        ],
+        "grain": "veri_seviyesi=Referans Tanım (REF_ID); degisim_seviyesi=Referans Tanım (REF_ID)"
+      }
+    },
+    {
+      "id": "AS_DWH.POL_POLICE_SATIS_KANALI",
+      "schema": "AS_DWH",
+      "name": "POL_POLICE_SATIS_KANALI",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID"
+        ],
+        "description": "Poliçe Satış Kanallarını İçeren Look Up Tablo",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_POLICE_SATIS_KANALI",
+          "Satış Kanalı",
+          "Satış Dağıtım Kanalı",
+          "Poliçe Satış Kanalı",
+          "Dağıtım Kanalı",
+          "Satış Platformu"
+        ],
+        "grain": "veri_seviyesi=Satış Kanalı; degisim_seviyesi=Satış Kanalı"
+      }
+    },
+    {
+      "id": "AS_DWH.POL_TKZ",
+      "schema": "AS_DWH",
+      "name": "POL_TKZ",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID"
+        ],
+        "business_notes": [
+          "Vergi Öncesi Prim TL ile çekerken AS_DWH.POL_POLICE_REF_TANIM tablosuna gitmelisin. Diğer Selectlerde AS_DWH.POL_TKZ tablosuna gidebilirsin."
+        ],
+        "description": "TKZ Tanımlarını İçeren Look Up Tablo",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "TKZ Kodu",
+          "Üretim",
+          "AS_DWH.POL_TKZ",
+          "Tarife Kodu",
+          "Teminat Kodu",
+          "Ürün Tarife Kodu",
+          "Tarife Tanımlama Kodu",
+          "TKZ Kodu Açıklaması",
+          "TKZ Tanımı",
+          "Tarife Kodu Açıklaması"
+        ],
+        "grain": "veri_seviyesi=TKZ; degisim_seviyesi=TKZ"
+      }
+    },
+    {
+      "id": "AS_DWH.POL_URUN",
+      "schema": "AS_DWH",
+      "name": "POL_URUN",
+      "table_metadata": {
+        "relationships": [
+          "AS_DWH.POL_POLICE_OZET.URUN_KODU = AS_DWH.POL_URUN.URUN_KODU"
+        ],
+        "description": "Ürünlere ait bilgileri tutan tablo.",
+        "performance_rules": [
+          "Apply selective date filters for production reporting queries.",
+          "Prefer key-based joins observed in workbook join definitions."
+        ],
+        "keywords": [
+          "Üretim",
+          "AS_DWH.POL_URUN",
+          "Ürün Adı",
+          "Sigorta Ürün Adı",
+          "Poliçe Ürün Adı",
+          "Ürün Tanımı",
+          "Sigorta Ürün İsmi",
+          "Ürün Tanımlaması",
+          "Ürün Kodu",
+          "Sigorta Ürün Kodu",
+          "Ürün Tanımlama Kodu"
+        ],
+        "grain": "veri_seviyesi=Ürün; degisim_seviyesi=Ürün"
+      }
+    }
+  ]
+}

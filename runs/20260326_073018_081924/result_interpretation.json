@@ -1,0 +1,26 @@
+{
+  "summary": "Sorgu sonucu 10 satir ve 2 kolon dondurdu. URUN_KODU alani icin toplam 47,000,393.00, ortalama 5,222,265.89. Bu ozet mevcut sonuc kumesi uzerinden uretilmistir.",
+  "chart_plan": {
+    "draw_chart": false,
+    "chart_type": "none",
+    "x": null,
+    "y": null,
+    "aggregation": "none",
+    "top_n": null,
+    "sort": "none",
+    "title_tr": "Grafik devre disi",
+    "reason_tr": "Grafik uretimi konfigrasyonda devre disi."
+  },
+  "llm_used": false,
+  "summary_mode": "heuristic",
+  "fallback_reason": "LLM summarizer disabled by configuration.",
+  "validation_errors": [],
+  "chart_render_enabled": false,
+  "selected_candidate_id": "option_2",
+  "executed_sql": "SELECT p.URUN_KODU, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE t.TARIH BETWEEN TO_DATE('2025-01-01', 'YYYY-MM-DD') AND TO_DATE('2025-12-31', 'YYYY-MM-DD') GROUP BY p.URUN_KODU ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+  "step_durations": {
+    "oracle_execution_sec": 369.813,
+    "summarization_sec": 0.004,
+    "artifact_save_sec": 0.05
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID INNER JOIN AS_DWH.ACE_ACENTE_ADRES aa ON a.ACENTE_ID = aa.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' AND aa.ACENTE_ADRES_IL = 'İstanbul' GROUP BY a.ACENTE_ADI ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Uses the correct join paths and filters to get top 3 acentes in Istanbul for December 2025",
+    "risk_notes": "Relies on correct join definitions and assumes ACENTE_ADI is unique",
+    "description": "Question answered: 202512 dönemi için İstanbul'daki acentelerin prim tutarlarını toplar ve en yüksek 3 acenteyi sıralar.\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH, ACE_ACENTE, ACE_ACENTE_ADRES\nFilters: Dönem 202512 ve acente adresi İstanbul'a göre filtreleme uygulanmıştır.\nGrouping/measures: Acente adlarına göre gruplama yapılmış ve toplam prim tutarı hesaplanmıştır.\nExpected output columns: ACENTE_ADI, PRIM_TUTARI\nAssumptions: ACENTE_ADI benzersiz ve doğru bir şekilde acenteyi temsil etmektedir.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID INNER JOIN AS_DWH.ACE_ACENTE_ADRES aa ON a.ACENTE_ID = aa.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' AND aa.ACENTE_ADRES_IL = 'İstanbul' GROUP BY a.ACENTE_ADI ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Alternative query with same logic but different join order",
+    "risk_notes": "Same risks as option_1",
+    "description": "Question answered: 202512 dönemi için İstanbul'daki acentelerin prim tutarlarını toplar ve en yüksek 3 acenteyi sıralar.\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH, ACE_ACENTE, ACE_ACENTE_ADRES\nFilters: Dönem 202512 ve acente adresi İstanbul'a göre filtreleme uygulanmıştır.\nGrouping/measures: Acente adlarına göre gruplama yapılmış ve toplam prim tutarı hesaplanmıştır.\nExpected output columns: ACENTE_ADI, PRIM_TUTARI\nAssumptions: ACENTE_ADI benzersiz ve doğru bir şekilde acenteyi temsil etmektedir.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE_ADRES aa ON p.ACENTE_ID = aa.ACENTE_ID INNER JOIN AS_DWH.ACE_ACENTE a ON aa.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' AND aa.ACENTE_ADRES_IL = 'İstanbul' GROUP BY a.ACENTE_ADI ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Alternative join path using ACE_ACENTE_ADRES first",
+    "risk_notes": "Same risks as option_1",
+    "description": "Question answered: 202512 dönemi için İstanbul'daki acentelerin prim tutarlarını toplar ve en yüksek 3 acenteyi sıralar.\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH, ACE_ACENTE_ADRES, ACE_ACENTE\nFilters: Dönem 202512 ve acente adresi İstanbul'a göre filtreleme uygulanmıştır.\nGrouping/measures: Acente adlarına göre gruplama yapılmış ve toplam prim tutarı hesaplanmıştır.\nExpected output columns: ACENTE_ADI, PRIM_TUTARI\nAssumptions: ACE_ACENTE_ADRES üzerinden ACE_ACENTE'ye doğru bir şekilde join yapılmıştır.",
+    "recommended": false
+  }
+]

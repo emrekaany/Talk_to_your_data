@@ -1,0 +1,55 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-26T07:14:28.408168+00:00",
+  "finished_at_utc": "2026-03-26T07:15:43.803662+00:00",
+  "total_calls": 5,
+  "total_duration_sec": 75.194,
+  "total_prompt_tokens": 18020,
+  "total_completion_tokens": 2964,
+  "by_source": {
+    "talk_to_data.llm_client": 5
+  },
+  "calls": [
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 6.874,
+      "prompt_tokens": 960,
+      "completion_tokens": 278
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 20.371,
+      "prompt_tokens": 5781,
+      "completion_tokens": 809
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 15.486,
+      "prompt_tokens": 2657,
+      "completion_tokens": 633
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 17.294,
+      "prompt_tokens": 6140,
+      "completion_tokens": 677
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 15.169,
+      "prompt_tokens": 2482,
+      "completion_tokens": 567
+    }
+  ],
+  "request": "202512 dönemi için Ürün koduna göre  en yüksek 10 toplam prim üretimi nedir?",
+  "attempt_count": 2,
+  "retry_attempted": true,
+  "step_durations": {
+    "extract_requirements_sec": 6.883,
+    "metadata_retrieval_sec": 0.004,
+    "sql_generation_attempt1_sec": 20.375,
+    "sql_judge_attempt1_sec": 15.499,
+    "sql_generation_attempt2_sec": 17.436,
+    "sql_judge_attempt2_sec": 15.183
+  }
+}

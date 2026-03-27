@@ -1,0 +1,55 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-26T07:09:44.098742+00:00",
+  "finished_at_utc": "2026-03-26T07:10:52.624591+00:00",
+  "total_calls": 5,
+  "total_duration_sec": 68.388,
+  "total_prompt_tokens": 17830,
+  "total_completion_tokens": 2734,
+  "by_source": {
+    "talk_to_data.llm_client": 5
+  },
+  "calls": [
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 6.856,
+      "prompt_tokens": 959,
+      "completion_tokens": 273
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 16.844,
+      "prompt_tokens": 5775,
+      "completion_tokens": 666
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 14.701,
+      "prompt_tokens": 2498,
+      "completion_tokens": 598
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 17.452,
+      "prompt_tokens": 6065,
+      "completion_tokens": 686
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 12.535,
+      "prompt_tokens": 2533,
+      "completion_tokens": 511
+    }
+  ],
+  "request": "202512 dönemi için ürün bazında en yüksek 10 toplam VOP üretimi nedir?",
+  "attempt_count": 2,
+  "retry_attempted": true,
+  "step_durations": {
+    "extract_requirements_sec": 6.864,
+    "metadata_retrieval_sec": 0.004,
+    "sql_generation_attempt1_sec": 16.848,
+    "sql_judge_attempt1_sec": 14.712,
+    "sql_generation_attempt2_sec": 17.541,
+    "sql_judge_attempt2_sec": 12.547
+  }
+}

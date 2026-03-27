@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID INNER JOIN AS_DWH.ACE_ACENTE_ADRES aa ON a.ACENTE_ID = aa.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' AND aa.ACENTE_ADRES_IL = 'İstanbul' GROUP BY a.ACENTE_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Aggregates BRUT_PRIM_TL by ACENTE_ADI for İstanbul in period 202512",
+    "risk_notes": "Uses ek tanzim tarihi as per reporting standards",
+    "description": "Question answered: 202512 dönemi için İstanbul ili içinde en çok BRUT_PRIM_TL üreten ilk 3 acenteyi listeler.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.ACE_ACENTE, AS_DWH.ACE_ACENTE_ADRES\nFilters: Dönem '202512', acente adresi 'İstanbul'\nGrouping/measures: BRUT_PRIM_TL toplamı acentelere göre gruplandırılır.\nExpected output columns: ACENTE_ADI, TOPLAM_PRIM\nAssumptions: Ek tanzim tarihi üretim raporlarında standart olarak kullanılır.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.ANA_POLICE_TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID INNER JOIN AS_DWH.ACE_ACENTE_ADRES aa ON a.ACENTE_ID = aa.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' AND aa.ACENTE_ADRES_IL = 'İstanbul' GROUP BY a.ACENTE_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Aggregates BRUT_PRIM_TL by ACENTE_ADI using ana police tanzim tarihi",
+    "risk_notes": "Uses ana police tanzim tarihi instead of default ek tanzim tarihi",
+    "description": "Question answered: 202512 dönemi için İstanbul ili içinde en çok BRUT_PRIM_TL üreten ilk 3 acenteyi listeler.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.ACE_ACENTE, AS_DWH.ACE_ACENTE_ADRES\nFilters: Dönem '202512', acente adresi 'İstanbul'\nGrouping/measures: BRUT_PRIM_TL toplamı acentelere göre gruplandırılır.\nExpected output columns: ACENTE_ADI, TOPLAM_PRIM\nAssumptions: Ana poliçe tanzim tarihi kullanılmıştır, bu üretim raporlama standartlarına uygun olmayabilir.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.BASLANGIC_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID INNER JOIN AS_DWH.ACE_ACENTE_ADRES aa ON a.ACENTE_ID = aa.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' AND aa.ACENTE_ADRES_IL = 'İstanbul' GROUP BY a.ACENTE_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Aggregates BRUT_PRIM_TL by ACENTE_ADI using baslangic tarihi",
+    "risk_notes": "Uses baslangic tarihi which may not align with standard production reporting",
+    "description": "Question answered: 202512 dönemi için İstanbul ili içinde en çok BRUT_PRIM_TL üreten ilk 3 acenteyi listeler.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.ACE_ACENTE, AS_DWH.ACE_ACENTE_ADRES\nFilters: Dönem '202512', acente adresi 'İstanbul'\nGrouping/measures: BRUT_PRIM_TL toplamı acentelere göre gruplandırılır.\nExpected output columns: ACENTE_ADI, TOPLAM_PRIM\nAssumptions: Başlangıç tarihi kullanılmıştır, bu üretim raporlama standartlarına uygun olmayabilir.",
+    "recommended": false
+  }
+]

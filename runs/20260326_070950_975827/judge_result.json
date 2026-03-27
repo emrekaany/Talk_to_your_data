@@ -1,0 +1,45 @@
+{
+  "recommended_candidate_id": "option_2",
+  "recommended_canonical_id": "option_2",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM selected a hard-disqualified option; fallback applied.",
+  "judge_error_kind": "parse_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3,
+  "retry_recommended": true,
+  "llm_raw_output": "{\n  \"choice\": \"option_2\",\n  \"descriptions\": [\n    {\n      \"id\": \"option_1\",\n      \"description\": \"Question answered: Lists top 10 products by total VOP for December 2025.\\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_URUN.\\nFilters: Applies date filter on ek tanzim tarihi for December 2025.\\nGrouping/measures: Groups by product name and sums VOP_TL.\\nExpected output columns: URUN_ADI, TOPLAM_VOP.\\nAssumptions: Assumes POL_URUN join path is valid and contains accurate product names.\"\n    },\n    {\n      \"id\": \"option_2\",\n      \"description\": \"Question answered: Lists top 10 products by total VOP for December 2025.\\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, AGGR.AS400_YENI_URUN.\\nFilters: Applies date filter on ek tanzim tarihi for December 2025.\\nGrouping/measures: Groups by product name and sums VOP_TL.\\nExpected output columns: URUN_ADI, TOPLAM_VOP.\\nAssumptions: Uses AGGR.AS400_YENI_URUN as the product dimension, which is explicitly listed in join_needs and is likely the correct source for URUN_ADI.\"\n    },\n    {\n      \"id\": \"option_3\",\n      \"description\": \"Question answered: Lists top 10 products by total VOP for December 2025.\\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM.\\nFilters: Applies date filter on ek tanzim tarihi for December 2025.\\nGrouping/measures: Groups by product name and sums VOP_TL.\\nExpected output columns: URUN_ADI, TOPLAM_VOP.\\nAssumptions: Assumes POL_POLICE_REF_TANIM contains accurate product names, but may miss product details compared to using POL_URUN.\"\n    }\n  ]\n}",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: r.URUN_ID (expected metadata table: AS_DWH.POL_POLICE_REF_TANIM); u.URUN_ID (expected metadata table: AS_DWH.POL_URUN)"
+      ],
+      "fallback_score": 8.7
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: u.URUN_ADI (expected metadata table: AGGR.AS400_YENI_URUN); f.URUN_ID (expected metadata table: AS_DWH.FACT_POL_POLICE_TEM_ASSET); u.URUN_ID (expected metadata table: AGGR.AS400_YENI_URUN)"
+      ],
+      "fallback_score": 9.0
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: r.URUN_ADI (expected metadata table: AS_DWH.POL_POLICE_REF_TANIM)"
+      ],
+      "fallback_score": 9.0
+    }
+  ],
+  "candidate_descriptions": {
+    "option_1": "Question answered: Lists top 10 products by total VOP for December 2025.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_URUN.\nFilters: Applies date filter on ek tanzim tarihi for December 2025.\nGrouping/measures: Groups by product name and sums VOP_TL.\nExpected output columns: URUN_ADI, TOPLAM_VOP.\nAssumptions: Assumes POL_URUN join path is valid and contains accurate product names.",
+    "option_2": "Question answered: Lists top 10 products by total VOP for December 2025.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, AGGR.AS400_YENI_URUN.\nFilters: Applies date filter on ek tanzim tarihi for December 2025.\nGrouping/measures: Groups by product name and sums VOP_TL.\nExpected output columns: URUN_ADI, TOPLAM_VOP.\nAssumptions: Uses AGGR.AS400_YENI_URUN as the product dimension, which is explicitly listed in join_needs and is likely the correct source for URUN_ADI.",
+    "option_3": "Question answered: Lists top 10 products by total VOP for December 2025.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM.\nFilters: Applies date filter on ek tanzim tarihi for December 2025.\nGrouping/measures: Groups by product name and sums VOP_TL.\nExpected output columns: URUN_ADI, TOPLAM_VOP.\nAssumptions: Assumes POL_POLICE_REF_TANIM contains accurate product names, but may miss product details compared to using POL_URUN."
+  }
+}

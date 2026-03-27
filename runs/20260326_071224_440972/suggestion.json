@@ -1,0 +1,8 @@
+{
+  "reason": "Kullanıcının isteğinde 'ürün bazında en yüksek 10 toplam prim üretimi' ifadesi yer almakta. Ancak mevcut metadata'da 'ürün' ile ilişkilendirilebilecek kolonlar arasında doğrudan gruplanabilir ve prim ile ilişkilendirilebilecek bir kolon (örneğin ürün adı veya ürün kodu) eksik. Ayrıca, 'prim üretimi' için uygun bir measure (örneğin BRUT_PRIM_TL veya VOP_TL) ile ürün bazında gruplama yapmak mümkün görünmemektedir çünkü ürün bilgisi içeren tablolarda (örneğin AS_DWH.POL_URUN) prim bilgisi doğrudan erişilebilir değil.",
+  "suggested_questions": [
+    "Poliçe kodu bazında 202512 dönemi için toplam brüt prim üretimi nedir?",
+    "Acente bazında 202512 dönemi için toplam VOP (vergi öncesi prim) üretimi nedir?",
+    "Ürün koduna göre 202512 dönemi için toplam poliçe sayısı nedir?"
+  ]
+}

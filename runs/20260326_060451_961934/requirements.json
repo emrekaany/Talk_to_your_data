@@ -1,0 +1,32 @@
+{
+  "intent": "listing",
+  "required_filters": [
+    "GNL_TARIH.TARIH = '202512'",
+    "ACENTE_ADRES_IL = 'İstanbul'"
+  ],
+  "measures": [
+    "PRIM_TUTARI"
+  ],
+  "dimensions": [
+    "ACENTE_ADI"
+  ],
+  "grain": [
+    "acente"
+  ],
+  "join_needs": [
+    "AS_DWH.ACE_ACENTE",
+    "AS_DWH.ACE_ACENTE_ADRES",
+    "AS_DWH.GNL_TARIH"
+  ],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "İstanbul ilinde 2025 Aralık dönemi için en çok prim üretimi yapan ilk 3 acente istenmektedir. Ek tanzim tarihi esas alınmamıştır çünkü dönem net olarak belirtilmiştir.",
+  "row_limit": 3,
+  "report_period": "202512",
+  "time_granularity": "month",
+  "time_value": "202512",
+  "time_range": {
+    "start": "2025-12-01",
+    "end": "2025-12-31"
+  }
+}

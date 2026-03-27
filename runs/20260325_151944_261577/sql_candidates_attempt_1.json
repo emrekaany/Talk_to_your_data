@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT b.BRANS_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.POL_BRANS b ON p.BRANS_ID = b.BRANS_ID GROUP BY b.BRANS_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Top 3 branches by total production using BRUT_PRIM_TL from the production table",
+    "risk_notes": "Does not include time filters since none were specified",
+    "description": "Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS.\nFilters: Zaman filtresi belirtilmediği için ek tanzim tarihi esas alınmamıştır.\nGrouping/measures: BRANS_ADI'na göre gruplama yapılmıştır ve BRUT_PRIM_TL toplamı alınmıştır.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM.\nAssumptions: Kullanıcı, üretim raporlamasında genellikle ek tanzim tarihi esas alınır; ancak bu sorguda zaman filtresi belirtilmediği için ek tanzim tarihi filtresi uygulanmamıştır.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT b.BRANS_ADI, SUM(t.VOP_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET t INNER JOIN AS_DWH.POL_POLICE_OZET p ON t.POLICE_ID = p.POLICE_ID AND t.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.POL_BRANS b ON p.BRANS_ID = b.BRANS_ID GROUP BY b.BRANS_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Top 3 branches by total production using VOP_TL from the production table",
+    "risk_notes": "Does not include time filters since none were specified",
+    "description": "Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS.\nFilters: Zaman filtresi belirtilmediği için ek tanzim tarihi esas alınmamıştır.\nGrouping/measures: BRANS_ADI'na göre gruplama yapılmıştır ve VOP_TL toplamı alınmıştır.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM.\nAssumptions: VOP_TL, prim tutarı olarak kullanılmıştır; ancak bu alan, üretim raporlamasında genellikle BRUT_PRIM_TL ile ilişkilendirilir.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT b.BRANS_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.POL_BRANS b ON p.BRANS_ID = b.BRANS_ID GROUP BY b.BRANS_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Alternative query to get top 3 branches by total production using BRUT_PRIM_TL",
+    "risk_notes": "Does not include time filters since none were specified",
+    "description": "Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS.\nFilters: Zaman filtresi belirtilmediği için ek tanzim tarihi esas alınmamıştır.\nGrouping/measures: BRANS_ADI'na göre gruplama yapılmıştır ve BRUT_PRIM_TL toplamı alınmıştır.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM.\nAssumptions: Bu sorgu, option_1 ile aynı yapıya sahip olduğu için fazladan bir değer sunmamaktadır.",
+    "recommended": false
+  }
+]

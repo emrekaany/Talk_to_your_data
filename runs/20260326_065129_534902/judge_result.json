@@ -1,0 +1,45 @@
+{
+  "recommended_candidate_id": "option_1",
+  "recommended_canonical_id": "option_1",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM selected a hard-disqualified option; fallback applied.",
+  "judge_error_kind": "parse_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3,
+  "retry_recommended": true,
+  "llm_raw_output": "{\n  \"choice\": \"option_3\",\n  \"descriptions\": [\n    {\n      \"id\": \"option_1\",\n      \"description\": \"Question answered: Selects top 10 branches by VOP for December 2025.\\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS.\\nFilters: Filters data for period '202512' using TARIH.\\nGrouping/measures: Groups by BRANS_ADI and sums VOP_TL.\\nExpected output columns: BRANS_ADI, TOTAL_VOP.\\nAssumptions: Assumes BRANS_ADI is available in POL_BRANS and joins are valid.\"\n    },\n    {\n      \"id\": \"option_2\",\n      \"description\": \"Question answered: Selects top 10 branches by VOP for the entire year of 2025.\\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS.\\nFilters: Filters data for year '2025' using TARIH.\\nGrouping/measures: Groups by BRANS_ADI and sums VOP_TL.\\nExpected output columns: BRANS_ADI, TOTAL_VOP.\\nAssumptions: Assumes BRANS_ADI is available in POL_BRANS and joins are valid.\"\n    },\n    {\n      \"id\": \"option_3\",\n      \"description\": \"Question answered: Selects top 10 branches by VOP for the entire year of 2025.\\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS.\\nFilters: Filters data between '2025-01-01' and '2025-12-31' using TARIH.\\nGrouping/measures: Groups by BRANS_ADI and sums VOP_TL.\\nExpected output columns: BRANS_ADI, TOTAL_VOP.\\nAssumptions: Assumes BRANS_ADI is available in POL_BRANS and joins are valid.\"\n    }\n  ]\n}",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: r.BRANS_ID (expected metadata table: AS_DWH.POL_POLICE_REF_TANIM)"
+      ],
+      "fallback_score": 9.2
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: r.BRANS_ID (expected metadata table: AS_DWH.POL_POLICE_REF_TANIM)"
+      ],
+      "fallback_score": 7.2
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: r.BRANS_ID (expected metadata table: AS_DWH.POL_POLICE_REF_TANIM)"
+      ],
+      "fallback_score": 7.2
+    }
+  ],
+  "candidate_descriptions": {
+    "option_1": "Question answered: Selects top 10 branches by VOP for December 2025.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS.\nFilters: Filters data for period '202512' using TARIH.\nGrouping/measures: Groups by BRANS_ADI and sums VOP_TL.\nExpected output columns: BRANS_ADI, TOTAL_VOP.\nAssumptions: Assumes BRANS_ADI is available in POL_BRANS and joins are valid.",
+    "option_2": "Question answered: Selects top 10 branches by VOP for the entire year of 2025.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS.\nFilters: Filters data for year '2025' using TARIH.\nGrouping/measures: Groups by BRANS_ADI and sums VOP_TL.\nExpected output columns: BRANS_ADI, TOTAL_VOP.\nAssumptions: Assumes BRANS_ADI is available in POL_BRANS and joins are valid.",
+    "option_3": "Question answered: Selects top 10 branches by VOP for the entire year of 2025.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS.\nFilters: Filters data between '2025-01-01' and '2025-12-31' using TARIH.\nGrouping/measures: Groups by BRANS_ADI and sums VOP_TL.\nExpected output columns: BRANS_ADI, TOTAL_VOP.\nAssumptions: Assumes BRANS_ADI is available in POL_BRANS and joins are valid."
+  }
+}

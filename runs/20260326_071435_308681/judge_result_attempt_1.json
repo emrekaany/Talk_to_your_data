@@ -1,0 +1,45 @@
+{
+  "recommended_candidate_id": "option_1",
+  "recommended_canonical_id": "option_1",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM selected a hard-disqualified option; fallback applied.",
+  "judge_error_kind": "parse_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3,
+  "retry_recommended": true,
+  "llm_raw_output": "{\n  \"choice\": \"option_1\",\n  \"descriptions\": [\n    {\n      \"id\": \"option_1\",\n      \"description\": \"Question answered: 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN.\\nFilters: Ek tanzim tarihi '202512' dönemi.\\nGrouping/measures: Ürün koduna göre gruplama ve toplam BRUT_PRIM_TL hesaplaması.\\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\\nAssumptions: POL_URUN tablosu URUN_KODU'nu içerir ve doğru şekilde POL_POLICE_OZET ile ilişkilendirilmiştir.\"\n    },\n    {\n      \"id\": \"option_2\",\n      \"description\": \"Question answered: 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi.\\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_POLICE_REF_TANIM, AS_DWH.POL_URUN.\\nFilters: Ek tanzim tarihi '202512' dönemi.\\nGrouping/measures: Ürün koduna göre gruplama ve toplam VOP_TL hesaplaması.\\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\\nAssumptions: POL_POLICE_REF_TANIM tablosu URUN_ID'yi içerir ve doğru şekilde POL_URUN ile ilişkilendirilmiştir.\"\n    },\n    {\n      \"id\": \"option_3\",\n      \"description\": \"Question answered: 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AGGR.AS400_YENI_URUN.\\nFilters: Ek tanzim tarihi '202512' dönemi.\\nGrouping/measures: Ürün koduna göre gruplama ve toplam BRUT_PRIM_TL hesaplaması.\\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\\nAssumptions: AGGR.AS400_YENI_URUN tablosu URUN_KODU'nu içerir ve doğru şekilde POL_POLICE_OZET ile ilişkilendirilmiştir.\"\n    }\n  ]\n}",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: p.URUN_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); u.URUN_ID (expected metadata table: AS_DWH.POL_URUN)"
+      ],
+      "fallback_score": 9.5
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: r.URUN_ID (expected metadata table: AS_DWH.POL_POLICE_REF_TANIM); u.URUN_ID (expected metadata table: AS_DWH.POL_URUN)"
+      ],
+      "fallback_score": 9.2
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: u.URUN_KODU (expected metadata table: AGGR.AS400_YENI_URUN); p.URUN_ID (expected metadata table: AS_DWH.POL_POLICE_OZET); u.URUN_ID (expected metadata table: AGGR.AS400_YENI_URUN)"
+      ],
+      "fallback_score": 9.5
+    }
+  ],
+  "candidate_descriptions": {
+    "option_1": "Question answered: 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN.\nFilters: Ek tanzim tarihi '202512' dönemi.\nGrouping/measures: Ürün koduna göre gruplama ve toplam BRUT_PRIM_TL hesaplaması.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: POL_URUN tablosu URUN_KODU'nu içerir ve doğru şekilde POL_POLICE_OZET ile ilişkilendirilmiştir.",
+    "option_2": "Question answered: 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_POLICE_REF_TANIM, AS_DWH.POL_URUN.\nFilters: Ek tanzim tarihi '202512' dönemi.\nGrouping/measures: Ürün koduna göre gruplama ve toplam VOP_TL hesaplaması.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: POL_POLICE_REF_TANIM tablosu URUN_ID'yi içerir ve doğru şekilde POL_URUN ile ilişkilendirilmiştir.",
+    "option_3": "Question answered: 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AGGR.AS400_YENI_URUN.\nFilters: Ek tanzim tarihi '202512' dönemi.\nGrouping/measures: Ürün koduna göre gruplama ve toplam BRUT_PRIM_TL hesaplaması.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: AGGR.AS400_YENI_URUN tablosu URUN_KODU'nu içerir ve doğru şekilde POL_POLICE_OZET ile ilişkilendirilmiştir."
+  }
+}

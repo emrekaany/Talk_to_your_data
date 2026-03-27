@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_ADI ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Aggregates BRUT_PRIM_TL by ACENTE_ADI for December 2025, filtered by İstanbul and ordered descending.",
+    "risk_notes": "Relies on correct join paths and assumes ACENTE_ADI is unique and available.",
+    "description": "Question answered: 2025 Aralık dönemi için İstanbul ili en çok prim üretimi yapan ilk 3 acenteyi ve prim tutarlarını getirir.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.ACE_ACENTE\nFilters: Dönem 202512 ve acente adresi İstanbul olarak filtrelenir.\nGrouping/measures: Acente bazında BRUT_PRIM_TL toplamı alınır.\nExpected output columns: ACENTE_ADI, PRIM_TUTARI\nAssumptions: Acente adı benzersiz ve doğru şekilde join edilmiştir.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_ADI HAVING SUM(f.BRUT_PRIM_TL) > 0 ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Same as option_1 but adds a HAVING clause to exclude zero-prim acentes.",
+    "risk_notes": "Adds filtering for non-zero production, which may reduce result count.",
+    "description": "Question answered: 2025 Aralık dönemi için İstanbul ili en çok prim üretimi yapan ilk 3 acenteyi ve prim tutarlarını getirir.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.ACE_ACENTE\nFilters: Dönem 202512 ve acente adresi İstanbul olarak filtrelenir.\nGrouping/measures: Acente bazında BRUT_PRIM_TL toplamı alınır ve sıfır primli acenteler hariç tutulur.\nExpected output columns: ACENTE_ADI, PRIM_TUTARI\nAssumptions: Acente adı benzersiz ve doğru şekilde join edilmiştir. Ekstra filtreleme, sıfır üretimli acentelerin sonuçlara dahil edilmesini engeller.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_ADI ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Alternative join path using the same logic as option_1.",
+    "risk_notes": "Same as option_1 but may vary slightly based on optimizer execution plan.",
+    "description": "Question answered: 2025 Aralık dönemi için İstanbul ili en çok prim üretimi yapan ilk 3 acenteyi ve prim tutarlarını getirir.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.ACE_ACENTE\nFilters: Dönem 202512 ve acente adresi İstanbul olarak filtrelenir.\nGrouping/measures: Acente bazında BRUT_PRIM_TL toplamı alınır.\nExpected output columns: ACENTE_ADI, PRIM_TUTARI\nAssumptions: Acente adı benzersiz ve doğru şekilde join edilmiştir. Sorgu mantığı option_1 ile aynıdır ancak optimize edici farklılıklar olabilir.",
+    "recommended": false
+  }
+]

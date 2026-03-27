@@ -1,0 +1,28 @@
+{
+  "intent": "listing",
+  "required_filters": [],
+  "measures": [
+    "PRIM_TUTARI"
+  ],
+  "dimensions": [
+    "BRANS_ADI"
+  ],
+  "grain": [
+    "brans"
+  ],
+  "join_needs": [
+    "POL_BRANS",
+    "POL_POLICE_OZET"
+  ],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "Kullanıcının en yüksek prim üretimi olan 3 branş ve toplam üretimlerini istemesi, üretim raporlamasına dayalı bir listeleme sorgusu gerektiriyor. Zaman filtresi belirtilmediği için varsayılan ek tanzim tarihi esas alınabilir.",
+  "row_limit": 3,
+  "report_period": null,
+  "time_granularity": null,
+  "time_value": null,
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

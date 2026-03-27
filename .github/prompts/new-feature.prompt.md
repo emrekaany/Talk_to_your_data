@@ -20,7 +20,7 @@ Bu prompt, repo'ya yeni feature eklerken adım adım izlenecek kontrol listesini
 - Runtime LLM çağrıları `talk_to_data/llm_client.py` üzerinden olmalı.
 - SQL generation tam 3 candidate üretmeli; fallback SQL fabrication yasak.
 - Sadece `SELECT`/`WITH` query'lere izin ver. DML/DDL, `SELECT *`, SQL comment yasak.
-- Oracle row limit: `FETCH FIRST 200 ROWS ONLY`.
+- Oracle row limit: `FETCH FIRST N ROWS ONLY` where 1 <= N <= 200.
 - Secret'lar sadece env-driven olmalı.
 
 ## Post-Implementation Validation

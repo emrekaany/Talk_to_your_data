@@ -1,0 +1,55 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-26T06:51:23.164052+00:00",
+  "finished_at_utc": "2026-03-26T06:52:31.072564+00:00",
+  "total_calls": 5,
+  "total_duration_sec": 67.673,
+  "total_prompt_tokens": 17839,
+  "total_completion_tokens": 2710,
+  "by_source": {
+    "talk_to_data.llm_client": 5
+  },
+  "calls": [
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 6.35,
+      "prompt_tokens": 978,
+      "completion_tokens": 256
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 17.391,
+      "prompt_tokens": 5777,
+      "completion_tokens": 686
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 12.518,
+      "prompt_tokens": 2526,
+      "completion_tokens": 511
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 19.253,
+      "prompt_tokens": 5931,
+      "completion_tokens": 763
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 12.161,
+      "prompt_tokens": 2627,
+      "completion_tokens": 494
+    }
+  ],
+  "request": "202512 dönemi için Branş bazında en yüksek 10 toplam VOP (vergi öncesi prim) üretimi nedir? Brans adini ve total üretimi göster",
+  "attempt_count": 2,
+  "retry_attempted": true,
+  "step_durations": {
+    "extract_requirements_sec": 6.357,
+    "metadata_retrieval_sec": 0.005,
+    "sql_generation_attempt1_sec": 17.4,
+    "sql_judge_attempt1_sec": 12.619,
+    "sql_generation_attempt2_sec": 19.344,
+    "sql_judge_attempt2_sec": 12.174
+  }
+}

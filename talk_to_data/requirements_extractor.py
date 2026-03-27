@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
+import threading
+from collections import OrderedDict
+from copy import deepcopy
 from typing import Any
 
 from .llm_client import LLMClient, LLMError
@@ -11,6 +15,11 @@ from .llm_client import LLMClient, LLMError
 
 class RequirementsExtractionError(RuntimeError):
     """Raised when structured requirement extraction fails."""
+
+
+_CACHE_MAX_SIZE = 64
+_cache: OrderedDict[str, dict[str, Any]] = OrderedDict()
+_cache_lock = threading.Lock()
 
 
 REQUIRED_KEYS = (
@@ -61,6 +70,9 @@ def extract_requirements(
     """
     Extract structured requirements from natural language request.
 
+    Results are cached by normalized request text so repeated or
+    near-identical queries skip the LLM round-trip (~5-7 s saving).
+
     Contract target: extract_requirements(user_request: str) -> dict
     """
     request = user_request.strip()
@@ -69,6 +81,11 @@ def extract_requirements(
 
     if llm_client is None:
         return _heuristic_requirements(request, metadata_overview)
+
+    cache_key = _build_cache_key(request, metadata_overview)
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return deepcopy(cached)
 
     enriched_prompt = _build_enriched_extraction_prompt(user_request, metadata_overview)
     try:
@@ -97,7 +114,9 @@ def extract_requirements(
             "Could not parse requirement JSON from model output."
         )
 
-    return _normalize_requirements(parsed)
+    result = _normalize_requirements(parsed)
+    _cache_put(cache_key, deepcopy(result))
+    return result
 
 
 def _build_enriched_extraction_prompt(
@@ -338,3 +357,35 @@ def _normalize_optional_text(value: Any) -> str | None:
     if not text or text.lower() == "none":
         return None
     return text
+
+
+# ---------------------------------------------------------------------------
+# Requirements extraction cache
+# ---------------------------------------------------------------------------
+
+def _build_cache_key(request: str, metadata_overview: dict[str, Any] | None) -> str:
+    """Deterministic cache key from normalized request + metadata fingerprint."""
+    normalized = re.sub(r"\s+", " ", request.strip().lower())
+    overview_sig = ""
+    if isinstance(metadata_overview, dict):
+        tables = metadata_overview.get("tables")
+        if isinstance(tables, list):
+            overview_sig = ",".join(str(t) for t in sorted(tables))
+    raw = f"{normalized}|{overview_sig}"
+    return hashlib.md5(raw.encode("utf-8")).hexdigest()
+
+
+def _cache_get(key: str) -> dict[str, Any] | None:
+    with _cache_lock:
+        if key in _cache:
+            _cache.move_to_end(key)
+            return _cache[key]
+    return None
+
+
+def _cache_put(key: str, value: dict[str, Any]) -> None:
+    with _cache_lock:
+        _cache[key] = value
+        _cache.move_to_end(key)
+        while len(_cache) > _CACHE_MAX_SIZE:
+            _cache.popitem(last=False)

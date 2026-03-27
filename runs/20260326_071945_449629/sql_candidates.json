@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT f.URUN_KODU, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' GROUP BY f.URUN_KODU ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Groups production by product code and returns top 10 highest total production values for 2025",
+    "risk_notes": "Uses BRUT_PRIM_TL as production metric, which aligns with business definition",
+    "description": "Question answered: Retrieves the top 10 total production values grouped by product code for the year 2025.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\nFilters: Filters records where the year is 2025 using TO_CHAR(t.TARIH, 'YYYY') = '2025'.\nGrouping/measures: Groups by URUN_KODU and sums BRUT_PRIM_TUTARI.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: BRUT_PRIM_TL is assumed to represent the correct production metric.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT f.URUN_KODU, SUM(f.VOP_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' GROUP BY f.URUN_KODU ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Groups net premium production by product code and returns top 10 highest values for 2025",
+    "risk_notes": "Uses VOP_TL as production metric, which represents pre-tax premium",
+    "description": "Question answered: Retrieves the top 10 net premium production values grouped by product code for the year 2025.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\nFilters: Filters records where the year is 2025 using TO_CHAR(t.TARIH, 'YYYY') = '2025'.\nGrouping/measures: Groups by URUN_KODU and sums VOP_TL.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: VOP_TL is assumed to represent net premium production.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT f.URUN_KODU, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID WHERE t.TARIH BETWEEN TO_DATE('2025-01-01','YYYY-MM-DD') AND TO_DATE('2025-12-31','YYYY-MM-DD') GROUP BY f.URUN_KODU ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Groups production by product code using explicit date range filter and returns top 10 highest values",
+    "risk_notes": "Uses precise date range filtering instead of year mask",
+    "description": "Question answered: Retrieves the top 10 total production values grouped by product code for the year 2025.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\nFilters: Filters records using explicit date range between '2025-01-01' and '2025-12-31'.\nGrouping/measures: Groups by URUN_KODU and sums BRUT_PRIM_TL.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: BRUT_PRIM_TL is assumed to represent the correct production metric.",
+    "recommended": false
+  }
+]

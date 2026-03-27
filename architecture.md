@@ -139,7 +139,7 @@ The system converts a natural-language analytics request into safe Oracle SQL op
 - SQL generation does not mutate LLM SQL text; candidates are parse-only at generation phase.
 - SQL generation fails fast when exactly 3 parseable candidates are not produced.
 - Mandatory filter obligation enforcement is disabled globally (generation/judge/execution).
-- Oracle row limit is enforced: `FETCH FIRST 200 ROWS ONLY`.
+- Oracle row limit is enforced: `FETCH FIRST N ROWS ONLY` where 1 <= N <= 200.
 - Execution checks include:
   - safety validation
   - table allowlist validation

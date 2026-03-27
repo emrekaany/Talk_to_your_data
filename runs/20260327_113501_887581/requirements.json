@@ -1,0 +1,30 @@
+{
+  "intent": "metric",
+  "required_filters": [
+    "GNL_TARIH.TARIH = '202512'"
+  ],
+  "measures": [
+    "PRIM_TUTARI"
+  ],
+  "dimensions": [
+    "POL_BRANS.BRANS_ADI"
+  ],
+  "grain": [
+    "brans"
+  ],
+  "join_needs": [
+    "POL_BRANS",
+    "GNL_TARIH"
+  ],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "Kullanıcının isteği, 2025 Aralık dönemi için en fazla prim üretimine sahip branşları ve toplam prim üretimini listelemektedir. Ek tanzim tarihi esas alınarak üretim hesaplanmalıdır.",
+  "row_limit": 200,
+  "report_period": "202512",
+  "time_granularity": "month",
+  "time_value": "202512",
+  "time_range": {
+    "start": "2025-12-01",
+    "end": "2025-12-31"
+  }
+}

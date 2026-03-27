@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT b.BRANS_ADI, SUM(ft.VOP_TL) AS TOTAL_VOP FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET ft INNER JOIN AS_DWH.POL_POLICE_OZET p ON ft.POLICE_ID = p.POLICE_ID AND ft.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_POLICE_REF_TANIM r ON ft.REF_ID = r.REF_ID INNER JOIN AS_DWH.POL_BRANS b ON r.BRANS_ID = b.BRANS_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY b.BRANS_ADI ORDER BY TOTAL_VOP DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Aggregates VOP by branch for December 2025 using valid joins and filters",
+    "risk_notes": "Relies on correct join paths and assumes POL_BRANS has BRANS_ADI",
+    "description": "Question answered: Selects top 10 branches by VOP for December 2025.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS.\nFilters: Filters data for period '202512' using TARIH.\nGrouping/measures: Groups by BRANS_ADI and sums VOP_TL.\nExpected output columns: BRANS_ADI, TOTAL_VOP.\nAssumptions: Assumes BRANS_ADI is available in POL_BRANS and joins are valid.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT b.BRANS_ADI, SUM(ft.VOP_TL) AS TOTAL_VOP FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET ft INNER JOIN AS_DWH.POL_POLICE_OZET p ON ft.POLICE_ID = p.POLICE_ID AND ft.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_POLICE_REF_TANIM r ON ft.REF_ID = r.REF_ID INNER JOIN AS_DWH.POL_BRANS b ON r.BRANS_ID = b.BRANS_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' GROUP BY b.BRANS_ADI ORDER BY TOTAL_VOP DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Aggregates annual VOP by branch for 2025 using valid joins and filters",
+    "risk_notes": "Relies on correct join paths and assumes POL_BRANS has BRANS_ADI",
+    "description": "Question answered: Selects top 10 branches by VOP for the entire year of 2025.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS.\nFilters: Filters data for year '2025' using TARIH.\nGrouping/measures: Groups by BRANS_ADI and sums VOP_TL.\nExpected output columns: BRANS_ADI, TOTAL_VOP.\nAssumptions: Assumes BRANS_ADI is available in POL_BRANS and joins are valid.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT b.BRANS_ADI, SUM(ft.VOP_TL) AS TOTAL_VOP FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET ft INNER JOIN AS_DWH.POL_POLICE_OZET p ON ft.POLICE_ID = p.POLICE_ID AND ft.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_POLICE_REF_TANIM r ON ft.REF_ID = r.REF_ID INNER JOIN AS_DWH.POL_BRANS b ON r.BRANS_ID = b.BRANS_ID WHERE t.TARIH BETWEEN TO_DATE('2025-01-01','YYYY-MM-DD') AND TO_DATE('2025-12-31','YYYY-MM-DD') GROUP BY b.BRANS_ADI ORDER BY TOTAL_VOP DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Aggregates VOP by branch for full year 2025 using valid joins and filters",
+    "risk_notes": "Relies on correct join paths and assumes POL_BRANS has BRANS_ADI",
+    "description": "Question answered: Selects top 10 branches by VOP for the entire year of 2025.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS.\nFilters: Filters data between '2025-01-01' and '2025-12-31' using TARIH.\nGrouping/measures: Groups by BRANS_ADI and sums VOP_TL.\nExpected output columns: BRANS_ADI, TOTAL_VOP.\nAssumptions: Assumes BRANS_ADI is available in POL_BRANS and joins are valid.",
+    "recommended": false
+  }
+]

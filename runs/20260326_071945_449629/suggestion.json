@@ -1,0 +1,8 @@
+{
+  "reason": "Kullanıcının sorduğu soruda 'URUN_KODU' kolonu, mevcut metadata'da tanımlı olmayan bir kolon olarak geçmektedir. Özellikle AS_DWH.FACT_POL_POLICE_EK ve AS_DWH.FACT_POL_POLICE_TEM_ASSET tablolarında 'URUN_KODU' kolonu bulunmamaktadır. Bu nedenle ürün koduna göre gruplama yapılamamıştır.",
+  "suggested_questions": [
+    "202512 dönemi için acentelere göre gruplanmış şekilde en yüksek 10 toplam VOP üretimi nedir?",
+    "202512 dönemi için ürün bazında gruplanmış şekilde en yüksek 10 toplam poliçe sayısı nedir?",
+    "202512 dönemi için satış kanallarına göre gruplanmış şekilde en yüksek 10 toplam brüt prim üretimi nedir?"
+  ]
+}

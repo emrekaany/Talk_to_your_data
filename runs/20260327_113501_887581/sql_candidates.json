@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT POL_BRANS.BRANS_ADI, SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK INNER JOIN AS_DWH.POL_POLICE_OZET ON (AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID AND AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID) INNER JOIN AS_DWH.GNL_TARIH ON AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID WHERE TO_CHAR(AS_DWH.GNL_TARIH.TARIH, 'YYYYMM') = '202512' GROUP BY POL_BRANS.BRANS_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Aggregates BRUT_PRIM_TL by BRANS_ADI for the specified month using ek tanzim tarihi.",
+    "risk_notes": "Relies on correct join paths and assumes BRANS_ADI is accessible via POL_BRANS table.",
+    "description": "Question answered: 2025 Aralık dönemi için en fazla prim üretimi yapan branş adı ve toplam prim üretimi.\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH\nFilters: Ek tanzim tarihi 202512 dönemi ile eşleştirildi.\nGrouping/measures: BRANS_ADI'na göre gruplama yapıldı ve BRUT_PRIM_TL toplamı hesaplandı.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM\nAssumptions: BRANS_ADI POL_BRANS tablosundan gelirken, bu tablo join edilmediği için doğrudan POL_POLICE_OZET üzerinden alınması bekleniyor. Ancak bu bir risk oluşturabilir.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT POL_BRANS.BRANS_ADI, SUM(AS_DWH.FACT_POL_POLICE_TEM_ASSET.VOP_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET INNER JOIN AS_DWH.POL_POLICE_OZET ON (AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID AND AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID) INNER JOIN AS_DWH.GNL_TARIH ON AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID WHERE TO_CHAR(AS_DWH.GNL_TARIH.TARIH, 'YYYYMM') = '202512' GROUP BY POL_BRANS.BRANS_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Aggregates VOP_TL by BRANS_ADI for the specified month using ek tanzim tarihi.",
+    "risk_notes": "Relies on correct join paths and assumes BRANS_ADI is accessible via POL_BRANS table.",
+    "description": "Question answered: 2025 Aralık dönemi için en fazla prim üretimi yapan branş adı ve toplam prim üretimi.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH\nFilters: Ek tanzim tarihi 202512 dönemi ile eşleştirildi.\nGrouping/measures: BRANS_ADI'na göre gruplama yapıldı ve VOP_TL toplamı hesaplandı.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM\nAssumptions: VOP_TL, prim üretimi için geçerli bir ölçü olabilir ancak bu metrik, kullanıcı isteğinde belirtilen 'PRIM_TUTARI' ile uyumsuz olabilir.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT POL_BRANS.BRANS_ADI, SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK INNER JOIN AS_DWH.POL_POLICE_OZET ON (AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID AND AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID) INNER JOIN AS_DWH.GNL_TARIH ON AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = AS_DWH.GNL_TARIH.TARIH_ID WHERE TO_CHAR(AS_DWH.GNL_TARIH.TARIH, 'YYYYMM') = '202512' GROUP BY POL_BRANS.BRANS_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 200 ROWS ONLY",
+    "rationale_short": "Alternative query using BRUT_PRIM_TL grouped by BRANS_ADI.",
+    "risk_notes": "Same logic as option_1 but repeated for clarity.",
+    "description": "Question answered: 2025 Aralık dönemi için en fazla prim üretimi yapan branş adı ve toplam prim üretimi.\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH\nFilters: Ek tanzim tarihi 202512 dönemi ile eşleştirildi.\nGrouping/measures: BRANS_ADI'na göre gruplama yapıldı ve BRUT_PRIM_TL toplamı hesaplandı.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM\nAssumptions: Bu sorgu option_1 ile aynı mantıkta çalışır ve ek bir katma değer sunmaz.",
+    "recommended": false
+  }
+]

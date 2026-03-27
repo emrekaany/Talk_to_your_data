@@ -1,0 +1,8 @@
+{
+  "reason": "Kullanıcının isteğinde 'BRANS_ID' kullanılmış ancak bu kolon mevcut metadata'da doğrudan erişilebilir bir kolon olarak bulunmamaktadır. Branş bilgisi, 'AS_DWH.POL_POLICE_REF_TANIM.BRANS_ADI' veya 'AS_DWH.POL_BRANS.BRANS_ADI' üzerinden alınabilir. Ancak VOP (vergi öncesi prim) ile ilgili veriler 'AS_DWH.FACT_POL_POLICE_TEM_ASSET.VOP_TL' üzerinden çekilmeli ve bu tabloyla ilgili join yolları üzerinden branş bilgisi alınabilmelidir.",
+  "suggested_questions": [
+    "202512 dönemi için ürün bazında en yüksek 10 toplam VOP üretimi nedir?",
+    "202512 dönemi için acente bazında en yüksek 10 toplam VOP üretimi nedir?",
+    "202512 dönemi için satış kanalı bazında en yüksek 10 toplam VOP üretimi nedir?"
+  ]
+}

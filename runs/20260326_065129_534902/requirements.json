@@ -1,0 +1,29 @@
+{
+  "intent": "metric",
+  "required_filters": [
+    "EK_TANZIM_TARIHI between '2025-01-01' and '2025-12-31'"
+  ],
+  "measures": [
+    "VOP_TL"
+  ],
+  "dimensions": [
+    "BRANS_ADI"
+  ],
+  "grain": [
+    "brans"
+  ],
+  "join_needs": [
+    "AS_DWH.POL_BRANS"
+  ],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "Kullanıcının isteği, 2025 yılı için branş bazında en yüksek 10 VOP üretimi hakkında bilgi istemektedir. VOP, ek tanzim tarihi esas alınarak hesaplanmalıdır.",
+  "row_limit": 10,
+  "report_period": "202512",
+  "time_granularity": "year",
+  "time_value": "2025",
+  "time_range": {
+    "start": "2025-01-01",
+    "end": "2025-12-31"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "reason": "Kullanıcının sorduğu 'Ürün koduna göre en yüksek 10 toplam prim üretimi' sorusu, mevcut metadata'da 'URUN_KODU' kolonunun AS_DWH.FACT_POL_POLICE_EK ve AS_DWH.FACT_POL_POLICE_TEM_ASSET tablolarında bulunmadığı için cevaplanamamaktadır. Bu tablolardan doğrudan ürün kodu bilgisi çekilemiyor.",
+  "suggested_questions": [
+    "202512 dönemi için poliçe kodu detayına göre toplam brüt prim üretimi nedir?",
+    "202512 dönemi için acente bazında toplam VOP (vergi öncesi prim) üretimi nedir?",
+    "202512 dönemi için ürün koduna göre poliçe sayısı nedir?"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "reason": "Kullanıcının isteğinde, 'branş' ve 'prim üretimi' kavramları yer almakla birlikte, mevcut metadata'da doğrudan 'branş' bilgisine ulaşabilecek tekil ve güvenilir bir kolon bulunmamaktadır. AS_DWH.POL_BRANS.BRANS_ADI ve AS_DWH.POL_POLICE_REF_TANIM.BRANS_ADI gibi olası branş bilgileri mevcut olsa da, bu alanlar doğrudan 'prim üretimi' ile ilişkilendirilecek şekilde bir join yapılamamıştır. Ayrıca, 'prim üretimi' için en uygun ölçü VOP_TL veya BRUT_PRIM_TL olmasına rağmen, bu ölçüye ulaşmak için gerekli olan join yolları eksik veya tutarsızdır.",
+  "suggested_questions": [
+    "Branş bazında toplam VOP (vergi öncesi prim) üretimi nedir?",
+    "Acente bazında toplam brüt prim üretimi nedir?",
+    "Ürün koduna göre toplam poliçe sayısı nedir?"
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT b.BRANS_ADI, SUM(f.BRUT_PRIM_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.POL_BRANS b ON p.BRANS_ID = b.BRANS_ID GROUP BY b.BRANS_ADI ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Top 3 branches by total gross premium production",
+    "risk_notes": "Uses default production reporting logic without date filters",
+    "description": "Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS\nFilters: None applied (no time or category filters requested)\nGrouping/measures: Branş adlarına göre gruplama ve BRUT_PRIM_TL üzerinden toplam prim hesaplaması\nExpected output columns: BRANS_ADI, PRIM_TUTARI\nAssumptions: Varsayılan ek tanzim tarihi esas alınmıştır; zaman filtresi belirtilmediği için sorguda ek tarih filtresi uygulanmamıştır.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT b.BRANS_ADI, SUM(t.VOP_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET t INNER JOIN AS_DWH.POL_POLICE_OZET p ON t.POLICE_ID = p.POLICE_ID AND t.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.POL_BRANS b ON p.BRANS_ID = b.BRANS_ID GROUP BY b.BRANS_ADI ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Top 3 branches by total pre-tax premium production",
+    "risk_notes": "Uses pre-tax premium metric instead of gross premium",
+    "description": "Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS\nFilters: None applied\nGrouping/measures: Branş adlarına göre gruplama ve VOP_TL üzerinden toplam prim hesaplaması\nExpected output columns: BRANS_ADI, PRIM_TUTARI\nAssumptions: VOP_TL, BRUT_PRIM_TL yerine kullanılmıştır; bu, üretim raporlaması açısından farklı bir metrik sunar.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT b.BRANS_ADI, SUM(f.BRUT_PRIM_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.POL_BRANS b ON p.BRANS_ID = b.BRANS_ID GROUP BY b.BRANS_ADI ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Alternative implementation using fact table joins",
+    "risk_notes": "Identical to option 1 but with explicit join syntax",
+    "description": "Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS\nFilters: None applied\nGrouping/measures: Branş adlarına göre gruplama ve BRUT_PRIM_TL üzerinden toplam prim hesaplaması\nExpected output columns: BRANS_ADI, PRIM_TUTARI\nAssumptions: Option_1 ile aynı mantık ve veri seti kullanılmıştır; sadece JOIN yazımı daha açık hale getirilmiştir.",
+    "recommended": false
+  }
+]

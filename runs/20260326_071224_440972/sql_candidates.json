@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT u.URUN_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AGGR.AS400_YENI_URUN u ON p.URUN_ID = u.URUN_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY u.URUN_ADI ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from the fact table joined with GNL_TARIH for filtering by month and AGGR.AS400_YENI_URUN for product names.",
+    "risk_notes": "Relies on correct join paths and assumes URUN_ADI is available in AGGR.AS400_YENI_URUN.",
+    "description": "Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AGGR.AS400_YENI_URUN.\nFilters: Tarihe göre filtreleme (2025-12), tarih tablosu üzerinden ay bazlı filtreleme.\nGrouping/measures: Ürün adına göre gruplama ve BRUT_PRIM_TL üzerinden toplam prim hesaplaması.\nExpected output columns: URUN_ADI, TOPLAM_PRIM_TUTARI.\nAssumptions: URUN_ADI AGGR.AS400_YENI_URUN tablosunda mevcuttur ve doğru join yapılmıştır.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT u.URUN_ADI, SUM(f.VOP_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AGGR.AS400_YENI_URUN u ON p.URUN_ID = u.URUN_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY u.URUN_ADI ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL from the fact table joined with GNL_TARIH for filtering by month and AGGR.AS400_YENI_URUN for product names.",
+    "risk_notes": "Relies on correct join paths and assumes URUN_ADI is available in AGGR.AS400_YENI_URUN.",
+    "description": "Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AGGR.AS400_YENI_URUN.\nFilters: Tarihe göre filtreleme (2025-12), tarih tablosu üzerinden ay bazlı filtreleme.\nGrouping/measures: Ürün adına göre gruplama ve VOP_TL üzerinden toplam prim hesaplaması.\nExpected output columns: URUN_ADI, TOPLAM_PRIM_TUTARI.\nAssumptions: VOP_TL prim tutarı olarak doğru ölçüyü temsil eder ve URUN_ADI AGGR.AS400_YENI_URUN tablosunda mevcuttur.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT u.URUN_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_URUN u ON p.URUN_ID = u.URUN_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY u.URUN_ADI ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Uses BRUT_PRIM_TL from the fact table joined with GNL_TARIH for filtering by month and AS_DWH.POL_URUN for product names.",
+    "risk_notes": "Relies on correct join paths and assumes URUN_ADI is available in AS_DWH.POL_URUN.",
+    "description": "Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam prim üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN.\nFilters: Tarihe göre filtreleme (2025-12), tarih tablosu üzerinden ay bazlı filtreleme.\nGrouping/measures: Ürün adına göre gruplama ve BRUT_PRIM_TL üzerinden toplam prim hesaplaması.\nExpected output columns: URUN_ADI, TOPLAM_PRIM_TUTARI.\nAssumptions: URUN_ADI AS_DWH.POL_URUN tablosunda mevcuttur ve doğru join yapılmıştır.",
+    "recommended": false
+  }
+]

@@ -1,0 +1,45 @@
+{
+  "recommended_candidate_id": "option_1",
+  "recommended_canonical_id": "option_1",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM selected a hard-disqualified option; fallback applied.",
+  "judge_error_kind": "parse_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3,
+  "retry_recommended": true,
+  "llm_raw_output": "{\n  \"choice\": \"option_3\",\n  \"descriptions\": [\n    {\n      \"id\": \"option_1\",\n      \"description\": \"Question answered: 2025 yılı için branş bazında en yüksek 10 VOP üretimi. Tables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_BRANS. Filters: Ek tanzim tarihi 2025 yılına göre filtreleme. Grouping/measures: VOP_TL toplamı, BRANS_ADI gruplaması. Expected output columns: BRANS_ADI, TOPLAM_VOP. Assumptions: VOP_TL doğrudan POL_BRANS ile ilişkilendirilmiştir.\"\n    },\n    {\n      \"id\": \"option_2\",\n      \"description\": \"Question answered: 2025 yılı için branş bazında en yüksek 10 VOP üretimi. Tables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS. Filters: Ek tanzim tarihi 2025 yılına göre filtreleme. Grouping/measures: VOP_TL toplamı, BRANS_ADI gruplaması. Expected output columns: BRANS_ADI, TOPLAM_VOP. Assumptions: Ekstra bir tablo (POL_POLICE_REF_TANIM) kullanılarak REF_ID doğrulaması yapılmış.\"\n    },\n    {\n      \"id\": \"option_3\",\n      \"description\": \"Question answered: 2025 yılı için branş bazında en yüksek 10 VOP üretimi. Tables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_BRANS. Filters: Ek tanzim tarihi 2025-01-01 ile 2025-12-31 arasında filtreleme. Grouping/measures: VOP_TL toplamı, BRANS_ADI gruplaması. Expected output columns: BRANS_ADI, TOPLAM_VOP. Assumptions: Tarihe göre filtreleme daha açık ve net bir şekilde yapılmış.\"\n    }\n  ]\n}",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: b.REF_ID (expected metadata table: AS_DWH.POL_BRANS)"
+      ],
+      "fallback_score": 7.5
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: b.REF_ID (expected metadata table: AS_DWH.POL_BRANS)"
+      ],
+      "fallback_score": 6.7
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: b.REF_ID (expected metadata table: AS_DWH.POL_BRANS)"
+      ],
+      "fallback_score": 7.0
+    }
+  ],
+  "candidate_descriptions": {
+    "option_1": "Question answered: 2025 yılı için branş bazında en yüksek 10 VOP üretimi. Tables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_BRANS. Filters: Ek tanzim tarihi 2025 yılına göre filtreleme. Grouping/measures: VOP_TL toplamı, BRANS_ADI gruplaması. Expected output columns: BRANS_ADI, TOPLAM_VOP. Assumptions: VOP_TL doğrudan POL_BRANS ile ilişkilendirilmiştir.",
+    "option_2": "Question answered: 2025 yılı için branş bazında en yüksek 10 VOP üretimi. Tables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_BRANS. Filters: Ek tanzim tarihi 2025 yılına göre filtreleme. Grouping/measures: VOP_TL toplamı, BRANS_ADI gruplaması. Expected output columns: BRANS_ADI, TOPLAM_VOP. Assumptions: Ekstra bir tablo (POL_POLICE_REF_TANIM) kullanılarak REF_ID doğrulaması yapılmış.",
+    "option_3": "Question answered: 2025 yılı için branş bazında en yüksek 10 VOP üretimi. Tables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_BRANS. Filters: Ek tanzim tarihi 2025-01-01 ile 2025-12-31 arasında filtreleme. Grouping/measures: VOP_TL toplamı, BRANS_ADI gruplaması. Expected output columns: BRANS_ADI, TOPLAM_VOP. Assumptions: Tarihe göre filtreleme daha açık ve net bir şekilde yapılmış."
+  }
+}

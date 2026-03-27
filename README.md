@@ -169,7 +169,7 @@ This repository implements the end-to-end workflow requested in `forhumans.md`:
 - Multiple statements are blocked.
 - `SELECT *` is blocked.
 - SQL comments are blocked.
-- Row limit is enforced by validation: every SQL must include `FETCH FIRST 200 ROWS ONLY`.
+- Row limit is enforced by validation: every SQL must include `FETCH FIRST N ROWS ONLY` where 1 <= N <= 200.
 - Mandatory filter obligation enforcement is disabled (generation, judge, execution).
 - SQL generation does not mutate LLM SQL output; parse-only candidate handling is used.
 - SQL-generation prompts explicitly prohibit non-metadata columns and instruct the model to keep SELECT lists minimal.

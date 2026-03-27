@@ -1,0 +1,26 @@
+{
+  "summary": "Sorgu sonucu 3 satir ve 2 kolon dondurdu. PRIM_TUTARI alani icin toplam 1,179,760,013.66, ortalama 393,253,337.89. ACENTE_ADI dagiliminda en sik degerler: AEH SİGORTA ACENTELİĞİ A.Ş.=1, TÜRKİYE İŞ BANKASI A.Ş. BİREYSEL BANKACILIK ÜRÜN BÖLÜMÜ=1, AON SİGORTA VE REASÜRANS BROKERLİĞİ A.Ş.=1.",
+  "chart_plan": {
+    "draw_chart": false,
+    "chart_type": "none",
+    "x": null,
+    "y": null,
+    "aggregation": "none",
+    "top_n": null,
+    "sort": "none",
+    "title_tr": "Grafik devre disi",
+    "reason_tr": "Grafik uretimi konfigrasyonda devre disi."
+  },
+  "llm_used": false,
+  "summary_mode": "heuristic",
+  "fallback_reason": "LLM summarizer disabled by configuration.",
+  "validation_errors": [],
+  "chart_render_enabled": false,
+  "selected_candidate_id": "option_1",
+  "executed_sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_ADI ORDER BY PRIM_TUTARI DESC FETCH FIRST 3 ROWS ONLY",
+  "step_durations": {
+    "oracle_execution_sec": 461.942,
+    "summarization_sec": 0.006,
+    "artifact_save_sec": 0.392
+  }
+}

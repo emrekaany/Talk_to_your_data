@@ -70,11 +70,25 @@ class AmbiguousTableReferenceViolation:
 
 
 @dataclass(frozen=True)
+class UnresolvedTableReferenceViolation:
+    """Table.column reference where the table exists in metadata but is not joined."""
+
+    alias: str
+    column: str
+    known_table: str
+
+    @property
+    def reference(self) -> str:
+        return f"{self.alias}.{self.column}"
+
+
+@dataclass(frozen=True)
 class SQLColumnValidationResult:
     """Result of alias/table/column validation parsing."""
 
     unknown_columns: tuple[UnknownAliasColumnViolation, ...]
     ambiguous_table_references: tuple[AmbiguousTableReferenceViolation, ...]
+    unresolved_table_references: tuple[UnresolvedTableReferenceViolation, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -121,9 +135,11 @@ def analyze_sql_column_validation(
     catalog = _effective_catalog(metadata_used, validation_catalog)
     alias_resolution = _resolve_aliases(sql, catalog)
     unknown_columns = _find_unknown_columns(sql, alias_resolution.alias_map, catalog)
+    unresolved_refs = _find_unresolved_table_refs(sql, alias_resolution.alias_map, catalog)
     return SQLColumnValidationResult(
         unknown_columns=tuple(unknown_columns),
         ambiguous_table_references=alias_resolution.ambiguous_table_references,
+        unresolved_table_references=tuple(unresolved_refs),
     )
 
 
@@ -384,6 +400,37 @@ def _resolve_table_token(
     return None, ()
 
 
+_JOIN_ON_PATTERN = re.compile(
+    r"\bON\s*\(\s*"
+    rf"({_IDENTIFIER_PATTERN})\s*\.\s*({_IDENTIFIER_PATTERN})"
+    r"\s*=\s*"
+    rf"({_IDENTIFIER_PATTERN})\s*\.\s*({_IDENTIFIER_PATTERN})"
+    r"\s*\)",
+    flags=re.IGNORECASE,
+)
+
+
+def _extract_join_on_refs(
+    sql: str,
+    alias_map: dict[str, str],
+    tables: dict[str, Any],
+) -> set[tuple[str, str]]:
+    """Return (alias_key, column_key) pairs used in JOIN ON clauses
+    where both sides resolve to known metadata tables."""
+    relaxed: set[tuple[str, str]] = set()
+    for m in _JOIN_ON_PATTERN.finditer(sql):
+        left_alias = _normalize_identifier_token(m.group(1))
+        left_col = _normalize_identifier_token(m.group(2))
+        right_alias = _normalize_identifier_token(m.group(3))
+        right_col = _normalize_identifier_token(m.group(4))
+        left_table = alias_map.get(left_alias)
+        right_table = alias_map.get(right_alias)
+        if left_table and right_table and left_table in tables and right_table in tables:
+            relaxed.add((left_alias, left_col))
+            relaxed.add((right_alias, right_col))
+    return relaxed
+
+
 def _find_unknown_columns(
     sql: str,
     alias_map: dict[str, str],
@@ -392,6 +439,8 @@ def _find_unknown_columns(
     tables = catalog.get("tables")
     if not isinstance(tables, dict) or not alias_map:
         return []
+
+    join_on_refs = _extract_join_on_refs(sql, alias_map, tables)
 
     violations: list[UnknownAliasColumnViolation] = []
     seen: set[tuple[str, str, str]] = set()
@@ -429,6 +478,8 @@ def _find_unknown_columns(
             continue
         if column_key in known_columns:
             continue
+        if (alias_key, column_key) in join_on_refs:
+            continue
 
         signature = (alias_key, column_key, table_key)
         if signature in seen:
@@ -440,6 +491,76 @@ def _find_unknown_columns(
                 alias=alias_raw,
                 column=column_raw,
                 expected_table=expected_table,
+            )
+        )
+    return violations
+
+
+def _find_unresolved_table_refs(
+    sql: str,
+    alias_map: dict[str, str],
+    catalog: dict[str, Any],
+) -> list[UnresolvedTableReferenceViolation]:
+    """Detect table.column refs where the table exists in metadata but is not joined."""
+    tables = catalog.get("tables")
+    bare_to_full = catalog.get("bare_to_full")
+    if not isinstance(tables, dict) or not isinstance(bare_to_full, dict):
+        return []
+
+    # Collect all alias keys that ARE resolved (from FROM/JOIN clauses)
+    resolved_aliases = set(alias_map.keys())
+
+    violations: list[UnresolvedTableReferenceViolation] = []
+    seen: set[tuple[str, str]] = set()
+    for match in _QUALIFIED_REF_PATTERN.finditer(sql):
+        if match.start() > 0 and sql[match.start() - 1] == ":":
+            continue
+        token_1 = str(match.group(1) or "").strip()
+        token_2 = str(match.group(2) or "").strip()
+        token_3 = str(match.group(3) or "").strip()
+        if token_3:
+            # 3-part ref (schema.table.column): alias is token_2
+            alias_raw = token_2
+            column_raw = token_3
+        else:
+            # 2-part ref (alias.column): alias is token_1
+            alias_raw = token_1
+            column_raw = token_2
+
+        alias_key = _normalize_identifier_token(alias_raw)
+        column_key = _normalize_identifier_token(column_raw)
+        if not alias_key or not column_key:
+            continue
+
+        # Skip if this alias is already resolved in FROM/JOIN
+        if alias_key in resolved_aliases:
+            continue
+
+        # Check if alias_key matches a known metadata table (bare name)
+        candidate_full_keys = bare_to_full.get(alias_key)
+        if not candidate_full_keys:
+            continue
+
+        # Pick the display name from the first matching full table
+        known_table = alias_key
+        for full_key in _as_string_list(candidate_full_keys):
+            table_payload = tables.get(full_key)
+            if isinstance(table_payload, dict):
+                known_table = (
+                    str(table_payload.get("display_name", full_key)).strip()
+                    or full_key
+                )
+                break
+
+        signature = (alias_key, column_key)
+        if signature in seen:
+            continue
+        seen.add(signature)
+        violations.append(
+            UnresolvedTableReferenceViolation(
+                alias=alias_raw,
+                column=column_raw,
+                known_table=known_table,
             )
         )
     return violations

@@ -712,7 +712,8 @@ def generate_clarification_suggestions(
     """Generate suggested alternative questions when all SQL candidates fail.
 
     Returns dict with 'reason' and 'suggested_questions' keys.
-    Every suggested question is validated against metadata before returning.
+    Suggestions are validated via LLM self-critique (3-step chain-of-thought):
+    over-generate 5 candidates, self-check each, return only passing ones.
     """
     fallback_suggestions = _generate_fallback_suggestions(metadata_used)
     fallback_result = {
@@ -737,18 +738,32 @@ def generate_clarification_suggestions(
         f"Dogrulama hatalari (SQL adaylarinin basarisizlik nedenleri):\n{errors_text}\n\n"
         f"Mevcut tablolar, kolonlar ve join yollari:\n{tables_summary}\n\n"
         f"Cevaplanabilir sorgu desenleri (mevcut measure ve dimension'lar):\n{answerable_patterns}\n\n"
-        "Gorev:\n"
-        "1. Kisaca (Turkce) bu istegin neden cevaplanamadini acikla.\n"
-        "2. Yukaridaki metadata'da listelenen tablo, kolon ve join yollarini kullanarak "
-        "KESINLIKLE cevaplanabilecek 2-3 alternatif soru oner.\n"
-        "3. KRITIK KURALLAR:\n"
-        "   - Her onerilen soru SADECE yukaridaki metadata'da listelenen tablo ve kolonlari kullanmalidir.\n"
-        "   - Metadata'da OLMAYAN tablo veya kolon referans eden soru ASLA onerme.\n"
-        "   - Her oneride en az bir measure (toplam/sayim yapilabilecek kolon) ve uygun dimension (gruplama kolonu) kullan.\n"
-        "   - Onerileri mumkun oldugunca kullanicinin orijinal niyetine yakin tut.\n"
-        "   - Turkce yaz, dogal dilde sor (SQL yazma).\n"
-        "   - Yukaridaki 'Cevaplanabilir sorgu desenleri' bolumundeki measure ve dimension isimlerini kullanarak onerileri olustur.\n\n"
-        'Strict JSON formatinda don: {"reason": "...", "suggested_questions": ["...", "..."]}'
+        "GOREV (3 ADIM):\n\n"
+        "ADIM 1 - URETIM: Kullanicinin orijinal niyetine yakin 5 aday soru uret.\n"
+        "Her soru icin yukaridaki metadata'dan bir measure (SUM/COUNT) ve bir dimension (GROUP BY) sec.\n\n"
+        "ADIM 2 - DOGRULAMA: Her aday icin su kontrolleri yap:\n"
+        "  a) Kullandigi measure kolonu yukaridaki metadata'da VAR MI? (TABLE.COLUMN olarak kontrol et)\n"
+        "  b) Kullandigi dimension kolonu yukaridaki metadata'da VAR MI?\n"
+        "  c) Measure ve dimension farkli tablolardaysa, aralarinda JoinDef TANIMLI MI?\n"
+        "  d) Dogrulama hatalarinda basarisiz olan kolonlari kullaniyor MU?\n"
+        "  Sonuc: GECTI veya KALDI\n\n"
+        "ADIM 3 - FILTRELEME: Sadece tum kontrollerden GECEN adaylari son listeye al (max 3).\n"
+        "Hicbiri gecmezse, en basit measure-only soruyu don (dimension'siz toplam).\n\n"
+        "Strict JSON formatinda don:\n"
+        "{\n"
+        '  "reason": "Turkce aciklama",\n'
+        '  "candidates": [\n'
+        "    {\n"
+        '      "question": "oneri metni",\n'
+        '      "measure": "TABLE.COLUMN",\n'
+        '      "dimension": "TABLE.COLUMN veya null",\n'
+        '      "checks": {"measure_exists": true, "dimension_exists": true, '
+        '"join_exists": true, "not_prohibited": true},\n'
+        '      "verdict": "GECTI"\n'
+        "    }\n"
+        "  ],\n"
+        '  "suggested_questions": ["sadece GECTI olan soruların question degerleri"]\n'
+        "}"
     )
 
     try:
@@ -756,7 +771,7 @@ def generate_clarification_suggestions(
             "Sen yardimci bir veri analisti asistanisin. Tum cevaplarin Turkce olsun. Sadece gecerli JSON dondur.",
             prompt,
             temperature=0.2,
-            max_tokens=800,
+            max_tokens=1200,
         ).content
     except LLMError:
         return fallback_result
@@ -774,10 +789,39 @@ def generate_clarification_suggestions(
         str(parsed.get("reason", "")).strip()
         or "Mevcut metadata ile bu istek cevaplanamadi."
     )
-    raw_suggestions = _as_string_list(parsed.get("suggested_questions"))[:5]
 
-    # Use LLM suggestions if available, otherwise fall back to programmatic ones
-    validated = raw_suggestions if raw_suggestions else fallback_suggestions
+    # Collect suggestions from LLM self-critique: prefer GECTI candidates
+    validated: list[str] = []
+    candidates = parsed.get("candidates")
+    if isinstance(candidates, list):
+        for cand in candidates:
+            if not isinstance(cand, dict):
+                continue
+            verdict = str(cand.get("verdict", "")).strip().upper()
+            question = str(cand.get("question", "")).strip()
+            if not question:
+                continue
+            if verdict != "KALDI":
+                validated.append(question)
+            if len(validated) >= 3:
+                break
+
+    # Fallback: use LLM suggested_questions if structured candidates yielded < 2
+    if len(validated) < 2:
+        llm_suggestions = _as_string_list(parsed.get("suggested_questions"))[:5]
+        for q in llm_suggestions:
+            if q not in validated:
+                validated.append(q)
+            if len(validated) >= 3:
+                break
+
+    # Final fallback: programmatic suggestions
+    if len(validated) < 2:
+        for q in fallback_suggestions:
+            if q not in validated:
+                validated.append(q)
+            if len(validated) >= 3:
+                break
 
     return {
         "reason": reason,

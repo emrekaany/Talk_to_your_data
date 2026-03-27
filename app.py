@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
+from pathlib import Path
 from typing import Any
 
 import gradio as gr
@@ -11,6 +13,8 @@ import gradio as gr
 from talk_to_data.db import render_sql_for_display
 from talk_to_data.pipeline import PipelineError, TalkToDataService
 
+
+logger = logging.getLogger(__name__)
 
 SERVICE = TalkToDataService()
 DEFAULT_ORACLE_JDBC_URL = "jdbc:oracle:thin:@//10.1.24.184:80/ODSPROD"
@@ -41,6 +45,14 @@ APP_CSS = """
   color: var(--ink);
 }
 """
+
+_PARALLEL_CHOICES = ["Paralelsiz", "Paralel 2", "Paralel 4"]
+_PARALLEL_MAP: dict[str, int] = {"Paralelsiz": 0, "Paralel 2": 2, "Paralel 4": 4}
+
+
+def _parse_parallel_level(label: str | None) -> int:
+    """Return Oracle PARALLEL degree from UI label."""
+    return _PARALLEL_MAP.get(str(label or "").strip(), 0)
 
 
 def _empty_candidate_outputs() -> tuple[str, ...]:
@@ -90,6 +102,7 @@ def generate_sql_options(
     username: str = "",
     password: str = "",
     use_all_metadata: bool = False,
+    parallel_level: str = "Paralelsiz",
 ) -> tuple[Any, ...]:
     request = user_request.strip()
     if not request:
@@ -103,7 +116,7 @@ def generate_sql_options(
             [],
             "",
             "",
-            None,
+            gr.update(value=None),
             "",
             "",
         )
@@ -123,7 +136,23 @@ def generate_sql_options(
             [],
             "",
             "",
+            gr.update(value=None),
+            "",
+            "",
+        )
+    except Exception as exc:
+        logger.exception("Unexpected error in generate_sql_options")
+        c = _empty_candidate_outputs()
+        return (
+            f"Unexpected error: {exc}",
+            *c,
+            gr.update(choices=[], value=None),
             None,
+            "",
+            [],
+            "",
+            "",
+            gr.update(value=None),
             "",
             "",
         )
@@ -151,7 +180,7 @@ def generate_sql_options(
             [],
             "",
             "",
-            None,
+            gr.update(value=None),
             suggestion_md,
             first_suggestion,
         )
@@ -217,11 +246,14 @@ def generate_sql_options(
             "user": username.strip(),
             "password": password,
         }
+        parallel_hint = _parse_parallel_level(parallel_level)
         try:
             auto_result = SERVICE.execute_selected_candidate(
                 context,
                 selected_default,
                 connection=connection,
+                parallel_hint=parallel_hint,
+                defer_llm_summary=True,
             )
             result_preview = auto_result.dataframe.head(500)
             result_summary = auto_result.summary
@@ -251,8 +283,15 @@ def generate_sql_options(
             run_status_text = f"Auto-run failed for '{selected_default}': {exc}"
             if sql_text:
                 run_status_text += f"\n\nFinal SQL:\n{sql_text}"
+        except Exception as exc:
+            logger.exception("Unexpected error during auto-run in generate_sql_options")
+            run_status_text = f"Auto-run unexpected error for '{selected_default}': {exc}"
     else:
         run_status_text = "Auto-run skipped: recommended SQL option was not resolved."
+
+    if result_file_path and not Path(result_file_path).exists():
+        logger.warning("Excel file missing after write: %s", result_file_path)
+        result_file_path = None
 
     return (
         status,
@@ -289,6 +328,7 @@ def run_selected_sql(
     jdbc_url: str,
     username: str,
     password: str,
+    parallel_level: str = "Paralelsiz",
 ) -> tuple[str, Any, str, str, str | None]:
     if not context:
         return (
@@ -296,14 +336,14 @@ def run_selected_sql(
             [],
             "",
             "",
-            None,
+            gr.update(value=None),
         )
 
     selected = selected_option.strip()
     if not selected:
         selected = str(context.get("recommended_candidate_id", "")).strip()
     if not selected:
-        return ("No SQL option resolved to run.", [], "", "", None)
+        return ("No SQL option resolved to run.", [], "", "", gr.update(value=None))
 
     connection = {
         "dsn": jdbc_url.strip(),
@@ -316,13 +356,17 @@ def run_selected_sql(
             context,
             selected,
             connection=connection,
+            parallel_hint=_parse_parallel_level(parallel_level),
         )
     except PipelineError as exc:
         sql_text = _find_candidate_display_sql(context, selected)
         error_message = f"Run failed: {exc}"
         if sql_text:
             error_message += f"\n\nFinal SQL:\n{sql_text}"
-        return (error_message, [], "", "", None)
+        return (error_message, [], "", "", gr.update(value=None))
+    except Exception as exc:
+        logger.exception("Unexpected error in run_selected_sql")
+        return (f"Unexpected error: {exc}", [], "", "", gr.update(value=None))
 
     preview = result.dataframe.head(500)
     llm_status = _llm_summary_status(result.summary_mode, result.fallback_reason)
@@ -341,13 +385,46 @@ def run_selected_sql(
             + "; ".join(result.validation_errors)
         )
     chart_plan_text = _format_chart_plan(result.chart_plan)
+    excel_path = str(result.excel_path)
+    if not Path(excel_path).exists():
+        logger.warning("Excel file missing after write: %s", excel_path)
+        excel_path = None
     return (
         status,
         preview,
         result.summary,
         chart_plan_text,
-        str(result.excel_path),
+        excel_path,
     )
+
+
+def _complete_deferred_summary(
+    context: dict[str, Any] | None,
+    result_preview: Any,
+    current_summary: str,
+    current_chart_plan: str,
+) -> tuple[str, str]:
+    """Run deferred LLM summarization after the dataframe is already displayed."""
+    if not isinstance(context, dict):
+        return current_summary, current_chart_plan
+    recommended = str(context.get("recommended_candidate_id", "")).strip()
+    if not recommended:
+        return current_summary, current_chart_plan
+    try:
+        import pandas as pd
+        if isinstance(result_preview, pd.DataFrame) and not result_preview.empty:
+            df = result_preview
+        else:
+            return current_summary, current_chart_plan
+        interpreted = SERVICE.complete_deferred_summary(context, df, recommended)
+        if interpreted is None:
+            return current_summary, current_chart_plan
+        summary = interpreted.summary_text or current_summary
+        chart_plan = _format_chart_plan(interpreted.chart_plan) or current_chart_plan
+        return summary, chart_plan
+    except Exception as exc:
+        logger.debug("Deferred summary failed: %s", exc)
+        return current_summary, current_chart_plan
 
 
 def _find_candidate_sql(context: dict[str, Any], candidate_id: str) -> str:
@@ -443,6 +520,11 @@ def build_app() -> gr.Blocks:
                 label="All Metadata (retrieval bypass)",
                 value=False,
             )
+            parallel_selector = gr.Radio(
+                label="SQL Paralellik Seviyesi",
+                choices=_PARALLEL_CHOICES,
+                value="Paralelsiz",
+            )
             generate_btn = gr.Button("Generate SQL Options", variant="primary")
             generation_status = gr.Markdown(label="Generation status")
             suggestion_box = gr.Markdown(value="", elem_id="suggestion-box")
@@ -517,6 +599,7 @@ def build_app() -> gr.Blocks:
                 oracle_user_box,
                 oracle_password_box,
                 all_metadata_checkbox,
+                parallel_selector,
             ],
             outputs=[
                 generation_status,
@@ -545,6 +628,10 @@ def build_app() -> gr.Blocks:
                 suggestion_box,
                 suggestion_state,
             ],
+        ).then(
+            fn=_complete_deferred_summary,
+            inputs=[context_state, result_table, summary_box, chart_plan_box],
+            outputs=[summary_box, chart_plan_box],
         )
 
         def _apply_suggestion(suggested_text: str) -> str:
@@ -564,6 +651,7 @@ def build_app() -> gr.Blocks:
                 jdbc_url_box,
                 oracle_user_box,
                 oracle_password_box,
+                parallel_selector,
             ],
             outputs=[run_status, result_table, summary_box, chart_plan_box, result_file],
         )

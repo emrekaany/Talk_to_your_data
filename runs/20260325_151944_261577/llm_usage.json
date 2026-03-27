@@ -1,0 +1,55 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-25T15:19:38.677055+00:00",
+  "finished_at_utc": "2026-03-25T15:20:37.987711+00:00",
+  "total_calls": 5,
+  "total_duration_sec": 58.946,
+  "total_prompt_tokens": 16747,
+  "total_completion_tokens": 2338,
+  "by_source": {
+    "talk_to_data.llm_client": 5
+  },
+  "calls": [
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 5.469,
+      "prompt_tokens": 947,
+      "completion_tokens": 210
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 13.283,
+      "prompt_tokens": 5617,
+      "completion_tokens": 514
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 14.965,
+      "prompt_tokens": 2240,
+      "completion_tokens": 617
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 12.791,
+      "prompt_tokens": 5729,
+      "completion_tokens": 488
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 12.438,
+      "prompt_tokens": 2214,
+      "completion_tokens": 509
+    }
+  ],
+  "request": "En yüksek prim üretimi olan 3 branş ve total üretimleri",
+  "attempt_count": 2,
+  "retry_attempted": true,
+  "step_durations": {
+    "extract_requirements_sec": 5.487,
+    "metadata_retrieval_sec": 0.015,
+    "sql_generation_attempt1_sec": 13.306,
+    "sql_judge_attempt1_sec": 14.994,
+    "sql_generation_attempt2_sec": 12.807,
+    "sql_judge_attempt2_sec": 12.615
+  }
+}

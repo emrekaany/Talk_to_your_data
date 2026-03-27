@@ -1,0 +1,41 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-26T07:30:11.266478+00:00",
+  "finished_at_utc": "2026-03-26T07:31:24.481770+00:00",
+  "total_calls": 3,
+  "total_duration_sec": 73.15,
+  "total_prompt_tokens": 20466,
+  "total_completion_tokens": 1520,
+  "by_source": {
+    "talk_to_data.llm_client": 3
+  },
+  "calls": [
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 6.77,
+      "prompt_tokens": 972,
+      "completion_tokens": 272
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 53.206,
+      "prompt_tokens": 16940,
+      "completion_tokens": 709
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 13.174,
+      "prompt_tokens": 2554,
+      "completion_tokens": 539
+    }
+  ],
+  "request": "202512 dönemi için Ürün koduna göre gruplanmış şekilde en yüksek 10 toplam prim üretimi nedir? ürün kodunu ve total prim üretimini ver",
+  "attempt_count": 1,
+  "retry_attempted": false,
+  "step_durations": {
+    "extract_requirements_sec": 6.777,
+    "metadata_retrieval_sec": 0.028,
+    "sql_generation_attempt1_sec": 53.217,
+    "sql_judge_attempt1_sec": 13.183
+  }
+}

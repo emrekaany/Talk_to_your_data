@@ -1,0 +1,48 @@
+{
+  "recommended_candidate_id": "option_1",
+  "recommended_canonical_id": "option_1",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM selected a hard-disqualified option; fallback applied.",
+  "judge_error_kind": "parse_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3,
+  "retry_recommended": true,
+  "llm_raw_output": "{\n  \"choice\": \"option_1\",\n  \"descriptions\": [\n    {\n      \"id\": \"option_1\",\n      \"description\": \"Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS.\\nFilters: Zaman filtresi belirtilmediği için ek tanzim tarihi esas alınmamıştır.\\nGrouping/measures: BRANS_ADI'na göre gruplama yapılmıştır ve BRUT_PRIM_TL toplamı alınmıştır.\\nExpected output columns: BRANS_ADI, TOPLAM_PRIM.\\nAssumptions: Kullanıcı, üretim raporlamasında genellikle ek tanzim tarihi esas alınır; ancak bu sorguda zaman filtresi belirtilmediği için ek tanzim tarihi filtresi uygulanmamıştır.\"\n    },\n    {\n      \"id\": \"option_2\",\n      \"description\": \"Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri.\\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS.\\nFilters: Zaman filtresi belirtilmediği için ek tanzim tarihi esas alınmamıştır.\\nGrouping/measures: BRANS_ADI'na göre gruplama yapılmıştır ve VOP_TL toplamı alınmıştır.\\nExpected output columns: BRANS_ADI, TOPLAM_PRIM.\\nAssumptions: VOP_TL, prim tutarı olarak kullanılmıştır; ancak bu alan, üretim raporlamasında genellikle BRUT_PRIM_TL ile ilişkilendirilir.\"\n    },\n    {\n      \"id\": \"option_3\",\n      \"description\": \"Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS.\\nFilters: Zaman filtresi belirtilmediği için ek tanzim tarihi esas alınmamıştır.\\nGrouping/measures: BRANS_ADI'na göre gruplama yapılmıştır ve BRUT_PRIM_TL toplamı alınmıştır.\\nExpected output columns: BRANS_ADI, TOPLAM_PRIM.\\nAssumptions: Bu sorgu, option_1 ile aynı yapıya sahip olduğu için fazladan bir değer sunmamaktadır.\"\n    }\n  ]\n}",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Sanity check failed: SQL must include FETCH FIRST 200 ROWS ONLY.",
+        "Safety validation failed: SQL must include FETCH FIRST 200 ROWS ONLY."
+      ],
+      "fallback_score": 4.5
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Sanity check failed: SQL must include FETCH FIRST 200 ROWS ONLY.",
+        "Safety validation failed: SQL must include FETCH FIRST 200 ROWS ONLY."
+      ],
+      "fallback_score": 4.5
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Sanity check failed: SQL must include FETCH FIRST 200 ROWS ONLY.",
+        "Safety validation failed: SQL must include FETCH FIRST 200 ROWS ONLY."
+      ],
+      "fallback_score": 4.5
+    }
+  ],
+  "candidate_descriptions": {
+    "option_1": "Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS.\nFilters: Zaman filtresi belirtilmediği için ek tanzim tarihi esas alınmamıştır.\nGrouping/measures: BRANS_ADI'na göre gruplama yapılmıştır ve BRUT_PRIM_TL toplamı alınmıştır.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM.\nAssumptions: Kullanıcı, üretim raporlamasında genellikle ek tanzim tarihi esas alınır; ancak bu sorguda zaman filtresi belirtilmediği için ek tanzim tarihi filtresi uygulanmamıştır.",
+    "option_2": "Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS.\nFilters: Zaman filtresi belirtilmediği için ek tanzim tarihi esas alınmamıştır.\nGrouping/measures: BRANS_ADI'na göre gruplama yapılmıştır ve VOP_TL toplamı alınmıştır.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM.\nAssumptions: VOP_TL, prim tutarı olarak kullanılmıştır; ancak bu alan, üretim raporlamasında genellikle BRUT_PRIM_TL ile ilişkilendirilir.",
+    "option_3": "Question answered: En yüksek prim üretimi olan 3 branş ve toplam üretimleri.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.POL_BRANS.\nFilters: Zaman filtresi belirtilmediği için ek tanzim tarihi esas alınmamıştır.\nGrouping/measures: BRANS_ADI'na göre gruplama yapılmıştır ve BRUT_PRIM_TL toplamı alınmıştır.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM.\nAssumptions: Bu sorgu, option_1 ile aynı yapıya sahip olduğu için fazladan bir değer sunmamaktadır."
+  }
+}

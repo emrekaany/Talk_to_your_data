@@ -85,9 +85,6 @@
       ],
       "select_expressions": [
         "AS_DWH.ACE_ACENTE.ACENTE_KODU_NUMERIC"
-      ],
-      "sample_questions": [
-        "320020 no'lu acentenin cari yıl üretimini gösterebilir misin ?"
       ]
     },
     {
@@ -115,9 +112,6 @@
       "semantic_type": "Dimensional",
       "keywords": [
         "Dağıtım Kanalı"
-      ],
-      "sample_questions": [
-        "Dağıtım kanalı bazında üretimi gösterebilir misin?"
       ]
     },
     {
@@ -134,9 +128,37 @@
       ],
       "select_expressions": [
         "AS_DWH.ACE_ACENTE.SATIS_MUDURLUGU"
-      ],
-      "sample_questions": [
-        "Bölge müdürlüğü bazında üretim en fazla olduğu 5 acente nedir?"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE",
+      "name": "BOLGE_MUDURLUGU_ID",
+      "type": "NUMBER",
+      "description": "Bolge Mudurlugu ID. ACE_SATIS_MUDURLUGU tablosuyla join icin kullanilir.",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Bolge Mudurlugu",
+        "Satis Mudurlugu ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE_ADRES",
+      "name": "ACENTE_ID",
+      "type": "NUMBER",
+      "description": "Acente ID. ACE_ACENTE tablosuyla join icin kullanilir.",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Acente ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_ACENTE_ADRES",
+      "name": "ALT_ACENTE_KODU",
+      "type": "NUMBER",
+      "description": "Alt Acente Kodu. Adres filtrelemesi icin kullanilir (genellikle 0 = ana adres).",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Alt Acente Kodu"
       ]
     },
     {
@@ -155,21 +177,93 @@
         "CASE WHEN AS_DWH.ACE_ACENTE.ACENTE_KODU IS NOT NULL THEN AS_DWH.ACE_ACENTE_ADRES.IL_ADI END"
       ],
       "allowed_values": [
-        "ADANA", "ADIYAMAN", "AFYONKARAHİSAR", "AĞRI", "AKSARAY", "AMASYA",
-        "ANKARA", "ANTALYA", "ARDAHAN", "ARTVİN", "AYDIN", "BALIKESİR",
-        "BARTIN", "BATMAN", "BAYBURT", "BİLECİK", "BİNGÖL", "BİTLİS",
-        "BOLU", "BURDUR", "BURSA", "ÇANAKKALE", "ÇANKIRI", "ÇORUM",
-        "DENİZLİ", "DİYARBAKIR", "DÜZCE", "EDİRNE", "ELAZIĞ", "ERZİNCAN",
-        "ERZURUM", "ESKİŞEHİR", "GAZİANTEP", "GİRESUN", "GİRNE", "GUZELYURT",
-        "GÜMÜŞHANE", "GÜZELYURT", "HAKKARİ", "HATAY", "IĞDIR", "ISPARTA",
-        "İSTANBUL", "İZMİR", "KAHRAMANMARAŞ", "KARABÜK", "KARAMAN", "KARS",
-        "KASTAMONU", "KAYSERİ", "KIRIKKALE", "KIRKLARELİ", "KIRŞEHİR",
-        "KİLİS", "KKTC", "KOCAELİ", "KONYA", "KÜTAHYA", "LEFKOŞA",
-        "MAĞUSA", "MALATYA", "MANİSA", "MARDİN", "MERSİN", "MUĞLA",
-        "MUŞ", "NEVŞEHİR", "NİĞDE", "ORDU", "OSMANİYE", "RİZE",
-        "SAKARYA", "SAMSUN", "SİİRT", "SİNOP", "SİVAS", "ŞANLIURFA",
-        "ŞIRNAK", "TEKİRDAĞ", "TOKAT", "TRABZON", "TUNCELİ", "UŞAK",
-        "VAN", "YALOVA", "YOZGAT", "ZONGULDAK"
+        "ADANA",
+        "ADIYAMAN",
+        "AFYONKARAHİSAR",
+        "AĞRI",
+        "AKSARAY",
+        "AMASYA",
+        "ANKARA",
+        "ANTALYA",
+        "ARDAHAN",
+        "ARTVİN",
+        "AYDIN",
+        "BALIKESİR",
+        "BARTIN",
+        "BATMAN",
+        "BAYBURT",
+        "BİLECİK",
+        "BİNGÖL",
+        "BİTLİS",
+        "BOLU",
+        "BURDUR",
+        "BURSA",
+        "ÇANAKKALE",
+        "ÇANKIRI",
+        "ÇORUM",
+        "DENİZLİ",
+        "DİYARBAKIR",
+        "DÜZCE",
+        "EDİRNE",
+        "ELAZIĞ",
+        "ERZİNCAN",
+        "ERZURUM",
+        "ESKİŞEHİR",
+        "GAZİANTEP",
+        "GİRESUN",
+        "GİRNE",
+        "GUZELYURT",
+        "GÜMÜŞHANE",
+        "GÜZELYURT",
+        "HAKKARİ",
+        "HATAY",
+        "IĞDIR",
+        "ISPARTA",
+        "İSTANBUL",
+        "İZMİR",
+        "KAHRAMANMARAŞ",
+        "KARABÜK",
+        "KARAMAN",
+        "KARS",
+        "KASTAMONU",
+        "KAYSERİ",
+        "KIRIKKALE",
+        "KIRKLARELİ",
+        "KIRŞEHİR",
+        "KİLİS",
+        "KKTC",
+        "KOCAELİ",
+        "KONYA",
+        "KÜTAHYA",
+        "LEFKOŞA",
+        "MAĞUSA",
+        "MALATYA",
+        "MANİSA",
+        "MARDİN",
+        "MERSİN",
+        "MUĞLA",
+        "MUŞ",
+        "NEVŞEHİR",
+        "NİĞDE",
+        "ORDU",
+        "OSMANİYE",
+        "RİZE",
+        "SAKARYA",
+        "SAMSUN",
+        "SİİRT",
+        "SİNOP",
+        "SİVAS",
+        "ŞANLIURFA",
+        "ŞIRNAK",
+        "TEKİRDAĞ",
+        "TOKAT",
+        "TRABZON",
+        "TUNCELİ",
+        "UŞAK",
+        "VAN",
+        "YALOVA",
+        "YOZGAT",
+        "ZONGULDAK"
       ]
     },
     {
@@ -214,16 +308,10 @@
         "Toplam Prim Tutarı",
         "Vergi Dahil Prim",
         "Poliçe Brüt Primi",
-        "Brüt Prim TL",
-        "Üretim",
-        "Üretim Tutarı",
-        "Prim Üretimi"
+        "Brüt Prim TL"
       ],
       "select_expressions": [
         "SUM(AS_DWH.FACT_POL_POLICE_EK.BRUT_PRIM_TL)"
-      ],
-      "sample_questions": [
-        "Bana Son 5 Yılı Tanzim Yılı Bazında Brüt Prim Tutarlarını Yazar mısın?"
       ]
     },
     {
@@ -238,12 +326,7 @@
         "Prim Tutarı (Vergi Hariç)",
         "Net Poliçe Primi",
         "VOP TL",
-        "Vergi Öncesi Prim TL",
-        "Üretim",
-        "Üretim Tutarı",
-        "Tanzimli Üretim",
-        "Prim Üretimi",
-        "Varsayılan Üretim"
+        "Vergi Öncesi Prim TL"
       ],
       "select_expressions": [
         "SUM(AS_DWH.FACT_POL_POLICE_TEM_ASSET.VOP_TL)"
@@ -265,9 +348,6 @@
       ],
       "select_expressions": [
         "AS_DWH.GNL_KAYNAK_SISTEM.KAYNAK_SISTEM_ID"
-      ],
-      "sample_questions": [
-        "AS400 Poliçe Sayım ve Geçen Yılki Üretimim Nedir? (Üretim Denilince aksi belirtilmedikçe Vergi Öncesi Prim TL kolonu kullanılır)"
       ]
     },
     {
@@ -284,60 +364,10 @@
         "Tan Trh",
         "Bas Tarih",
         "Bas Trh",
-        "Poliçe Düzenleme Tarihi",
-        "Ek Tanzim Tarihi",
-        "Tanzimli",
-        "Üretim Tarihi",
-        "Ana Plc Baslangic Tarihi",
-        "Ana Pol BTS TRH",
-        "Ana Pol Btis Tarihi",
-        "Ana Poliçe Başlangıç Tarihi",
-        "Ana Poliçe Btitiş Tarihi",
-        "Bitiş Tarihi",
-        "Ek Baslangic Trh",
-        "Ek Başlangıç Tarihi",
-        "Ek Düzenleme Tarihi",
-        "Ek Geçerlilik Başlangıç Tarihi",
-        "Ek Geçerlilik Bitiş Tarihi",
-        "Ek Süre Bitiş Tarihi",
-        "Ek Tarihi",
-        "Ek Teminat Başlangıç Tarihi",
-        "Ek Teminat Bitiş Tarihi",
-        "Ek Teminat Yürürlük Tarihi",
-        "Ek Tnzm Tarihi",
-        "Ek Tnzm Trh",
-        "Ek Trh",
-        "Ek İşlem Tarihi",
-        "Police Baslangic Tarihi",
-        "Poliçe Ana Bitiş Tarihi",
-        "Poliçe Başlangıç Tarihi",
-        "Poliçe Bitiş Tarihi",
-        "Poliçe Kayıt Tarihi",
-        "Poliçe Oluşturma Tarihi",
-        "Poliçe Sonlanma Tarihi",
-        "Poliçe Yürürlük Tarihi",
-        "Sigorta Başlangıç Tarihi",
-        "Sigorta Bitiş Tarihi",
-        "Teminat Başlangıcı",
-        "Teminat Başlangıç Tarihi",
-        "Teminat Bitiş Tarihi",
-        "Teminat Sonu Tarihi",
-        "Zeyil Başlangıç Tarihi",
-        "Zeyil Bitiş Tarihi",
-        "Zeyil Düzenleme Tarihi",
-        "Zeyil Geçerlilik Sonu",
-        "Zeyil Kayıt Tarihi",
-        "Zeyil Yürürlük Tarihi"
+        "Poliçe Düzenleme Tarihi"
       ],
       "select_expressions": [
         "MAX(AS_DWH.GNL_TARIH.TARIH)"
-      ],
-      "sample_questions": [
-        "2025 Yılı Tanzimli Üretimi Verebilir Misin?",
-        "Aksi belirtilmediği sürece üretim raporları ek tanzim tarihi esasıyla hazırlanır.Örneğin kullanıcı 2026 yılındaki üretimini getir dediğinde bu tarihe göre çalışmalıdır.Opr 54 ve Prim adet yasal raporu örnek verilebilir.",
-        "2025 Yılı başlangıçlı poliçelerin listesini verebilir misin?",
-        "2. Ekin Başlangıç Tarihini Verebilir Misin?",
-        "2026 İçerisinde Bitecek Poliçelerin Sayısı Nedir?"
       ]
     },
     {
@@ -375,9 +405,6 @@
       "select_expressions": [
         "AS_DWH.MUS_MUSTERI.MUSTERI_NUMARASI",
         "COUNT (DISTINCT AS_DWH.MUS_MUSTERI.MUSTERI_NUMARASI)"
-      ],
-      "sample_questions": [
-        "Müşteri Bazında top 10/20 üretimi olan müşterileri gösterebilir misin?"
       ]
     },
     {
@@ -409,9 +436,6 @@
       ],
       "select_expressions": [
         "AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ADI"
-      ],
-      "sample_questions": [
-        "952 kodlu ürünün müşteri cinsiyet bazında üretim dağılımını getirebilir misin ?"
       ]
     },
     {
@@ -430,9 +454,6 @@
       ],
       "select_expressions": [
         "SUM(AS_DWH.POLICE_SAYISI.POLICE_SAYISI)"
-      ],
-      "sample_questions": [
-        "Cari yılda ürettiğim poliçe"
       ]
     },
     {
@@ -479,9 +500,6 @@
       ],
       "select_expressions": [
         "AS_DWH.POL_POLICE_DURUMU.POLICE_DURUMU_ADI"
-      ],
-      "sample_questions": [
-        "Yürürlükteki Poliçe Adedim Kaçtır?"
       ]
     },
     {
@@ -498,9 +516,6 @@
       ],
       "select_expressions": [
         "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, AS_DWH.POL_POLICE_KOD.POLICE_KOD_ADI"
-      ],
-      "sample_questions": [
-        "Bu Poliçe Hangi Ürüne Aittir?, Ürün bazında üretimimiz nedir ?"
       ]
     },
     {
@@ -515,9 +530,6 @@
       ],
       "select_expressions": [
         "AS_DWH.POL_POLICE_KOD.POLICE_KOD_KODU"
-      ],
-      "sample_questions": [
-        "Poliçe Koduna göre üretimleri gösterebilir misin?"
       ]
     },
     {
@@ -536,9 +548,6 @@
       ],
       "select_expressions": [
         "AS_DWH.POL_POLICE_OZET.POLICE_DOVIZ_CINSI"
-      ],
-      "sample_questions": [
-        "Yabancı para cinsinden üretimim bu sene ne kadardır ? -Poliçe döviz cinsi hariç bırakılıp diğer para birimleri tablo haline getirilip sunulmalıdır."
       ]
     },
     {
@@ -592,9 +601,26 @@
       ],
       "select_expressions": [
         "AS_DWH.POL_POLICE_OZET.POLICE_YENILEME_NO"
-      ],
-      "sample_questions": [
-        "Bu Poliçenin Kaç Adet Yenilemesi Vardır?  Bu yıl poliçesini yenileyenlerin Üretimi Nedir? ( Ana Poliçe Başlangıç Tarihi daha çok sorgulanmak istenir.). Poliçe Yenileme Tarihini Söyler Misin? (Sıfırıncı Ekteki Tanzim Tarihini Sorguluyor)"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "REF_ID",
+      "type": "NUMBER",
+      "description": "Referans tanimlama ID. FACT_POL_POLICE_TEM_ASSET tablosuyla join icin kullanilir.",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "REF ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "BRANS_ID",
+      "type": "NUMBER",
+      "description": "Brans ID FK. POL_BRANS tablosuna referans veren foreign key kolonu. Bransin benzersiz tanimlayicisidir.",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Brans ID"
       ]
     },
     {
@@ -655,6 +681,17 @@
     },
     {
       "table": "AS_DWH.POL_POLICE_REF_TANIM",
+      "name": "POLICE_KOD_KODU",
+      "type": "VARCHAR2",
+      "description": "Police Kod Kodu. Police kodunun numerik ID karsiligi.",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "Police Kod Kodu",
+        "Urun Kodu"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_REF_TANIM",
       "name": "POLICE_KOD_ADI",
       "type": "VARCHAR2",
       "description": "Poliçe Adı Poliçe kodunun açıklamasını içerir. Ürünün Adını verin",
@@ -669,9 +706,6 @@
       "select_expressions": [
         "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, AS_DWH.POL_POLICE_KOD.POLICE_KOD_ADI",
         "AS_DWH.POL_POLICE_REF_TANIM.POLICE_KOD_ADI, CASE WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 741 THEN 71602 WHEN AGGR.AS400_YENI_URUN.NEW_FPOLK = 742 THEN 71603 ELSE AGGR.AS400_YENI_URUN.NEW_FPOLK END"
-      ],
-      "sample_questions": [
-        "Bu Poliçe Hangi Ürüne Aittir?, Ürün bazında üretimimiz nedir ?"
       ]
     },
     {
@@ -704,9 +738,6 @@
       ],
       "select_expressions": [
         "AS_DWH.POL_TKZ.TKZ_KODU, AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU"
-      ],
-      "sample_questions": [
-        "TKZ kodu bazında üretimimi gösterebilir misin ?"
       ]
     },
     {
@@ -724,9 +755,6 @@
       ],
       "select_expressions": [
         "AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI"
-      ],
-      "sample_questions": [
-        "Satış Kanalına göre üretimleri gösterebilir misin?"
       ]
     },
     {
@@ -759,9 +787,6 @@
       ],
       "select_expressions": [
         "AS_DWH.POL_TKZ.TKZ_KODU, AS_DWH.POL_POLICE_REF_TANIM.TKZ_KODU"
-      ],
-      "sample_questions": [
-        "TKZ kodu bazında üretimimi gösterebilir misin ?"
       ]
     },
     {
@@ -795,6 +820,356 @@
       ],
       "select_expressions": [
         "AS_DWH.POL_URUN.URUN_KODU"
+      ]
+    },
+    {
+      "table": "AS_DWH.ACE_SATIS_MUDURLUGU",
+      "name": "SATIS_MUDURLUGU_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.ACE_ACENTE.BOLGE_MUDURLUGU_ID = AS_DWH.ACE_SATIS_MUDURLUGU.SATIS_MUDURLUGU_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "SATIS MUDURLUGU ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.FACT_POL_POLICE_EK",
+      "name": "KAYNAK_SISTEM_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.FACT_POL_POLICE_EK.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "KAYNAK SISTEM ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.FACT_POL_POLICE_EK",
+      "name": "POLICE_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.FACT_POL_POLICE_EK.POLICE_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "POLICE ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+      "name": "KAYNAK_SISTEM_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.FACT_POL_POLICE_TEM_ASSET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "KAYNAK SISTEM ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+      "name": "POLICE_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.FACT_POL_POLICE_TEM_ASSET.POLICE_ID = AS_DWH.POL_POLICE_OZET.POLICE_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "POLICE ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.FACT_POL_POLICE_TEM_ASSET",
+      "name": "REF_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.FACT_POL_POLICE_TEM_ASSET.REF_ID = AS_DWH.POL_POLICE_REF_TANIM.REF_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "REF ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.GNL_TARIH",
+      "name": "TARIH_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = ALS_POL_EK_TANZIM_TARIHI.TARIH_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "TARIH ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.MUS_MUSTERI",
+      "name": "MUSTERI_CINSIYET_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "MUSTERI CINSIYET ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.MUS_MUSTERI",
+      "name": "MUSTERI_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "MUSTERI ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.MUS_MUSTERI_CINSIYET",
+      "name": "MUSTERI_CINSIYET_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.MUS_MUSTERI.MUSTERI_CINSIYET_ID = AS_DWH.MUS_MUSTERI_CINSIYET.MUSTERI_CINSIYET_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "MUSTERI CINSIYET ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POLICE_SAYISI",
+      "name": "POLICE_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POLICE_SAYISI.POLICE_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "POLICE ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_BRANS",
+      "name": "BRANS_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_REF_TANIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "BRANS ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_DURUMU",
+      "name": "POLICE_DURUMU_KODU",
+      "type": "VARCHAR2",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = ALS_POLICE_DURUMU.POLICE_DURUMU_KODU",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "POLICE DURUMU KODU"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_KIRILIM",
+      "name": "BRANS_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_KIRILIM.BRANS_ID = AS_DWH.POL_BRANS.BRANS_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "BRANS ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_KIRILIM",
+      "name": "KAYNAK_SISTEM_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "KAYNAK SISTEM ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_KIRILIM",
+      "name": "POLICE_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "POLICE ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_KIRILIM",
+      "name": "TKZ_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "TKZ ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_KOD",
+      "name": "POLICE_KOD_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "POLICE KOD ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "ACENTE_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.ACENTE_ID = AS_DWH.ACE_ACENTE.ACENTE_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "ACENTE ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "ANA_POLICE_BASLANGIC_TARIH_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.ANA_POLICE_BASLANGIC_TARIH_ID = ALS_POL_ANA_BAS_TARIHI.TARIH_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "ANA POLICE BASLANGIC TARIH ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "ANA_POLICE_BITIS_TARIH_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.ANA_POLICE_BITIS_TARIH_ID = ALS_POL_ANA_BITIS_TARIHI.TARIH_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "ANA POLICE BITIS TARIH ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "ANA_POLICE_TANZIM_TARIH_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.ANA_POLICE_TANZIM_TARIH_ID = ALS_POL_ANA_TANZIM_TARIHI.TARIH_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "ANA POLICE TANZIM TARIH ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "BASLANGIC_TARIH_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.BASLANGIC_TARIH_ID = ALS_POL_EK_BAS_TARIHI.TARIH_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "BASLANGIC TARIH ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "BITIS_TARIH_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.BITIS_TARIH_ID = ALS_POL_EK_BITIS_TARIHI.TARIH_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "BITIS TARIH ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "KAYNAK_SISTEM_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.KAYNAK_SISTEM_ID = AS_DWH.POL_POLICE_KIRILIM.KAYNAK_SISTEM_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "KAYNAK SISTEM ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "MUSTERI_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.MUSTERI_ID = AS_DWH.MUS_MUSTERI.MUSTERI_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "MUSTERI ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "NEW_FPOLK",
+      "type": "VARCHAR2",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.NEW_FPOLK = AGGR.AS400_YENI_URUN.NEW_FPOLK",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "NEW FPOLK"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "POLICE_DURUMU_KODU_AS400",
+      "type": "VARCHAR2",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_DURUMU_KODU_AS400 = ALS_POLICE_DURUMU.POLICE_DURUMU_KODU",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "POLICE DURUMU KODU AS400"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "POLICE_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_ID = AS_DWH.POL_POLICE_KIRILIM.POLICE_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "POLICE ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "POLICE_KOD_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.POLICE_KOD_ID = AS_DWH.POL_POLICE_KOD.POLICE_KOD_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "POLICE KOD ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "SATIS_KANALI_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "SATIS KANALI ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "TANZIM_TARIH_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.TANZIM_TARIH_ID = ALS_POL_EK_TANZIM_TARIHI.TARIH_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "TANZIM TARIH ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_OZET",
+      "name": "URUN_KODU",
+      "type": "VARCHAR2",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_OZET.URUN_KODU = AS_DWH.POL_URUN.URUN_KODU",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "URUN KODU"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_POLICE_SATIS_KANALI",
+      "name": "SATIS_KANALI_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_SATIS_KANALI.SATIS_KANALI_ID = AS_DWH.POL_POLICE_OZET.SATIS_KANALI_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "SATIS KANALI ID"
+      ]
+    },
+    {
+      "table": "AS_DWH.POL_TKZ",
+      "name": "TKZ_ID",
+      "type": "NUMBER",
+      "description": "Join key kolonu. AS_DWH.POL_POLICE_KIRILIM.TKZ_ID = AS_DWH.POL_TKZ.TKZ_ID",
+      "semantic_type": "Dimensional",
+      "keywords": [
+        "TKZ ID"
       ]
     }
   ]

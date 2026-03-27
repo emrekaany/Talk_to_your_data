@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Aggregates BRUT_PRIM_TL by ACENTE_ADI for period 202512 in Istanbul",
+    "risk_notes": "Assumes ACENTE_ADI is unique and correctly mapped",
+    "description": "Question answered: 202512 dönemi için İstanbul ili içinde en çok BRUT_PRIM_TL üreten ilk 3 acenteyi listeler.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.ACE_ACENTE\nFilters: Dönem '202512' ve acente adresi İstanbul olarak filtrelenir.\nGrouping/measures: BRUT_PRIM_TL toplamı ACENTE_ADI bazında gruplanır.\nExpected output columns: ACENTE_ADI, TOPLAM_PRIM\nAssumptions: ACENTE_ADI benzersiz ve doğru şekilde eşleştirilmiştir.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Alternative query with same logic but different join order",
+    "risk_notes": "Same assumptions as option_1",
+    "description": "Question answered: 202512 dönemi için İstanbul ili içinde en çok BRUT_PRIM_TL üreten ilk 3 acenteyi listeler.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.ACE_ACENTE\nFilters: Dönem '202512' ve acente adresi İstanbul olarak filtrelenir.\nGrouping/measures: BRUT_PRIM_TL toplamı ACENTE_ADI bazında gruplanır.\nExpected output columns: ACENTE_ADI, TOPLAM_PRIM\nAssumptions: ACENTE_ADI benzersiz ve doğru şekilde eşleştirilmiştir.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT a.ACENTE_ADI, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.ACE_ACENTE a ON p.ACENTE_ID = a.ACENTE_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY a.ACENTE_ADI ORDER BY TOPLAM_PRIM DESC FETCH FIRST 3 ROWS ONLY",
+    "rationale_short": "Third variation with identical structure",
+    "risk_notes": "Same assumptions as previous options",
+    "description": "Question answered: 202512 dönemi için İstanbul ili içinde en çok BRUT_PRIM_TL üreten ilk 3 acenteyi listeler.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.ACE_ACENTE\nFilters: Dönem '202512' ve acente adresi İstanbul olarak filtrelenir.\nGrouping/measures: BRUT_PRIM_TL toplamı ACENTE_ADI bazında gruplanır.\nExpected output columns: ACENTE_ADI, TOPLAM_PRIM\nAssumptions: ACENTE_ADI benzersiz ve doğru şekilde eşleştirilmiştir.",
+    "recommended": false
+  }
+]

@@ -27,7 +27,7 @@ request → extraction → metadata retrieval → 3 SQL options → best-option 
 
 - Candidate generation must produce exactly 3 SQL options. Fabricating fallback SQL when 3 valid candidates can't be produced is forbidden — fail with an explicit error.
 - Only `SELECT`/`WITH` queries are allowed. No DML/DDL, no `SELECT *`, no SQL comments.
-- Oracle row limit: `FETCH FIRST 200 ROWS ONLY`.
+- Oracle row limit: `FETCH FIRST N ROWS ONLY` where 1 <= N <= 200.
 - Artifacts persist under `runs/<timestamp>/`.
 - Secrets are env-driven only — never hardcode API keys or passwords.
 - Runtime LLM calls in `talk_to_data/` must use `talk_to_data/llm_client.py` — do not route through `scripts/llm_prompt.py`.

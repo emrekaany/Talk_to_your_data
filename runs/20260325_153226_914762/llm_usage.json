@@ -1,0 +1,55 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-25T15:32:19.180809+00:00",
+  "finished_at_utc": "2026-03-25T15:33:31.896026+00:00",
+  "total_calls": 5,
+  "total_duration_sec": 72.519,
+  "total_prompt_tokens": 17810,
+  "total_completion_tokens": 2904,
+  "by_source": {
+    "talk_to_data.llm_client": 5
+  },
+  "calls": [
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 7.672,
+      "prompt_tokens": 960,
+      "completion_tokens": 304
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 19.92,
+      "prompt_tokens": 5768,
+      "completion_tokens": 790
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 14.837,
+      "prompt_tokens": 2675,
+      "completion_tokens": 610
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 16.173,
+      "prompt_tokens": 5932,
+      "completion_tokens": 630
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 13.917,
+      "prompt_tokens": 2475,
+      "completion_tokens": 570
+    }
+  ],
+  "request": "202512 dönemi için istanbul ilinde en çok prim üretimi olan ilk 3 acente kimdir?",
+  "attempt_count": 2,
+  "retry_attempted": true,
+  "step_durations": {
+    "extract_requirements_sec": 7.681,
+    "metadata_retrieval_sec": 0.005,
+    "sql_generation_attempt1_sec": 19.927,
+    "sql_judge_attempt1_sec": 14.856,
+    "sql_generation_attempt2_sec": 16.264,
+    "sql_judge_attempt2_sec": 13.932
+  }
+}

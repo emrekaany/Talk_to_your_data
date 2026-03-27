@@ -1,0 +1,8 @@
+{
+  "reason": "Kullanıcının isteği, ürün bazında en yüksek 10 toplam VOP üretimi için sorgulamak istemesine karşın, mevcut metadata'da 'URUN_ID' veya 'URUN_ADI' gibi ürün tanımlayıcı kolonlar doğrudan VOP_TL ile ilişkilendirilebilecek bir tabloda bulunmamaktadır. VOP_TL verisi AS_DWH.FACT_POL_POLICE_TEM_ASSET tablosunda yer almakta ve bu tabloyla ürün bilgilerini ilişkilendirmek için gerekli olan tablolar arasında tutarlı bir join yolu bulunamamıştır.",
+  "suggested_questions": [
+    "202512 dönemi için acente bazında toplam VOP üretimi nedir?",
+    "202512 dönemi için ürün koduna göre toplam poliçe sayısı nedir?",
+    "202512 dönemi için satış kanalına göre toplam VOP üretimi nedir?"
+  ]
+}

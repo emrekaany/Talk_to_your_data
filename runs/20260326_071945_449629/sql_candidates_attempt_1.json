@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT p.URUN_KODU, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID AND f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_URUN p ON o.URUN_ID = p.URUN_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' GROUP BY p.URUN_KODU ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Ek tanzim tarihi 2025 olan poliçelerin ürün kodlarına göre toplam brüt prim tutarlarını gruplayıp en yüksek 10'una filtreler.",
+    "risk_notes": "Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır. Ürün kodu bilgisi POL_URUN tablosundan alınmıştır.",
+    "description": "Question answered: 2025 dönemi için ürün kodlarına göre gruplanmış en yüksek 10 toplam brüt prim tutarını verir.\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH, POL_URUN\nFilters: Ek tanzim tarihi 2025 yılını içeren poliçeler.\nGrouping/measures: Ürün koduna göre gruplama ve toplam brüt prim tutarı hesaplaması.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI\nAssumptions: Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır.",
+    "recommended": false
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT p.URUN_KODU, SUM(f.VOP_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f INNER JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID AND f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_POLICE_REF_TANIM r ON f.REF_ID = r.REF_ID INNER JOIN AS_DWH.POL_URUN p ON r.URUN_ID = p.URUN_ID WHERE TO_CHAR(t.TARIH, 'YYYY') = '2025' GROUP BY p.URUN_KODU ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Ek tanzim tarihi 2025 olan poliçelerin ürün kodlarına göre toplam vergi öncesi prim tutarlarını gruplayıp en yüksek 10'una filtreler.",
+    "risk_notes": "Vergi öncesi prim üzerinden üretim hesaplaması yapılmıştır. Ürün kodu bilgisi POL_URUN tablosundan alınmıştır.",
+    "description": "Question answered: 2025 dönemi için ürün kodlarına göre gruplanmış en yüksek 10 toplam vergi öncesi prim tutarını verir.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH, POL_POLICE_REF_TANIM, POL_URUN\nFilters: Ek tanzim tarihi 2025 yılını içeren poliçeler.\nGrouping/measures: Ürün koduna göre gruplama ve toplam vergi öncesi prim tutarı hesaplaması.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI\nAssumptions: Vergi öncesi prim üzerinden üretim hesaplaması yapılmıştır.",
+    "recommended": true
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT p.URUN_KODU, SUM(f.BRUT_PRIM_TL) AS TOPLAM_PRIM_TUTARI FROM AS_DWH.FACT_POL_POLICE_EK f INNER JOIN AS_DWH.POL_POLICE_OZET o ON f.POLICE_ID = o.POLICE_ID AND f.KAYNAK_SISTEM_ID = o.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON o.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_URUN p ON o.URUN_ID = p.URUN_ID WHERE t.TARIH BETWEEN TO_DATE('2025-01-01', 'YYYY-MM-DD') AND TO_DATE('2025-12-31', 'YYYY-MM-DD') GROUP BY p.URUN_KODU ORDER BY TOPLAM_PRIM_TUTARI DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Ek tanzim tarihi 2025 yılını kapsayan poliçelerin ürün kodlarına göre toplam brüt prim tutarlarını gruplayıp en yüksek 10'una filtreler.",
+    "risk_notes": "Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır. Ürün kodu bilgisi POL_URUN tablosundan alınmıştır.",
+    "description": "Question answered: 2025 dönemi için ürün kodlarına göre gruplanmış en yüksek 10 toplam brüt prim tutarını verir.\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH, POL_URUN\nFilters: Ek tanzim tarihi 2025-01-01 ile 2025-12-31 arasında olan poliçeler.\nGrouping/measures: Ürün koduna göre gruplama ve toplam brüt prim tutarı hesaplaması.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI\nAssumptions: Ek tanzim tarihi üzerinden üretim hesaplaması yapılmıştır.",
+    "recommended": false
+  }
+]

@@ -75,6 +75,19 @@ def validate_sql_before_execution(
             f"Unknown alias.column references: {details}"
         )
 
+    if column_validation.unresolved_table_references:
+        details = "; ".join(
+            (
+                f"{violation.reference} "
+                f"(table {violation.known_table} exists in metadata but is not joined in the query)"
+            )
+            for violation in column_validation.unresolved_table_references
+        )
+        raise SQLGuardrailError(
+            "Column allowlist validation failed. "
+            f"Unresolved table references: {details}"
+        )
+
 def _extract_selected_tables(sql: str) -> list[str]:
     matches = re.findall(
         r"\b(?:from|join)\s+([A-Za-z0-9_.$#\"]+)",

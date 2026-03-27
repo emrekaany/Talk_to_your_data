@@ -1,0 +1,45 @@
+{
+  "recommended_candidate_id": "option_1",
+  "recommended_canonical_id": "option_1",
+  "selection_mode": "fallback",
+  "fallback_reason": "LLM selected a hard-disqualified option; fallback applied.",
+  "judge_error_kind": "parse_error",
+  "all_candidates_disqualified": true,
+  "disqualified_count": 3,
+  "retry_recommended": true,
+  "llm_raw_output": "{\n  \"choice\": \"option_3\",\n  \"descriptions\": [\n    {\n      \"id\": \"option_1\",\n      \"description\": \"Question answered: Retrieves the top 10 total production values grouped by product code for the year 2025.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\\nFilters: Filters records where the year is 2025 using TO_CHAR(t.TARIH, 'YYYY') = '2025'.\\nGrouping/measures: Groups by URUN_KODU and sums BRUT_PRIM_TUTARI.\\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\\nAssumptions: BRUT_PRIM_TL is assumed to represent the correct production metric.\"\n    },\n    {\n      \"id\": \"option_2\",\n      \"description\": \"Question answered: Retrieves the top 10 net premium production values grouped by product code for the year 2025.\\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\\nFilters: Filters records where the year is 2025 using TO_CHAR(t.TARIH, 'YYYY') = '2025'.\\nGrouping/measures: Groups by URUN_KODU and sums VOP_TL.\\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\\nAssumptions: VOP_TL is assumed to represent net premium production.\"\n    },\n    {\n      \"id\": \"option_3\",\n      \"description\": \"Question answered: Retrieves the top 10 total production values grouped by product code for the year 2025.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\\nFilters: Filters records using explicit date range between '2025-01-01' and '2025-12-31'.\\nGrouping/measures: Groups by URUN_KODU and sums BRUT_PRIM_TL.\\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\\nAssumptions: BRUT_PRIM_TL is assumed to represent the correct production metric.\"\n    }\n  ]\n}",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: f.URUN_KODU (expected metadata table: AS_DWH.FACT_POL_POLICE_EK)"
+      ],
+      "fallback_score": 8.0
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: f.URUN_KODU (expected metadata table: AS_DWH.FACT_POL_POLICE_TEM_ASSET)"
+      ],
+      "fallback_score": 7.5
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": true,
+      "disqualify_reasons": [
+        "Column allowlist validation failed. Unknown alias.column references: f.URUN_KODU (expected metadata table: AS_DWH.FACT_POL_POLICE_EK)"
+      ],
+      "fallback_score": 7.5
+    }
+  ],
+  "candidate_descriptions": {
+    "option_1": "Question answered: Retrieves the top 10 total production values grouped by product code for the year 2025.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\nFilters: Filters records where the year is 2025 using TO_CHAR(t.TARIH, 'YYYY') = '2025'.\nGrouping/measures: Groups by URUN_KODU and sums BRUT_PRIM_TUTARI.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: BRUT_PRIM_TL is assumed to represent the correct production metric.",
+    "option_2": "Question answered: Retrieves the top 10 net premium production values grouped by product code for the year 2025.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\nFilters: Filters records where the year is 2025 using TO_CHAR(t.TARIH, 'YYYY') = '2025'.\nGrouping/measures: Groups by URUN_KODU and sums VOP_TL.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: VOP_TL is assumed to represent net premium production.",
+    "option_3": "Question answered: Retrieves the top 10 total production values grouped by product code for the year 2025.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH.\nFilters: Filters records using explicit date range between '2025-01-01' and '2025-12-31'.\nGrouping/measures: Groups by URUN_KODU and sums BRUT_PRIM_TL.\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI.\nAssumptions: BRUT_PRIM_TL is assumed to represent the correct production metric."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "label": "prepare_candidates",
+  "started_at_utc": "2026-03-27T11:34:55.409924+00:00",
+  "finished_at_utc": "2026-03-27T11:36:10.464885+00:00",
+  "total_calls": 3,
+  "total_duration_sec": 74.946,
+  "total_prompt_tokens": 9899,
+  "total_completion_tokens": 1701,
+  "by_source": {
+    "talk_to_data.llm_client": 3
+  },
+  "calls": [
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 6.396,
+      "prompt_tokens": 961,
+      "completion_tokens": 252
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 53.99,
+      "prompt_tokens": 6020,
+      "completion_tokens": 857
+    },
+    {
+      "source": "talk_to_data.llm_client",
+      "duration_sec": 14.56,
+      "prompt_tokens": 2918,
+      "completion_tokens": 592
+    }
+  ],
+  "request": "202512 dönemi için en fazla prim üretimi yapan brans adı ve onların total prim üretimi",
+  "attempt_count": 1,
+  "retry_attempted": false,
+  "step_durations": {
+    "extract_requirements_sec": 6.405,
+    "metadata_retrieval_sec": 0.011,
+    "sql_generation_attempt1_sec": 54.002,
+    "sql_judge_attempt1_sec": 14.574
+  }
+}

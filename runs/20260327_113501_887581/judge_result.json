@@ -1,0 +1,39 @@
+{
+  "recommended_candidate_id": "option_1",
+  "recommended_canonical_id": "option_1",
+  "selection_mode": "llm_judge",
+  "fallback_reason": "",
+  "judge_error_kind": "none",
+  "all_candidates_disqualified": false,
+  "disqualified_count": 0,
+  "retry_recommended": false,
+  "llm_raw_output": "{\n  \"choice\": \"option_1\",\n  \"descriptions\": [\n    {\n      \"id\": \"option_1\",\n      \"description\": \"Question answered: 2025 Aralık dönemi için en fazla prim üretimi yapan branş adı ve toplam prim üretimi.\\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH\\nFilters: Ek tanzim tarihi 202512 dönemi ile eşleştirildi.\\nGrouping/measures: BRANS_ADI'na göre gruplama yapıldı ve BRUT_PRIM_TL toplamı hesaplandı.\\nExpected output columns: BRANS_ADI, TOPLAM_PRIM\\nAssumptions: BRANS_ADI POL_BRANS tablosundan gelirken, bu tablo join edilmediği için doğrudan POL_POLICE_OZET üzerinden alınması bekleniyor. Ancak bu bir risk oluşturabilir.\"\n    },\n    {\n      \"id\": \"option_2\",\n      \"description\": \"Question answered: 2025 Aralık dönemi için en fazla prim üretimi yapan branş adı ve toplam prim üretimi.\\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH\\nFilters: Ek tanzim tarihi 202512 dönemi ile eşleştirildi.\\nGrouping/measures: BRANS_ADI'na göre gruplama yapıldı ve VOP_TL toplamı hesaplandı.\\nExpected output columns: BRANS_ADI, TOPLAM_PRIM\\nAssumptions: VOP_TL, prim üretimi için geçerli bir ölçü olabilir ancak bu metrik, kullanıcı isteğinde belirtilen 'PRIM_TUTARI' ile uyumsuz olabilir.\"\n    },\n    {\n      \"id\": \"option_3\",\n      \"description\": \"Question answered: 2025 Aralık dönemi için en fazla prim üretimi yapan branş adı ve toplam prim üretimi.\\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH\\nFilters: Ek tanzim tarihi 202512 dönemi ile eşleştirildi.\\nGrouping/measures: BRANS_ADI'na göre gruplama yapıldı ve BRUT_PRIM_TL toplamı hesaplandı.\\nExpected output columns: BRANS_ADI, TOPLAM_PRIM\\nAssumptions: Bu sorgu option_1 ile aynı mantıkta çalışır ve ek bir katma değer sunmaz.\"\n    }\n  ]\n}",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 7.0
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 7.0
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 7.0
+    }
+  ],
+  "candidate_descriptions": {
+    "option_1": "Question answered: 2025 Aralık dönemi için en fazla prim üretimi yapan branş adı ve toplam prim üretimi.\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH\nFilters: Ek tanzim tarihi 202512 dönemi ile eşleştirildi.\nGrouping/measures: BRANS_ADI'na göre gruplama yapıldı ve BRUT_PRIM_TL toplamı hesaplandı.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM\nAssumptions: BRANS_ADI POL_BRANS tablosundan gelirken, bu tablo join edilmediği için doğrudan POL_POLICE_OZET üzerinden alınması bekleniyor. Ancak bu bir risk oluşturabilir.",
+    "option_2": "Question answered: 2025 Aralık dönemi için en fazla prim üretimi yapan branş adı ve toplam prim üretimi.\nTables used: FACT_POL_POLICE_TEM_ASSET, POL_POLICE_OZET, GNL_TARIH\nFilters: Ek tanzim tarihi 202512 dönemi ile eşleştirildi.\nGrouping/measures: BRANS_ADI'na göre gruplama yapıldı ve VOP_TL toplamı hesaplandı.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM\nAssumptions: VOP_TL, prim üretimi için geçerli bir ölçü olabilir ancak bu metrik, kullanıcı isteğinde belirtilen 'PRIM_TUTARI' ile uyumsuz olabilir.",
+    "option_3": "Question answered: 2025 Aralık dönemi için en fazla prim üretimi yapan branş adı ve toplam prim üretimi.\nTables used: FACT_POL_POLICE_EK, POL_POLICE_OZET, GNL_TARIH\nFilters: Ek tanzim tarihi 202512 dönemi ile eşleştirildi.\nGrouping/measures: BRANS_ADI'na göre gruplama yapıldı ve BRUT_PRIM_TL toplamı hesaplandı.\nExpected output columns: BRANS_ADI, TOPLAM_PRIM\nAssumptions: Bu sorgu option_1 ile aynı mantıkta çalışır ve ek bir katma değer sunmaz."
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "option_1",
+    "sql": "SELECT u.URUN_ADI, SUM(f.VOP_TL) AS TOPLAM_VOP FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_URUN u ON p.URUN_ID = u.URUN_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY u.URUN_ADI ORDER BY TOPLAM_VOP DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Uses VOP_TL metric grouped by product name for December 2025 based on ek tanzim tarihi",
+    "risk_notes": "Relies on correct join paths and assumes POL_URUN.URUN_ADI contains valid product names",
+    "description": "Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam VOP üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN.\nFilters: Ek tanzim tarihi '202512' dönemi.\nGrouping/measures: Ürün adına göre gruplama ve VOP_TL toplamı.\nExpected output columns: URUN_ADI, TOPLAM_VOP.\nAssumptions: VOP_TL doğru şekilde toplanır ve ürün adları POL_URUN tablosunda doğru şekilde temsil edilir.",
+    "recommended": true
+  },
+  {
+    "id": "option_2",
+    "sql": "SELECT u.URUN_ADI, SUM(f.VOP_TL) AS TOPLAM_VOP FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AGGR.AS400_YENI_URUN u ON p.URUN_ID = u.URUN_ID WHERE TO_CHAR(t.TARIH, 'YYYYMM') = '202512' GROUP BY u.URUN_ADI ORDER BY TOPLAM_VOP DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Alternative product dimension source using AS400_YENI_URUN table",
+    "risk_notes": "Uses alternative product dimension table but maintains same join logic",
+    "description": "Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam VOP üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AGGR.AS400_YENI_URUN.\nFilters: Ek tanzim tarihi '202512' dönemi.\nGrouping/measures: Ürün adına göre gruplama ve VOP_TL toplamı.\nExpected output columns: URUN_ADI, TOPLAM_VOP.\nAssumptions: VOP_TL doğru şekilde toplanır ve ürün adları AGGR.AS400_YENI_URUN tablosunda doğru şekilde temsil edilir.",
+    "recommended": false
+  },
+  {
+    "id": "option_3",
+    "sql": "SELECT u.URUN_ADI, SUM(f.VOP_TL) AS TOPLAM_VOP FROM AS_DWH.FACT_POL_POLICE_TEM_ASSET f INNER JOIN AS_DWH.POL_POLICE_OZET p ON f.POLICE_ID = p.POLICE_ID AND f.KAYNAK_SISTEM_ID = p.KAYNAK_SISTEM_ID INNER JOIN AS_DWH.GNL_TARIH t ON p.TANZIM_TARIH_ID = t.TARIH_ID INNER JOIN AS_DWH.POL_URUN u ON p.URUN_ID = u.URUN_ID WHERE t.TARIH BETWEEN 20251201 AND 20251231 GROUP BY u.URUN_ADI ORDER BY TOPLAM_VOP DESC FETCH FIRST 10 ROWS ONLY",
+    "rationale_short": "Alternative date filtering approach using numeric date range",
+    "risk_notes": "Uses numeric date comparison instead of string formatting",
+    "description": "Question answered: 2025 Aralık dönemi için ürün bazında en yüksek 10 toplam VOP üretimi.\nTables used: AS_DWH.FACT_POL_POLICE_TEM_ASSET, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH, AS_DWH.POL_URUN.\nFilters: Ek tanzim tarihi 2025-12-01 ile 2025-12-31 arasında.\nGrouping/measures: Ürün adına göre gruplama ve VOP_TL toplamı.\nExpected output columns: URUN_ADI, TOPLAM_VOP.\nAssumptions: VOP_TL doğru şekilde toplanır ve ürün adları POL_URUN tablosunda doğru şekilde temsil edilir.",
+    "recommended": false
+  }
+]

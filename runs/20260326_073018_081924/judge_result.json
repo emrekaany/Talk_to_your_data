@@ -1,0 +1,39 @@
+{
+  "recommended_candidate_id": "option_2",
+  "recommended_canonical_id": "option_2",
+  "selection_mode": "llm_judge",
+  "fallback_reason": "",
+  "judge_error_kind": "none",
+  "all_candidates_disqualified": false,
+  "disqualified_count": 0,
+  "retry_recommended": false,
+  "llm_raw_output": "{\n  \"choice\": \"option_2\",\n  \"descriptions\": [\n    {\n      \"id\": \"option_1\",\n      \"description\": \"Question answered: Retrieves top 10 total premium production by product code for 2025 using year extraction from date.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\\nFilters: Year extracted from TARIH column equals '2025'\\nGrouping/measures: Groups by URUN_KODU, sums BRUT_PRIM_TL as TOPLAM_PRIM_TUTARI\\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI\\nAssumptions: BRUT_PRIM_TL is the correct measure for premium production.\"\n    },\n    {\n      \"id\": \"option_2\",\n      \"description\": \"Question answered: Retrieves top 10 total premium production by product code for the full year of 2025 using explicit date range.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\\nFilters: TARIH between '2025-01-01' and '2025-12-31'\\nGrouping/measures: Groups by URUN_KODU, sums BRUT_PRIM_TL as TOPLAM_PRIM_TUTARI\\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI\\nAssumptions: BRUT_PRIM_TL is the correct measure for premium production.\"\n    },\n    {\n      \"id\": \"option_3\",\n      \"description\": \"Question answered: Retrieves top 10 total premium production by product code for 2025, filtering out zero production entries.\\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\\nFilters: Year extracted from TARIH column equals '2025'\\nGrouping/measures: Groups by URUN_KODU, sums BRUT_PRIM_TL as TOPLAM_PRIM_TUTARI\\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI\\nAssumptions: BRUT_PRIM_TL is the correct measure for premium production, and zero production entries are irrelevant.\"\n    }\n  ]\n}",
+  "candidate_evaluations": [
+    {
+      "canonical_id": "option_1",
+      "candidate_id": "option_1",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 7.0
+    },
+    {
+      "canonical_id": "option_2",
+      "candidate_id": "option_2",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 7.0
+    },
+    {
+      "canonical_id": "option_3",
+      "candidate_id": "option_3",
+      "hard_disqualified": false,
+      "disqualify_reasons": [],
+      "fallback_score": 7.0
+    }
+  ],
+  "candidate_descriptions": {
+    "option_1": "Question answered: Retrieves top 10 total premium production by product code for 2025 using year extraction from date.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Year extracted from TARIH column equals '2025'\nGrouping/measures: Groups by URUN_KODU, sums BRUT_PRIM_TL as TOPLAM_PRIM_TUTARI\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI\nAssumptions: BRUT_PRIM_TL is the correct measure for premium production.",
+    "option_2": "Question answered: Retrieves top 10 total premium production by product code for the full year of 2025 using explicit date range.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: TARIH between '2025-01-01' and '2025-12-31'\nGrouping/measures: Groups by URUN_KODU, sums BRUT_PRIM_TL as TOPLAM_PRIM_TUTARI\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI\nAssumptions: BRUT_PRIM_TL is the correct measure for premium production.",
+    "option_3": "Question answered: Retrieves top 10 total premium production by product code for 2025, filtering out zero production entries.\nTables used: AS_DWH.FACT_POL_POLICE_EK, AS_DWH.POL_POLICE_OZET, AS_DWH.GNL_TARIH\nFilters: Year extracted from TARIH column equals '2025'\nGrouping/measures: Groups by URUN_KODU, sums BRUT_PRIM_TL as TOPLAM_PRIM_TUTARI\nExpected output columns: URUN_KODU, TOPLAM_PRIM_TUTARI\nAssumptions: BRUT_PRIM_TL is the correct measure for premium production, and zero production entries are irrelevant."
+  }
+}

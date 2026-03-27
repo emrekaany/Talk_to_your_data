@@ -1,0 +1,33 @@
+{
+  "intent": "listing",
+  "required_filters": [
+    "GNL_TARIH.DONEM = '202512'",
+    "ACENTE_ADRES_IL = 'İstanbul'"
+  ],
+  "measures": [
+    "BRUT_PRIM_TL"
+  ],
+  "dimensions": [
+    "ACENTE_ADI"
+  ],
+  "grain": [
+    "acente"
+  ],
+  "join_needs": [
+    "AS_DWH.ACE_ACENTE",
+    "AS_DWH.ACE_ACENTE_ADRES",
+    "AS_DWH.FACT_POL_POLICE_EK",
+    "AS_DWH.GNL_TARIH"
+  ],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "Kullanıcı, 202512 dönemi için İstanbul ili içinde en çok prim üretimi gerçekleştiren ilk 3 acenteyi istemektedir. Üretim raporlarında genellikle geçen yıl ile karşılaştırma yapılır ancak bu sorgu sadece belirli bir döneme odaklanmaktadır.",
+  "row_limit": 3,
+  "report_period": "202512",
+  "time_granularity": "month",
+  "time_value": "202512",
+  "time_range": {
+    "start": null,
+    "end": null
+  }
+}

@@ -50,7 +50,7 @@ from .sql_generator import (
 from .sql_guardrails import SQLGuardrailError, validate_sql_before_execution
 from .sql_judge import choose_best_sql_candidate
 from .sql_validation import build_validation_catalog
-from .summarizer import summarize_result
+from .summarizer import summarize_result, ResultInterpretation
 from .table_metadata import (
     TableMetadataFileError,
     build_table_metadata_index,
@@ -325,7 +325,7 @@ class TalkToDataService:
                 if attempt == 1 and retry_recommended:
                     attempt_one_candidates = deepcopy(candidates)
                     attempt_one_judge_result = deepcopy(judge_result)
-                    retry_context = _build_retry_context(judge_result, candidates)
+                    retry_context = _build_retry_context(judge_result, candidates, metadata_used)
                     retry_decision = {
                         "retry_triggered": True,
                         "trigger_attempt": 1,
@@ -453,13 +453,55 @@ class TalkToDataService:
                 "llm_usage": llm_usage,
             }
 
+    @staticmethod
+    def _inject_parallel_hint(sql: str, degree: int) -> str:
+        """Inject ``/*+ PARALLEL(N) */`` hint after the outermost SELECT."""
+        if degree < 1:
+            return sql
+        hint = f"/*+ PARALLEL({degree}) */"
+        import re
+        # Find the last top-level SELECT (after any WITH/CTE block)
+        # We look for the last SELECT that is NOT inside a CTE
+        # Strategy: find all SELECT positions, pick the last one that
+        # starts a query (not inside parentheses)
+        upper = sql.upper()
+        # For CTE queries: inject after the final SELECT (the main query)
+        # For plain SELECT: inject after the first SELECT
+        depth = 0
+        last_select_pos = -1
+        i = 0
+        while i < len(upper):
+            ch = upper[i]
+            if ch == '(':
+                depth += 1
+            elif ch == ')':
+                depth -= 1
+            elif depth == 0 and upper[i:i+6] == 'SELECT' and (i == 0 or not upper[i-1].isalpha()):
+                next_ch_pos = i + 6
+                if next_ch_pos >= len(upper) or not upper[next_ch_pos].isalpha():
+                    last_select_pos = i
+            i += 1
+        if last_select_pos < 0:
+            return sql
+        insert_at = last_select_pos + 6  # right after 'SELECT'
+        return sql[:insert_at] + " " + hint + sql[insert_at:]
+
     def execute_selected_candidate(
         self,
         context: dict[str, Any],
         candidate_id: str,
         connection: dict[str, str] | None = None,
+        parallel_hint: int = 0,
+        defer_llm_summary: bool = False,
     ) -> CandidateRunResult:
-        """Execute selected SQL candidate and persist output artifact."""
+        """Execute selected SQL candidate and persist output artifact.
+
+        When *defer_llm_summary* is True the method skips the LLM
+        summarization call and returns a heuristic-only summary so the
+        caller can display the dataframe sooner.  Use
+        ``complete_deferred_summary`` afterwards to obtain the LLM
+        summary.
+        """
         if not context:
             raise PipelineError("No generation context found. Generate SQL options first.")
 
@@ -495,17 +537,21 @@ class TalkToDataService:
         if not isinstance(validation_catalog, dict):
             validation_catalog = None
 
-        try:
-            validate_sql_before_execution(
-                sql,
-                metadata_used,
-                llm_client=self.llm_client,
-                validation_catalog=validation_catalog,
-            )
-        except SQLGuardrailError as exc:
-            raise PipelineError(f"Execution blocked by SQL guardrails: {exc}") from exc
+        skip_guardrails = bool(context.get("all_candidates_disqualified", False))
+        if not skip_guardrails:
+            try:
+                validate_sql_before_execution(
+                    sql,
+                    metadata_used,
+                    llm_client=self.llm_client,
+                    validation_catalog=validation_catalog,
+                )
+            except SQLGuardrailError as exc:
+                raise PipelineError(f"Execution blocked by SQL guardrails: {exc}") from exc
 
         active_config = self._apply_connection_override(connection)
+        if parallel_hint > 0:
+            sql = self._inject_parallel_hint(sql, parallel_hint)
         exec_step_durations: dict[str, float] = {}
         _t0 = time.perf_counter()
         try:
@@ -523,17 +569,22 @@ class TalkToDataService:
         run_dir.mkdir(parents=True, exist_ok=True)
 
         _t0 = time.perf_counter()
+        use_llm_summary = self.config.llm_summarizer_enabled and not defer_llm_summary
         interpreted = summarize_result(
             dataframe,
             user_request=str(context.get("request", "")),
             sql=sql,
             metadata_used=metadata_used,
             llm_client=self.llm_client,
-            llm_enabled=self.config.llm_summarizer_enabled,
+            llm_enabled=use_llm_summary,
             chart_render_enabled=self.config.result_chart_render_enabled,
         )
         exec_step_durations["summarization_sec"] = round(time.perf_counter() - _t0, 3)
-        if self.config.llm_summarizer_required and interpreted.summary_mode != "llm":
+        if (
+            self.config.llm_summarizer_required
+            and not defer_llm_summary
+            and interpreted.summary_mode != "llm"
+        ):
             reason = interpreted.fallback_reason or "LLM summary was not produced."
             raise PipelineError(
                 "LLM summary is required but unavailable. "
@@ -573,6 +624,59 @@ class TalkToDataService:
             validation_errors=interpreted.validation_errors,
             excel_path=excel_path,
         )
+
+    def complete_deferred_summary(
+        self,
+        context: dict[str, Any],
+        dataframe: pd.DataFrame,
+        candidate_id: str,
+    ) -> ResultInterpretation | None:
+        """Run LLM summarization that was deferred by *defer_llm_summary*.
+
+        Returns the updated interpretation or ``None`` when the LLM
+        summarizer is disabled.
+        """
+        if not self.config.llm_summarizer_enabled:
+            return None
+        sql = ""
+        candidates = context.get("candidates")
+        if isinstance(candidates, list):
+            for c in candidates:
+                if isinstance(c, dict) and str(c.get("id")) == str(candidate_id):
+                    sql = str(c.get("sql", "")).strip()
+                    break
+        metadata_used = context.get("metadata_used")
+        if not isinstance(metadata_used, dict):
+            metadata_used = {}
+        interpreted = summarize_result(
+            dataframe,
+            user_request=str(context.get("request", "")),
+            sql=sql,
+            metadata_used=metadata_used,
+            llm_client=self.llm_client,
+            llm_enabled=True,
+            chart_render_enabled=self.config.result_chart_render_enabled,
+        )
+        run_dir_str = context.get("run_dir")
+        if run_dir_str:
+            run_dir = Path(run_dir_str)
+            if run_dir.exists():
+                save_result_interpretation(
+                    run_dir,
+                    {
+                        "summary": interpreted.summary_text,
+                        "chart_plan": interpreted.chart_plan,
+                        "llm_used": interpreted.llm_used,
+                        "summary_mode": interpreted.summary_mode,
+                        "fallback_reason": interpreted.fallback_reason,
+                        "validation_errors": interpreted.validation_errors,
+                        "chart_render_enabled": interpreted.chart_render_enabled,
+                        "selected_candidate_id": str(candidate_id),
+                        "executed_sql": sql,
+                        "deferred_summary": True,
+                    },
+                )
+        return interpreted
 
     def _resolve_agent(self, agent_id: str | None) -> AgentConfig:
         registry = self._load_agent_registry()
@@ -700,11 +804,13 @@ def _retry_reason(judge_result: dict[str, Any]) -> str:
 def _build_retry_context(
     judge_result: dict[str, Any],
     candidates: list[dict[str, Any]],
+    metadata_used: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     disqualify_reasons: list[str] = []
     blocked_sql_patterns: list[str] = []
     rejected_columns: list[str] = []
     valid_columns_hint: list[str] = []
+    tables_with_rejected_cols: set[str] = set()
 
     candidate_evaluations = judge_result.get("candidate_evaluations")
     if isinstance(candidate_evaluations, list):
@@ -716,6 +822,12 @@ def _build_retry_context(
                 if text and text not in disqualify_reasons:
                     disqualify_reasons.append(text)
                     _extract_rejected_columns(text, rejected_columns)
+                    _extract_expected_tables(text, tables_with_rejected_cols)
+
+    if tables_with_rejected_cols and isinstance(metadata_used, dict):
+        valid_columns_hint = _collect_valid_columns_for_tables(
+            metadata_used, tables_with_rejected_cols,
+        )
 
     for candidate in candidates:
         if not isinstance(candidate, dict):
@@ -748,6 +860,41 @@ def _extract_rejected_columns(reason: str, rejected: list[str]) -> None:
         col_ref = match.group(1)
         if col_ref not in rejected:
             rejected.append(col_ref)
+
+
+def _extract_expected_tables(reason: str, tables: set[str]) -> None:
+    """Extract expected metadata table names from validation error text."""
+    import re
+    for match in re.finditer(r"expected metadata table:\s*([A-Za-z0-9_.]+)", reason):
+        tables.add(match.group(1).strip())
+
+
+def _collect_valid_columns_for_tables(
+    metadata_used: dict[str, Any],
+    target_tables: set[str],
+) -> list[str]:
+    """Return 'TABLE.COLUMN' hints for tables involved in validation failures."""
+    target_lower = {t.lower() for t in target_tables}
+    hints: list[str] = []
+    items = metadata_used.get("relevant_items")
+    if not isinstance(items, list):
+        return hints
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        table = str(item.get("table", "")).strip()
+        if not table or table.lower() not in target_lower:
+            continue
+        bare = table.split(".")[-1] if "." in table else table
+        columns = item.get("columns")
+        if not isinstance(columns, list):
+            continue
+        for col in columns:
+            name = col.get("name", "") if isinstance(col, dict) else str(col)
+            name = str(name).strip()
+            if name:
+                hints.append(f"{bare}.{name}")
+    return hints[:30]
 
 
 def _collect_validation_errors(judge_result: dict[str, Any]) -> list[str]:

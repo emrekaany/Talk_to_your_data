@@ -1,0 +1,31 @@
+{
+  "intent": "metric",
+  "required_filters": [
+    "GNL_TARIH.TARIH = '202512'"
+  ],
+  "measures": [
+    "TOPLAM_PRIM_TUTARI"
+  ],
+  "dimensions": [
+    "URUN_KODU"
+  ],
+  "grain": [
+    "urun"
+  ],
+  "join_needs": [
+    "AGGR.AS400_YENI_URUN",
+    "AS_DWH.GNL_TARIH",
+    "AS_DWH.POL_URUN"
+  ],
+  "security_constraints": [],
+  "invalid_request": false,
+  "notes": "Kullanıcının isteği, 2025 Aralık dönemi için ürün kodlarına göre en yüksek 10 toplam prim üretimi hakkında bilgi istemektedir. Zaman filtresi ek tanzim tarihi esas alınarak uygulanmalıdır.",
+  "row_limit": 10,
+  "report_period": "202512",
+  "time_granularity": "month",
+  "time_value": "202512",
+  "time_range": {
+    "start": "2025-12-01",
+    "end": "2025-12-31"
+  }
+}
